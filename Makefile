@@ -246,7 +246,7 @@ git: README.md
 	@[ -d .git ]||{ curl -u "$(DPROG)" https://api.github.com/user/repos -d "{\"name\":\"$(DPROG)\"}" >/dev/null; git init;git add $(GDAT:vgb.cpp=) versdt README.md;}
 	$(call setz_gitv,".")
 	@git config --global push.default simple
-#	@git add $(call cat vars|grep DTN::=|cut -f2 -d'=')
+	@git add $(call cat vars|grep DTN::=|cut -f2 -d'=') 2>/dev/null
 	@git add -u
 	@git commit -m "Version $$(cat versdt)"
 	@grep remote\ \"origin\"] .git/config >/dev/null 2>&1||git remote add origin https://github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git
