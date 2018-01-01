@@ -1,0 +1,17 @@
+
+Rueckmeldung bei einricht libcurl-devel:
+Loading repository data...
+Reading installed packages...
+Forcing installation of 'libcurl-devel-7.37.0-23.1.x86_64' from repository 'Hauptaktualisierungs-Repository'.
+Resolving package dependencies...
+
+The following NEW package is going to be installed:
+  libcurl-devel
+
+1 new package to install.
+Overall download size: 0 B. Already cached: 225.7 KiB. After the operation, additional 357.2 KiB will be used.
+Continue? [y/n/...? shows all options] (y): y
+In cache libcurl-devel-7.37.0-23.1.x86_64.rpm (1/1), 225.7 KiB (357.2 KiB unpacked)
+Checking for file conflicts: [...done]
+(1/1) Installing: libcurl-devel-7.37.0-23.1.x86_64 [...........done]
+IP: ' libcurl-devel'

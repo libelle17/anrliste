@@ -1,0 +1,3 @@
+rpm -e --nodeps  libcurl-devel
+# zypper -n --gpg-auto-import-keys in -f libcurl-devel
+printf "(Inst: 2018-01-02 00:09:57): $blau%s$reset\n" "rpm -e --nodeps  libcurl-devel"
