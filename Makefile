@@ -240,7 +240,7 @@ weiter: compiler $(EXEC) $(GZS)
 git: README.md
 #	@git config --global user.name "Gerald Schade"
 #	@git config --global user.email "gerald.schade@gmx.de"
-	@VD="versdt";[ -f $$VD ]||echo "0.5">$$VD;
+	@VD="versdt";[ -f $$VD ]||echo 0.1>$$VD;
 	@printf " Copying files from/ Kopiere Dateien von: %b%s%b (Version %b%s%b) -> git (%b%s%b)\n" $(blau) "$(PWD)" $(reset) $(blau) $$(cat versdt)\
   $(reset) $(blau) "$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;};[ -d .git ]&&cat .git/./config|sed -n '/url =/p')" $(reset) >$(BA) 
 	-@cp -au Makefile Makefile.roh
@@ -285,6 +285,7 @@ $(EXEC): $(OBJ)
 
 %.o : %.cpp
 %.o : %.cpp $(DEPDIR)/%.d
+	echo $(DPROG)
 	@[ $@ = $(DPROG).o ]&&{ test -f versdt || echo 0.1>versdt; if test -f entwickeln; then awk "BEGIN {print `cat versdt`+0.00001}">versdt;\
 	else printf " %bFile '%bentwickeln%b' missing, keeping the version number stable/ Datei '%bentwickeln%b' fehlt, lasse die Version gleich%b\n" \
 	$(schwarz) $(grau) $(schwarz) $(grau) $(schwarz) $(reset) >$(BA); fi;}; :;
