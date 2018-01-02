@@ -35,6 +35,8 @@ getIPR() {
 			REPOS="${SUDC}$Z lr|grep 'g++\|devel_gcc'\>$KR||${SUDC}$Z ar http://download.opensuse.org/repositories/devel:/gcc/\`cat /etc/*-release|grep ^NAME= |cut -d'\"' -f2|sed 's/ /_/'\`_\`cat /etc/*-release|grep ^VERSION_ID= |cut -d'\"' -f2\`/devel:gcc.repo;";
 			UREPO="${SUDC}$Z lr|grep \\\\\"g++\\\\\|devel_gcc\\\\\"\>$KR && ${SUDC}$Z rr devel_gcc;";
 			COMP="gcc gcc-c++ \$(CCInst)";
+			# z.B. 'i+ | boost_1_65-devel |'
+			LBOOST=$(zypper se boost*-devel|grep ' | boost'|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
 			LT=${_LT}-${dev};
 		} 
 	} || 
@@ -91,6 +93,7 @@ getIPR() {
 		libmac=mariadb;
 		COMP="make automake gcc-c++ kernel-devel";
 		IP_R="${SUDC}$IdPR";
+		LBOOST=boost-${dev};
 		LBIO=boost-iostreams
 		LBLO=boost-locale
 		LT="${_LT} ${_LT}-${dev}";
@@ -99,7 +102,6 @@ getIPR() {
 	{ still which rpm &&
 		{ 
 			SPR="rpm -q ";
-			LBOOST=boost-${dev};
 			LACL=libacl-${dev};
 			LCURL=libcurl-${dev};
 			UDPR="${SUDC}rpm -e --nodeps ";
@@ -216,7 +218,7 @@ einricht() {
 		CMD=${IP_R};
 		if test -n "$Z"; then
 			${SUDC}$Z lr|grep 'g++\|devel_gcc'>/dev/null 2>&1 ||{ 
-			GREPO=http://download.opensuse.org/repositories/devel:/gcc/
+				GREPO=http://download.opensuse.org/repositories/devel:/gcc/
 			GREPO=${GREPO}`cat /etc/*-release|grep ^NAME= |cut -d\" -f2|sed 's/ /_/'`_
 			GREPO=${GREPO}`cat /etc/*-release|grep ^VERSION_ID= |cut -d\" -f2`
 			GREPO=${GREPO}/devel:gcc.repo;

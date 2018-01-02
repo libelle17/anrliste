@@ -3747,6 +3747,7 @@ string meinpfad() {
   return string(buff);
 } // meinpfad
 
+// home-Verzeichnis ohne '/' am Schluss
 string gethome()
 {
  static string erg;
@@ -4925,10 +4926,12 @@ hcl::hcl(const int argc, const char *const *const argv)
 	logvz = "/var/log";
 #endif
 	logdname = meinname+".log";
-	loggespfad=logvz+vtz+logdname;
-	logdt=&loggespfad.front();
+	setzlog();
 	pruefplatte(); // geht ohne Logaufruf, falls nicht #define systemrueckprofiler
 	linstp=new linst_cl(obverb,oblog);
+	vaufr[0]=mpfad+" -noia >/dev/null 2>&1"; // /usr/bin/<DPROG> -noia
+	saufr[0]=base_name(vaufr[0]); // <DPROG> -noia
+	zsaufr[0]=ersetzAllezu(saufr[0],"/","\\/");
 } // hcl::hcl()
 
 hcl::~hcl()
@@ -5159,8 +5162,7 @@ void hcl::gcl0()
 				break;
 			case 1:
 				opts.push_back(/*4*/optioncl(T_v_k,T_verbose_l, &Txk, T_Bildschirmausgabe_gespraechiger,/*wi=*/1,&plusverb,/*wert=*/1));
-				loggespfad=logvz+vtz+logdname;
-				logdt=&loggespfad.front();
+				setzlog();
 				opts.push_back(/*2*/optioncl(T_lvz_k,T_logvz_l, &Txk, T_waehlt_als_Logverzeichnis_pfad_derzeit,/*wi=*/0,&logvz, pverz,
 							&agcnfA,"logvz",&logvneu));
 				opts.push_back(/*3a*/optioncl(T_ld_k,T_logdname_l, &Txk, T_logdatei_string_im_Pfad, /*wi=*/0, &logvz, T_wird_verwendet_anstatt, 
@@ -5196,8 +5198,7 @@ void hcl::gcl0()
 	} // for(unsigned iru=0;iru<3;iru++)
 	if (logvneu||logdneu) {
 		if (!logdname.empty()) {
-			loggespfad=logvz+vtz+logdname;
-			logdt=&loggespfad.front();
+			setzlog();
 			//// <<rot<<"logdt: "<<logdt<<endl;
 			//// <<rot<<"loggespfad: "<<loggespfad<<endl;
 			////<<violett<<"logdname: "<<*agcnfA.hole("logdname")<<schwarz<<endl;
@@ -5447,10 +5448,18 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 	} //   if (!(conffehlt=lstat(smbdt,&sstat)))
 } // pruefsamba
 
-void hcl::lieskonfein()
+void hcl::lieskonfein(const string& DPROG)
 {
 	Log(violetts+Txk[T_lieskonfein]+schwarz);
-	if (akonfdt.empty()) akonfdt=aktprogverz()+".conf";
+//	if (akonfdt.empty()) akonfdt=aktprogverz()+".conf";
+	if (akonfdt.empty()) {
+		svec rue;
+		// aus Datenschutzgründen sollte das Home-Verzeichnis zuverlässig ermittelt werden
+		systemrueck("getent passwd $(logname)|cut -d: -f6",0,0,&rue);
+		if (rue.size()) {
+			akonfdt=rue[0]+vtz+"."+DPROG+".conf";
+		}
+	} // 	if (akonfdt.empty()) 
 	// agcnfA.init muss spaetetens am Anfang von getcommandl0 kommen
 	// sodann werden die Daten aus gconf den einzelenen Klassenmitgliedsvariablen zugewiesen 
 	// die Reihenfolge muss der in agcnfA.init (in getcommandl0) sowie der in rueckfragen entsprechen

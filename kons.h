@@ -1153,7 +1153,7 @@ class hcl
 		~hcl();
 		int Log(const string& text,const bool oberr=0,const short klobverb=0) const;
     int pruefinstv();
-    void lieskonfein();
+    void lieskonfein(const string& DPROG);
 		void setzlog();
 		int zeighilfe(const stringstream *const erkl);
 		void pruefsamba(const vector<const string*>& vzn,const svec& abschni,const svec& suchs,const char* DPROG,const string& cuser);
