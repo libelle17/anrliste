@@ -240,10 +240,10 @@ weiter: compiler $(EXEC) $(GZS)
 git: README.md
 #	@git config --global user.name "Gerald Schade"
 #	@git config --global user.email "gerald.schade@gmx.de"
+	@VD="versdt";[ -f $$VD ]||echo "0.5">$$VD;
 	@printf " Copying files from/ Kopiere Dateien von: %b%s%b (Version %b%s%b) -> git (%b%s%b)\n" $(blau) "$(PWD)" $(reset) $(blau) $$(cat versdt)\
   $(reset) $(blau) "$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;};[ -d .git ]&&cat .git/./config|sed -n '/url =/p')" $(reset) >$(BA) 
 	-@cp -au Makefile Makefile.roh
-	@VD="versdt";[ -f $$VD ]||echo "0.5">$$VD;
 	@[ -d .git ]||{ curl -u "$(DPROG)" https://api.github.com/user/repos -d "{\"name\":\"$(DPROG)\"}" >/dev/null; git init;git add $(GDAT:vgb.cpp=) versdt README.md;}
 	$(call setz_gitv,".")
 	@git config --global push.default simple
