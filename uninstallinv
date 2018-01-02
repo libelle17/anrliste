@@ -1,3 +1,15 @@
 rpm -e --nodeps  libcurl-devel
 # zypper -n --gpg-auto-import-keys in -f libcurl-devel
 printf "(Inst: 2018-01-02 00:09:57): $blau%s$reset\n" "rpm -e --nodeps  libcurl-devel"
+sudo sh -c 'cd "/var";sudo setfacl -Rb "/var/log"'
+# cd "/var";test -f "log.anrliste.perm"||getfacl -R "log">"log.anrliste.perm"
+printf "(Inst: 2018-01-02 14:19:18): $blau%s$reset\n" "sudo sh -c 'cd \"/var\";sudo setfacl -Rb \"/var/log\"'"
+rm -f /home/schade/rootscrontab;crontab -l|sed '//d'>/home/schade/rootscrontab; crontab /home/schade/rootscrontab;
+# sudo sh -c 'rm -f /home/schade/rootscrontab;crontab -l|sed '//d'>/home/schade/rootscrontab; echo "*/2 * * * * /usr/bin/ionice -c2 -n7 /usr/bin/nice -n19 ">>/home/schade/rootscrontab; crontab /home/schade/rootscrontab;'
+printf "(Inst: 2018-01-02 22:50:14): $blau%s$reset\n" "rm -f /home/schade/rootscrontab;crontab -l|sed '//d'>/home/schade/rootscrontab; crontab /home/schade/rootscrontab;"
+rm -f /home/schade/rootscrontab;crontab -l|sed '/anrliste -noia >\/dev\/null 2>&1/d'>/home/schade/rootscrontab; crontab /home/schade/rootscrontab;
+# sudo sh -c 'rm -f /home/schade/rootscrontab;crontab -l|sed '/anrliste -noia >\/dev\/null 2>&1/d'>/home/schade/rootscrontab; echo "*/2 * * * * /usr/bin/ionice -c2 -n7 /usr/bin/nice -n19 /usr/bin/anrliste -noia >/dev/null 2>&1">>/home/schade/rootscrontab; crontab /home/schade/rootscrontab;'
+printf "(Inst: 2018-01-02 22:57:30): $blau%s$reset\n" "rm -f /home/schade/rootscrontab;crontab -l|sed '/anrliste -noia >\/dev\/null 2>&1/d'>/home/schade/rootscrontab; crontab /home/schade/rootscrontab;"
+sudo sh -c 'cd "/usr";sudo setfacl -Rb "/usr/bin"'
+# cd "/usr";test -f "bin.anrliste.perm"||getfacl -R "bin">"bin.anrliste.perm"
+printf "(Inst: 2018-01-02 23:26:51): $blau%s$reset\n" "sudo sh -c 'cd \"/usr\";sudo setfacl -Rb \"/usr/bin\"'"
