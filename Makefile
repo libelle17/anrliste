@@ -243,7 +243,7 @@ git: README.md
 	@printf " Copying files from/ Kopiere Dateien von: %b%s%b (Version %b%s%b) -> git (%b%s%b)\n" $(blau) "$(PWD)" $(reset) $(blau) $$(cat versdt)\
   $(reset) $(blau) "$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;};[ -d .git ]&&cat .git/./config|sed -n '/url =/p')" $(reset) >$(BA) 
 	-@cp -au Makefile Makefile.roh
-	@[ -d .git ]||{ curl -u "$(DPROG)" https://api.github.com/user/repos -d "{\"name\":\"$(DPROG)\"}" >/dev/null; git init;git add $(GDAT:vgb.cpp=) versdt README.md;}
+	@[ -d .git ]||{ curl -u "$(DPROG)" https://api.github.com/user/repos -d "{\"name\":\"$(DPROG)\"}" >/dev/null; git init;[ -f versdt ]||echo "0.5">versdt;git add $(GDAT:vgb.cpp=) versdt README.md;}
 	$(call setz_gitv,".")
 	@git config --global push.default simple
 	@git add -u
