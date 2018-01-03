@@ -577,7 +577,7 @@ static int writer(char *data, size_t size, size_t nmemb, std::string *writerData
 
   return size * nmemb;
 }
-
+// XML-Inhalt ermitteln
 size_t holraus(const std::string xml,std::string tag,std::string *ergp,size_t anf=0)
 {
   const std::string von="<"+tag+">", bis="</"+tag+">";
