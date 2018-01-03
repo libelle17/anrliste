@@ -890,13 +890,13 @@ int main(int argc,char** argv)
 	 hhi.pruefanrufe(hhi.My,hhi.tanrufe, hhi.obverb,hhi.oblog);
  } // 	if (!hhi.keineverarbeitung)
 
- hhi.pruefcron(); // soll vor Log(Tx[T_Verwende ... stehen
+ hhi.pruefcron(nix); // soll vor Log(Tx[T_Verwende ... stehen
  if (!hhi.keineverarbeitung) {
-	 hhi.holanr();
 	 hhi.zeigueberschrift();
+	 hhi.holanr();
 	 hhi.setzzaehler();
 	 hhi.schreibzaehler();
- }
+ } //  if (!hhi.keineverarbeitung)
 
  hhi.autokonfschreib();
  hhi.update(DPROG);

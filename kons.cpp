@@ -4929,9 +4929,6 @@ hcl::hcl(const int argc, const char *const *const argv)
 	setzlog();
 	pruefplatte(); // geht ohne Logaufruf, falls nicht #define systemrueckprofiler
 	linstp=new linst_cl(obverb,oblog);
-	vaufr[0]=mpfad+" -noia >/dev/null 2>&1"; // /usr/bin/<DPROG> -noia
-	saufr[0]=base_name(vaufr[0]); // <DPROG> -noia
-	zsaufr[0]=ersetzAllezu(saufr[0],"/","\\/");
 } // hcl::hcl()
 
 hcl::~hcl()
@@ -5631,13 +5628,14 @@ void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const strin
 } // void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const string& cbef)
 
 // wird aufgerufen in: main
-uchar hcl::pruefcron()
+uchar hcl::pruefcron(const string& cm)
 {
+	const string& cmhier=cm.empty()?cronminut:cm;
 	crongeprueft=1;
 	uchar obschreib=0;
 	//  svec rueck;
 	int cronda=0;
-	cronzuplanen=(cronminut!="0");
+	cronzuplanen=(cmhier!="0");
 	Log(violetts+Txk[T_pruefcron]+schwarz+Txk[T_cronzuplanen]+violetts+(cronzuplanen?"1":"0")+schwarz);
 	for (uchar runde=0;runde<2;runde++) {
 		cronda=obprogda("crontab",obverb-1,0);
@@ -5651,13 +5649,15 @@ uchar hcl::pruefcron()
 		////		string vorcm; // Vor-Cron-Minuten
 		nochkeincron = systemrueck("crontab -l",obverb-1,0,0,/*obsudc=*/1,2);
 		setztmpcron();
+		const string vaufr=mpfad+" -noia"; // /usr/bin/<DPROG> -noia // (vollaufruf) z.B. '/usr/bin/<DPROG> -noia >/dev/null 2>&1'
+		const string zsaufr=base_name(vaufr); // ersetzAllezu(cbef,"/","\\/"); // Suchstring zum Loeschen
 		const string vorsaetze=" "+linstp->ionicepf+" -c2 -n7 "+linstp->nicepf+" -n19 ";
-		const string cabfr=vorsaetze+".*"+saufr[0];// "date >/home/schade/zeit"; // Befehl zum Abfragen der Cronminuten aus aktuellem Cron-Script
-		const string cbef=string("*/")+cronminut+" * * * *"+vorsaetze+vaufr[0]; // "-"-Zeichen nur als cron
+		const string cabfr=vorsaetze+".*"+zsaufr;// <DPROG> -noia // Suchstring in Crontab // Befehl zum Abfragen der Cronminuten aus aktuellem Cron-Script
+		const string cbef=string("*/")+cmhier+" * * * *"+vorsaetze+vaufr+" -cf "+akonfdt+" >/dev/null 2>&1"; // "-"-Zeichen nur als cron
 		const string czt=" \\* \\* \\* \\*";
 		////		string vorcm; // Vor-Cron-Minuten
 		if (!nochkeincron) {
-			cmd="bash -c 'grep \"\\*/.*"+czt+cabfr+"\" <(crontab -l 2>/dev/null)| sed \"s_\\*/\\([^ ]*\\) .*_\\1_\"'";
+			cmd="bash -c 'grep \"\\*/.*"+czt+cabfr+"\" <(crontab -l 2>/dev/null)| sed \"s_\\*/\\([^ ]*\\) .*_\\1_\"'"; // fuer debian usw.: dash geht hier nicht
 			svec cmrueck;
 			systemrueck(cmd,obverb,oblog,&cmrueck,/*obsudc=*/1);
 			if (cmrueck.size()) vorcm=cmrueck[0];
@@ -5666,17 +5666,17 @@ uchar hcl::pruefcron()
 			if (obverb||cmeingegeben) 
 				::Log(Txk[T_Kein_cron_gesetzt_nicht_zu_setzen],1,oblog);
 		} else {
-			if (cronminut==vorcm) {
-				if (cmeingegeben) ::Log(blaus+"'"+saufr[0]+"'"+schwarz+Txk[T_wird]+Txk[T_unveraendert]+
+			if (cmhier==vorcm) {
+				if (cmeingegeben) ::Log(blaus+"'"+zsaufr+"'"+schwarz+Txk[T_wird]+Txk[T_unveraendert]+
 						+blau+(vorcm.empty()?Txk[T_gar_nicht]:Txk[T_alle]+vorcm+Txk[T_Minuten])+schwarz+Txk[T_aufgerufen],1,oblog);
 			} else {
 				obschreib=1;
-				tucronschreib(zsaufr[0],cronzuplanen,cbef);
+				tucronschreib(zsaufr,cronzuplanen,cbef);
 				if (cmeingegeben)
-					::Log(blaus+"'"+saufr[0]+"'"+schwarz+Txk[T_wird]+blau+(cronzuplanen?Txk[T_alle]+cronminut+Txk[T_Minuten]:Txk[T_gar_nicht])+schwarz+
+					::Log(blaus+"'"+zsaufr+"'"+schwarz+Txk[T_wird]+blau+(cronzuplanen?Txk[T_alle]+cmhier+Txk[T_Minuten]:Txk[T_gar_nicht])+schwarz+
 							Txk[T_statt]+blau+(vorcm.empty()?Txk[T_gar_nicht]:Txk[T_alle]+vorcm+Txk[T_Minuten])+schwarz+Txk[T_aufgerufen],1,oblog);
-			} // 				if (cronminut==vorcm) else
-		} // 		if (vorcm.empty() && cronminut=="0")
+			} // 				if (cmhier==vorcm) else
+		} // 		if (vorcm.empty() && cmhier=="0")
 #ifdef anders
 #define uebersichtlich
 #ifdef uebersichtlich
@@ -5691,7 +5691,7 @@ uchar hcl::pruefcron()
 			if (nochkeincron) {
 				befehl="rm -f "+tmpcron+";";
 			} else {
-				befehl="bash -c 'grep \"\\*/"+cronminut+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l|sed \"/"+zsaufr[0]+"/d\">"+tmpcron+";";
+				befehl="bash -c 'grep \"\\*/"+cmhier+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l|sed \"/"+zsaufr[0]+"/d\">"+tmpcron+";";
 			}
 			befehl+="echo \""+cbef+"\">>"+tmpcron+"; crontab "+tmpcron+"";
 			if (!nochkeincron)
@@ -5700,7 +5700,7 @@ uchar hcl::pruefcron()
 #else // uebersichtlich
 		const string befehl=cronzuplanen?
 			(nochkeincron?"rm -f "+tmpcron+";":
-			 "bash -c 'grep \"\\*/"+cronminut+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l | sed \"/"+zsaufr[0]+"/d\">"+tmpcron+"; ")+
+			 "bash -c 'grep \"\\*/"+cmhier+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l | sed \"/"+zsaufr[0]+"/d\">"+tmpcron+"; ")+
 			"echo \""+cbef+"\">>"+tmpcron+"; crontab "+tmpcron+(nochkeincron?"":";}'")
 			:
 			(nochkeincron?"":"bash -c 'grep \""+saufr[0]+"\" -q <(crontab -l)&&{ crontab -l | sed \"/"+zsaufr[0]+"/d\">"+tmpcron+";"

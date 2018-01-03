@@ -1097,9 +1097,6 @@ class hcl
 		unsigned lfd;
     uchar rzf=0; // rueckzufragen
 		confdat afcd;
-		string vaufr[1]; // (vollaufruf) z.B. '/usr/bin/<DPROG> -noia >/dev/null 2>&1'
-    string saufr[1]; // (stummaufruf) '<DPROG> -noia >/dev/null 2>&1'
-		string zsaufr[1]; // zitiert saufr (in sed)
 		string tmpcron; // fuer crontab
     string cronminut; // Minuten fuer crontab; 0 = kein Crontab-Eintrag
 		uchar nochkeincron;
@@ -1174,7 +1171,7 @@ class hcl
 		void zeigversion(const string& ltiffv=nix);
 		void zeigkonf();
 		void gcl0();
-		uchar pruefcron();
+		uchar pruefcron(const string& cm);
 		void dodovi(const svec d1,const svec d2);
 		void dovi();
 		virtual void schlussanzeige();
