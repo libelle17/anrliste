@@ -577,24 +577,6 @@ static int writer(char *data, size_t size, size_t nmemb, std::string *writerData
 
   return size * nmemb;
 }
-// XML-Inhalt ermitteln
-size_t holraus(const std::string xml,std::string tag,std::string *ergp,size_t anf=0)
-{
-  const std::string von="<"+tag+">", bis="</"+tag+">";
-  if (ergp) {
-    ergp->clear();
-    size_t p1=xml.find(von,anf);
-    if (p1!=std::string::npos) {
-      p1+=von.length();
-      size_t p2=xml.find(bis,p1);
-      if (p2!=std::string::npos) {
-        *ergp=xml.substr(p1,p2-p1);
-        return p2+bis.length();
-      }
-    }
-  }
-  return 0;
-} // size_t holraus(const std::string xml,std::string tag,std::string *ergp;size_t anf=0)
 
 // ermittelt aus test3.sh mit curl ... --libcurl test3.c
 int fragurl(const std::string url, const std::string cred, const std::string servT, const std::string action,const std::string item, std::string* bufp)

@@ -437,6 +437,7 @@ class perfcl
 };
 
 string holsystemsprache(int obverb=0);
+size_t holraus(const std::string xml,std::string tag,std::string *ergp,size_t anf=0); // XML-Inhalt ermitteln
 int pruefberecht(const string& datei,const string& benutzer,const mode_t mod=01,int obverb=0);
 int untersuser(const string& uname,__uid_t *uidp=0, __gid_t *gidp=0, vector<gid_t> *gids=0,struct passwd* ustr=0);
 double verszuzahl(const string& vers);
