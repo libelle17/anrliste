@@ -2,7 +2,7 @@
 #include "DB.h"
 #define VOMHAUPTCODE
 #include "anrliste.h"
-#include <curl/curl.h>
+#include "tr64.h"
 
 enum T_
 {
@@ -568,87 +568,6 @@ void hhcl::pruefggfmehrfach()
 } // void hhcl::pruefggfmehrfach()
 
 
-static int writer(char *data, size_t size, size_t nmemb, std::string *writerData)
-{
-  if(writerData == NULL)
-    return 0;
-
-  writerData->append(data, size*nmemb);
-
-  return size * nmemb;
-}
-
-// ermittelt aus test3.sh mit curl ... --libcurl test3.c
-int fragurl(const std::string url, const std::string cred, const std::string servT, const std::string action,const std::string item, std::string* bufp)
-{
-  //std::cout<<"url: "<<url<<std::endl;
-  CURL *hnd = NULL;
-  CURLcode code;
-  static char errorBuffer[CURL_ERROR_SIZE];
-  bufp->clear();
-  struct curl_slist *slist1=0;
-  slist1 = curl_slist_append(slist1, "Content-Type: text/xml; charset=\"utf-8\"");
-  slist1 = curl_slist_append(slist1, ("SoapAction: "+servT+"#"+action).c_str());
-  hnd = curl_easy_init();
-  if(hnd == NULL) {
-    fprintf(stderr, "Failed to create CURL connection\n");
-    exit(EXIT_FAILURE);
-  }
-  curl_easy_setopt(hnd, CURLOPT_URL, url.c_str());
-  curl_easy_setopt(hnd, CURLOPT_USERPWD, cred.c_str());
-  std::string postfield="<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"\nxmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\n<s:Body>\n<u:"+action+" xmlns:u=\""+servT+"\">\n<></>\n</u:"+action+">\n</s:Body>\n</s:Envelope>";
-  if ((code=curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, postfield.c_str()))!=CURLE_OK) {
-    fprintf(stderr, "Fehler bei postfield [%s]\n", errorBuffer);
-    return false;
-  }
-  curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)postfield.length());
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.37.0");
-  curl_easy_setopt(hnd, CURLOPT_HTTPHEADER, slist1);
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(hnd, CURLOPT_IPRESOLVE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, writer);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA , bufp);
-  curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, errorBuffer);
-  // Retrieve content for the URL
-  code = curl_easy_perform(hnd);
-  curl_easy_cleanup(hnd);
-  if(code != CURLE_OK) {
-    fprintf(stderr, "Fehler beim Verbinden zu '%s' [%s]\n", url.c_str(), errorBuffer);
-    exit(EXIT_FAILURE);
-  }
-  return 0;
-} // string fragurl(const string url, const string cred, const string servT, const string action,const string item)
-
-int holurl(const std::string url, std::string* bufp)
-{
-  //std::cout<<"url: "<<url<<std::endl;
-  CURL *hnd = NULL;
-  CURLcode code;
-  static char errorBuffer[CURL_ERROR_SIZE];
-  bufp->clear();
-  hnd = curl_easy_init();
-  if(hnd == NULL) {
-    fprintf(stderr, "Failed to create CURL connection\n");
-    exit(EXIT_FAILURE);
-  }
-  curl_easy_setopt(hnd, CURLOPT_URL, url.c_str());
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, writer);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA , bufp);
-  curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, errorBuffer);
-  // Retrieve content for the URL
-  code = curl_easy_perform(hnd);
-  curl_easy_cleanup(hnd);
-  if(code != CURLE_OK) {
-    fprintf(stderr, "Fehler beim Verbinden zu '%s' [%s]\n", url.c_str(), errorBuffer);
-    exit(EXIT_FAILURE);
-  }
-  return 0;
-} // int holurl(const std::string url, std::string* bufp)
-
 int hhcl::holanr()
 {
 	const size_t aktc=0;
@@ -667,30 +586,13 @@ int hhcl::holanr()
   tz.push_back("Duration");
   tz.push_back("Count");
 
-  // Ensure one argument is given
 
-
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-
-  // Initialize CURL connection
-
-  std::string credentials=fbusr+":"+fbpwd;
-  std::string FB="fritz.box:49000";
-  std::string controlURL="/upnp/control/x_contact";
-  std::string serviceType="urn:dslforum-org:service:X_AVM-DE_OnTel:1";
-  std::string action="GetCallList";
-  std::string item="NewCallListURL";
-  /*
-  if(!init(hnd, ("http://"+FB+controlURL).c_str())) {
-    fprintf(stderr, "Connection initializion failed\n");
-    exit(EXIT_FAILURE);
-  }
-  */
+	tr64cl tr64(fbusr,fbpwd);
   std::string buffer,nurl;
-  fragurl("http://"+FB+controlURL,credentials,serviceType,action,item,&buffer);
+  tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList","",&buffer);
 
   //std::cout<<buffer<<std::endl;
-  holraus(buffer,item,&nurl);
+  holraus(buffer,"NewCallListURL",&nurl);
   holurl(nurl,&buffer);
   size_t pos=0,enr=0;
 	RS rins(My); 
