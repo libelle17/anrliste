@@ -589,7 +589,7 @@ int hhcl::holanr()
 
 	tr64cl tr64(fbusr,fbpwd);
   std::string buffer,nurl;
-  tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList","",&buffer);
+  tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList",&buffer);
 
   //std::cout<<buffer<<std::endl;
   holraus(buffer,"NewCallListURL",&nurl);
