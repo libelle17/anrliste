@@ -40,7 +40,7 @@ getIPR() {
 				LBOOST=$(cat vars|grep LBOOST|cut -d= -f2);
 			else
   			# z.B. 'i+ | boost_1_65-devel |'
-  			LBOOST=$(zypper se boost*-devel|grep ' | boost'|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
+  			LBOOST=$(zypper se boost*-devel|grep ' | boost'|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
 			fi
 			LT=${_LT}-${dev};
 		} 
@@ -124,7 +124,6 @@ getIPR() {
 			UDPR="${SUDC}apt-get -f install; ${SUDC}dpkg -r --force-depends ";
 		};
 	}
-	echo "vor test mysql"
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<mysql.h>" "$A" &&break;done ||libmac=;
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<boost" "$A" &&break;done ||LBOOST=;
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<tiffio.h>" "$A" &&break;done ||LT=;
@@ -276,9 +275,7 @@ _LT="libtiff"
 LT5="${_LT}5"
 LM18=libmysqlclient18
 
-echo "vor getIPR"
 getIPR;
-echo "nach getIPR"
 # diese Datei wird wegen obigem in viall gesourct, deshalb dort der Rest zu uebergehen
 rot="\033[1;31m"
 gruen="\033[1;32m"
