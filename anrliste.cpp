@@ -1,10 +1,12 @@
-#include "kons.h"
-#include "DB.h"
-#define VOMHAUPTCODE
+// '//α' oder '//ω' als Kommentar sind nur für die Verwendung dieses Programms als Programmvorlage wichtig
+// sed -n '/\/\/α/,/\/\/ω/p;/\/\/ω/a\\' test
+#include "kons.h" //α
+#include "DB.h" 
+#define VOMHAUPTCODE //ω
 #include "anrliste.h"
 #include "tr64.h"
 
-enum T_
+enum T_           //α
 {
 	T_zu_schreiben,
 	T_VorgbAllg,
