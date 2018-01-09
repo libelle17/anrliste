@@ -438,7 +438,7 @@ int hhcl::getcommandline()
 			 } // 				if (opts[optslsz].kurzi==T_mpwd_k)
 			 break;
 		 } //       if (opts[optslsz].pruefpar(&argcmv,&i,&obhilfe,Tx.lgn))
-	 } // for(size_t i=0;i<argcmv.size();i++) 
+	 } // for(size_t i=0;i<argcmv.size();i++)
  } //   for(;optslsz<opts.size();optslsz++)
  if (nrzf||obhilfe>2) rzf=0; // 3 oder 4
  for(size_t i=0;i<argcmv.size();i++) {
