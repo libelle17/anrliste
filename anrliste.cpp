@@ -1,12 +1,14 @@
 // '//α' oder '//ω' als Kommentar sind nur für die Verwendung dieses Programms als Programmvorlage wichtig
 // sed -n '/\/\/α/,/\/\/ω/p;/\/\/ω/a\\' test
+// sed -n '/\/\/α/,/\/\/ω/p' test
 #include "kons.h" //α
 #include "DB.h" 
-#define VOMHAUPTCODE //ω
-#include "anrliste.h"
+#define VOMHAUPTCODE 
+#include "anrliste.h" //ω
 #include "tr64.h"
 
-enum T_           //α
+// für verschiedene Sprachen //α
+enum T_      
 {
 	T_zu_schreiben,
 	T_VorgbAllg,
@@ -14,65 +16,30 @@ enum T_           //α
 	T_MusterVorgb,
 	T_rueckfragen,
 	T_autokonfschreib,
-	T_pruefanrufe,
-	T_Anruftyp_1_ankommend_3_abgehend,
-	T_Fehler_beim_Pruefen_von,
-	T_Zeitpunkt_des_Verbindungsaufbaus,
-	T_Name_des_Verbindungspartners,
-	T_Rufnummer_des_Verbindungspartners,
-	T_Nebenstelle_hier,
-	T_Eigene_Rufnummer,
-	T_CalledNr,
-	T_Nummerntyp,
-	T_Port,
-	T_Verbindungsdauer,
-	T_Zahl,
-	T_Telefonprotokoll_der_Fritzbox,
-	T_eindeutige_Identifikation,
-	T_ID_aus_Fritzbox,
-	T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf,
-	T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,
-	T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,
-	T_verwendet_die_Datenbank_string_anstatt,
-	T_verwendet_die_Tabelle_string_anstatt,
-	T_Host_fuer_MySQL_MariaDB_Datenbank,
-	T_Benutzer_fuer_MySQL_MariaDB,
-	T_Passwort_fuer_MySQL_MariaDB,
-	T_Datenbankname_fuer_MySQL_MariaDB_auf,
-	T_Tabellenname_in,
-	T_Benutzer_fuer_Fritzbox,
-	T_Passwort_fuer_Fritzbox,
-	T_Logverzeichnis,
-	T_Logdateiname,
-	Verbindung_zur_Datenbank_nicht_herstellbar,
-	T_Breche_ab,
-	T_pruefDB,
-	T_host_k,
-	T_host_l,
-	T_muser_k,
-	T_muser_l,
-	T_mpwd_k,
-	T_mpwd_l,
-	T_db_k,
-	T_datenbank_l,
-	T_tb_k,
-	T_tabelle_l,
-	T_fbusr_k,
-	T_fbusr_l,
-	T_fbpwd_k,
-	T_fbpwd_l,
-	T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,
-	T_verwendet_fuer_die_Fritzbox_das_Passwort_string,
+	T_cm_k,
+	T_cronminuten_l,
+	T_Alle_wieviel_Minuten_soll,
+	T_autoupd_k,
+	T_autoupd_l,
+	T_Programm_automatisch_aktualisieren,
+	T_Sollen_neue_Programmversionen_von,
+	T_automatisch_installiert_werden,
+	T_zeigvers,
+	T_Logpfad,
+	T_oblog,
+	T_Oblog,
+	T_Aufrufintervall,
+	T_kein_Aufruf,
+	T_Minute,
 	T_sqlv_k,
 	T_sql_verbose_l,
 	T_rf_k,
 	T_rueckfragen_l,
 	T_krf_k,
 	T_keinerueckfragen_l,
-	T_cm_k,
-	T_cronminuten_l,
 	T_nicht_erkannt,
-	T_Liest_das_Fritzbox_Journal_Ueber_RogerRouter_aus_und_sammelt_es_in_einer_Datenbank,
+	T_Logverzeichnis,
+	T_Logdateiname,
 	T_schreibe_Konfiguration,
 	T_info_k,
 	T_version_l,
@@ -88,29 +55,65 @@ enum T_           //α
 	T_Konfigurations_u_Logdatei_bearbeiten_sehen,
 	T_Erklaerung_haeufiger_Optionen,
 	T_Erklaerung_aller_Optionen,
-	T_Fuege_ein,
+	Verbindung_zur_Datenbank_nicht_herstellbar,
+	T_Breche_ab,
+	T_pruefDB,
+	T_host_k,
+	T_host_l,
+	T_muser_k,
+	T_muser_l,
+	T_mpwd_k,
+	T_mpwd_l,
+	T_db_k,
+	T_datenbank_l,
+	T_tb_k,
+	T_tabelle_l,
+	T_Bildschirmausgabe_mit_SQL_Befehlen,
+	T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf,
+	T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,
+	T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,
+	T_verwendet_die_Datenbank_string_anstatt,
+	T_verwendet_die_Tabelle_string_anstatt,
+	T_Host_fuer_MySQL_MariaDB_Datenbank,
+	T_Benutzer_fuer_MySQL_MariaDB,
+	T_Passwort_fuer_MySQL_MariaDB,
+	T_Datenbankname_fuer_MySQL_MariaDB_auf,
+	T_Tabellenname_in,
+	T_Fehler_beim_Pruefen_von,
+	T_keine_Rueckfragen_zB_aus_Cron,
+	T_aufgerufen_werden_0_ist_gar_nicht,
+	T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,
+	T_Fuege_ein, //ω
 	T_Datensaetze_gelesen,
 	T_Datensaetze_eingetragen,
-	T_Alle_wieviel_Minuten_soll,
-	T_aufgerufen_werden_0_ist_gar_nicht,
-	T_Bildschirmausgabe_mit_SQL_Befehlen,
-	T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,
-	T_keine_Rueckfragen_zB_aus_Cron,
-	T_autoupd_k,
-	T_autoupd_l,
-	T_Programm_automatisch_aktualisieren,
-	T_Sollen_neue_Programmversionen_von,
-	T_automatisch_installiert_werden,
-	T_zeigvers,
-	T_Logpfad,
-	T_oblog,
-	T_Oblog,
-	T_Aufrufintervall,
-	T_kein_Aufruf,
-	T_Minute,
-	T_MAX
-}; // enum T_
+	T_pruefanrufe,
+	T_Anruftyp_1_ankommend_3_abgehend,
+	T_Zeitpunkt_des_Verbindungsaufbaus,
+	T_Name_des_Verbindungspartners,
+	T_Rufnummer_des_Verbindungspartners,
+	T_Nebenstelle_hier,
+	T_Eigene_Rufnummer,
+	T_CalledNr,
+	T_Nummerntyp,
+	T_Port,
+	T_Verbindungsdauer,
+	T_Zahl,
+	T_Telefonprotokoll_der_Fritzbox,
+	T_eindeutige_Identifikation,
+	T_ID_aus_Fritzbox,
+	T_Benutzer_fuer_Fritzbox,
+	T_Passwort_fuer_Fritzbox,
+	T_fbusr_k,
+	T_fbusr_l,
+	T_fbpwd_k,
+	T_fbpwd_l,
+	T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,
+	T_verwendet_fuer_die_Fritzbox_das_Passwort_string,
+	T_Liest_das_Fritzbox_Journal_Ueber_RogerRouter_aus_und_sammelt_es_in_einer_Datenbank,
+	T_MAX //α
+}; // enum T_ //ω
 
+// für verschiedene Sprachen //α
 char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// T_zu_schreiben
 	{"zu schreiben: ","must write: "},
@@ -124,104 +127,36 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"rueckfragen()","callbacks()"},
 	// T_autokonfschreib
 	{"autokonfschreib()","autoconfwrite()"},
-	// T_pruefanrufe
-	{"pruefanrufe()","checkcalls()"},
-	// T_Anruftyp_1_ankommend_3_abgehend
-	{"Anruftyp: 1=ankommend, 2=ankommend im Abwesenheit, 3=abgehend","type of call: 1=incoming, 2=incoming absent, 3=outgoing"},
-	//	T_Fehler_beim_Pruefen_von
-	{"Fehler beim Pruefen von: ","Error while examining: "},
-	// T_Zeitpunkt_des_Verbindungsaufbaus
-	{"Zeitpunkt des Verbindungsaufbaus","Start time of the connection"},
-	// T_Name_des_Verbindungspartners
-	{"Name des Verbindungspartners","Name of the Couterpart"},
-	// T_Rufnummer_des_Verbindungspartners
-	{"Rufnummer des Verbindungspartners","Dial number of the counterpart"},
-	// T_Nebenstelle_hier
-	{"Nebenstelle hier","party line here"},
-	// T_Eigene_Rufnummer
-	{"Eigene Rufnummer","Own calling number"},
-	// T_CalledNr
-	{"angerufene Nr, meist überzählig","Called number, mostly redundant"},
-	// T_Nummerntyp
-	{"Nummberntyp","number type"},
-	// T_Port
-	{"Port","port"},
-	// T_Verbindungsdauer
-	{"Verbindungsdauer","Connection duration"},
-	// T_Zahl
-	{"Zahl","count"},
-	// T_Telefonprotokoll_der_Fritzbox
-	{"Telefonprotokoll der Fritzbox","Connection journal of the fritzbox"},
-	// T_eindeutige_Identifikation
-	{"eindeutige Identifiaktion","unique ID"},
-	// T_ID_aus_Fritzbox
-	{"ID aus der Fritzbox","ID from the fritzbox"},
-	// T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf
-	{"verwendet die Datenbank auf Host <string> anstatt auf","takes the database on host <string> instead of"},
-	// T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt
-	{"verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt","takes the user <string> for MySQL/MariaDB instead of"},
-	// T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string
-	{"verwendet fuer MySQL/MariaDB das Passwort <string>","takes the password <string> for MySQL/MariaDB"},
-	// T_verwendet_die_Datenbank_string_anstatt
-	{"verwendet die Datenbank <string> anstatt","uses the database <string> instead of"},
-	// T_verwendet_die_Tabelle_string_anstatt
-	{"verwendet die Tabelle <string> anstatt","uses the table <string> instead of"},
-	// T_Host_fuer_MySQL_MariaDB_Datenbank
-	{"Host fuer MySQL/MariaDB-Datenbank","host for mysql/mariadb-database"},
-	// T_Benutzer_fuer_MySQL_MariaDB,
-	{"Benutzer fuer MySQL/MariaDB:","user for mysql/mariadb:"},
-	// T_Passwort_fuer_MySQL_MariaDB,
-	{"Passwort fuer MySQL/MariaDB (Achtung: nur schwach verschluesselt!)","password for mysql/mariadb (caution: only weakly encrypted!)"},
-	// T_Datenbankname_fuer_MySQL_MariaDB_auf
-	{"Datenbankname fuer MySQL/MariaDB auf '","database name for mysql/mariabd on '"},
-	// T_Tabellenname_in
-	{"Tabellenname in '","table name in '"},
-	// T_Benutzer_fuer_Fritzbox,
-	{"Benutzer fuer Fritzbox","password for fritzbox"},
-	// T_Passwort_fuer_Fritzbox,
-	{"Passwort fuer Fritzbox (Achtung: nur schwach verschluesselt!)","password for fritzbox (caution: only weakly encrypted!)"},
-	// T_Logverzeichnis
-	{"Logverzeichnis","log directory"},
-	// T_Logdateiname
-	{"Logdateiname","log file name"},
-	// Verbindung_zur_Datenbank_nicht_herstellbar
-	{"Verbindung zur Datenbank nicht herstellbar, fehnr: ","Connection to the database could not be established, errnr: "},
-	// T_Breche_ab
-	{". Breche ab.","Stopping."},
-	// T_pruefDB
-	{"pruefDB(","checkDB("},
-	// T_host_k
-	{"host","host"},
-	// T_host_l
-	{"host","host"},
-	// T_muser_k
-	{"muser","muser"},
-	// T_muser_l
-	{"muser","muser"},
-	// T_mpwd_k
-	{"mpwd","mpwd"},
-	// T_mpwd_l
-	{"mpwd","mpwd"},
-	// T_db_k
-	{"db","db"},
-	// T_datenbank_l
-	{"datenbank","database"},
-	// T_tb_k,
-	{"tb","tb"},
-	// T_tabelle_l,
-	{"tabelle","table"},
-	// T_fbusr_k,
-	{"fbusr","fbusr"},
-	// T_fbusr_l,
-	{"fbusr","fbusr"},
-	// T_fbpwd_k,
-	{"fbpwd","fbpwd"},
-	// T_fbpwd_l,
-	{"fbpwd","fbpwd"},
-	// T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt
-	{"verwendet fuer die Fritzbox den Benutzer <string> anstatt","takes the user <string> for the fritzbox instead of"},
-	// T_verwendet_fuer_die_Fritzbox_das_Passwort_string
-	{"verwendet fuer die Fritzbox das Passwort <string>","takes the password <string< for the fritzbox"},
+	// T_cm_k
+	{"cm","cm"},
+	// T_cronminuten_l
+	{"cronminuten","cronminutes"},
+	// T_Alle_wieviel_Minuten_soll
+	{"alle wieviel Minuten soll ","every how many minutes shall "},
+	// 	T_autoupd_k,
+	{"autoakt","autoupd"},
+	// 	T_autoupd_l,
+	{"autoaktual","autoupdate"},
+	// T_Programm_automatisch_aktualisieren
+	{"Programm automatisch aktualisieren","Update program automatically"},
+	// T_Sollen_neue_Programmversionen_von
+	{"Sollen neue Programmversionen von ","Shall new versions of "},
+	// T_automatisch_installiert_werden
+	{" automatisch installiert werden?"," be automatically installed?"},
+	// T_zeigvers
+	{"zeigvers","showvers"},
+	// T_Logpfad,
+	{"Logpfad: '","Log path: '"},
+	// T_oblog,
+	{"' (oblog: ","' (with logging: "},
+	// T_Oblog,
+	{"Oblog (ausführliche Protokollierung): ","Log (detailled logging): "},
+	// T_Aufrufintervall
+	{"; Aufrufintervall: ","; (cron) call interval: "},
+	// T_kein_Aufruf
+	{"kein cron-Aufruf","no cron call"},
+	// T_Minute
+	{" Minute"," minute"},
 	// T_sqlv_k
 	{"sqlw","sqlv"},
 	// T_sql_verbose_l
@@ -234,15 +169,12 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"krf","noia"},
 	// T_keinerueckfragen_l
 	{"keinerueckfragen","nointeraction"},
-	// T_cm_k
-	{"cm","cm"},
-	// T_cronminuten_l
-	{"cronminuten","cronminutes"},
 	// T_nicht_erkannt
 	{" nicht erkannt!"," not identified!"},
-	// T_Liest_das_Fritzbox_Journal_Ueber_RogerRouter_aus_und_sammelt_es_in_einer_Datenbank
-	{"Liest das Fritzbox Journal über RogerRouter aus und sammelt es einer Datenbank",
-		"Reads the fritzbox journal via roger router and collects in in a database"},
+	// T_Logverzeichnis
+	{"Logverzeichnis","log directory"},
+	// T_Logdateiname
+	{"Logdateiname","log file name"},
 	// T_schreibe_Konfiguration
 	{"schreibe Konfiguration!","writing configuration!"},
 	// T_info_k
@@ -272,48 +204,119 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	// 	T_Erklaerung_haeufiger_Optionen
 	{"Erklärung häufiger Optionen","Explanation of frequent options"},
 	// T_Erklaerung_aller_Optionen
-	{"Erklärung aller Optionen","Explanation of all options"},
+	{"Erklärung aller Optionen","Explanation of all options"}, 
+	// Verbindung_zur_Datenbank_nicht_herstellbar
+	{"Verbindung zur Datenbank nicht herstellbar, fehnr: ","Connection to the database could not be established, errnr: "},
+	// T_Breche_ab
+	{". Breche ab.","Stopping."},
+	// T_pruefDB
+	{"pruefDB(","checkDB("},
+	// T_host_k
+	{"host","host"},
+	// T_host_l
+	{"host","host"},
+	// T_muser_k
+	{"muser","muser"},
+	// T_muser_l
+	{"muser","muser"},
+	// T_mpwd_k
+	{"mpwd","mpwd"},
+	// T_mpwd_l
+	{"mpwd","mpwd"},
+	// T_db_k
+	{"db","db"},
+	// T_datenbank_l
+	{"datenbank","database"},
+	// T_tb_k,
+	{"tb","tb"},
+	// T_tabelle_l,
+	{"tabelle","table"},
+	// T_Bildschirmausgabe_mit_SQL_Befehlen
+	{"Bildschirmausgabe mit SQL-Befehlen","screen output with SQL commands"},
+	// T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf
+	{"verwendet die Datenbank auf Host <string> anstatt auf","takes the database on host <string> instead of"},
+	// T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt
+	{"verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt","takes the user <string> for MySQL/MariaDB instead of"},
+	// T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string
+	{"verwendet fuer MySQL/MariaDB das Passwort <string>","takes the password <string> for MySQL/MariaDB"},
+	// T_verwendet_die_Datenbank_string_anstatt
+	{"verwendet die Datenbank <string> anstatt","uses the database <string> instead of"},
+	// T_verwendet_die_Tabelle_string_anstatt
+	{"verwendet die Tabelle <string> anstatt","uses the table <string> instead of"},
+	// T_Host_fuer_MySQL_MariaDB_Datenbank
+	{"Host fuer MySQL/MariaDB-Datenbank","host for mysql/mariadb-database"},
+	// T_Benutzer_fuer_MySQL_MariaDB,
+	{"Benutzer fuer MySQL/MariaDB:","user for mysql/mariadb:"},
+	// T_Passwort_fuer_MySQL_MariaDB,
+	{"Passwort fuer MySQL/MariaDB (Achtung: nur schwach verschluesselt!)","password for mysql/mariadb (caution: only weakly encrypted!)"},
+	// T_Datenbankname_fuer_MySQL_MariaDB_auf
+	{"Datenbankname fuer MySQL/MariaDB auf '","database name for mysql/mariabd on '"},
+	// T_Tabellenname_in
+	{"Tabellenname in '","table name in '"},
+	//	T_Fehler_beim_Pruefen_von
+	{"Fehler beim Pruefen von: ","Error while examining: "},
+	// T_keine_Rueckfragen_zB_aus_Cron
+	{"keine Rueckfragen, z.B. für Aufruf aus cron","no questions, e.g. for a call of " DPROG " within cron"},
+	// T_aufgerufen_werden_0_ist_gar_nicht]
+	{" ueber crontab aufgerufen werden (0=gar nicht), anstatt ", " be called in crontab (0=not at all), instead of "},
+	// T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte
+	{"alle Parameter werden abgefragt (darunter einige hier nicht gezeigte)","all parameters will be prompted (some of them not shown here)"},
 	// T_Fuege_ein
-	{"Füge ein: ","Inserting: "},
+	{"Füge ein: ","Inserting: "}, //ω
 	// T_Datensaetze_gelesen
 	{" Datensaetze gelesen"," data sets read"},
 	// T_Datensaetze_eingetragen
 	{" Datensaetze eingetragen"," data sets inserted"},
-	// T_Alle_wieviel_Minuten_soll
-	{"alle wieviel Minuten soll ","every how many minutes shall "},
-	// T_aufgerufen_werden_0_ist_gar_nicht]
-	{" ueber crontab aufgerufen werden (0=gar nicht), anstatt ", " be called in crontab (0=not at all), instead of "},
-	// T_Bildschirmausgabe_mit_SQL_Befehlen
-	{"Bildschirmausgabe mit SQL-Befehlen","screen output with SQL commands"},
-	// T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte
-	{"alle Parameter werden abgefragt (darunter einige hier nicht gezeigte)","all parameters will be prompted (some of them not shown here)"},
-	// T_keine_Rueckfragen_zB_aus_Cron
-	{"keine Rueckfragen, z.B. für Aufruf aus cron","no questions, e.g. for a call of " DPROG " within cron"},
-	// 	T_autoupd_k,
-	{"autoakt","autoupd"},
-	// 	T_autoupd_l,
-	{"autoaktual","autoupdate"},
-	// T_Programm_automatisch_aktualisieren
-	{"Programm automatisch aktualisieren","Update program automatically"},
-	// T_Sollen_neue_Programmversionen_von
-	{"Sollen neue Programmversionen von ","Shall new versions of "},
-	// T_automatisch_installiert_werden
-	{" automatisch installiert werden?"," be automatically installed?"},
-	// T_zeigvers
-	{"zeigvers","showvers"},
-	// T_Logpfad,
-	{"Logpfad: '","Log path: '"},
-	// T_oblog,
-	{"' (oblog: ","' (with logging: "},
-	// T_Oblog,
-	{"Oblog (ausführliche Protokollierung): ","Log (detailled logging): "},
-	// T_Aufrufintervall
-	{"; Aufrufintervall: ","; (cron) call interval: "},
-	// T_kein_Aufruf
-	{"kein cron-Aufruf","no cron call"},
-	// T_Minute
-	{" Minute"," minute"},
- {"",""}
+	// T_pruefanrufe
+	{"pruefanrufe()","checkcalls()"},
+	// T_Anruftyp_1_ankommend_3_abgehend
+	{"Anruftyp: 1=ankommend, 2=ankommend im Abwesenheit, 3=abgehend","type of call: 1=incoming, 2=incoming absent, 3=outgoing"},
+	// T_Zeitpunkt_des_Verbindungsaufbaus
+	{"Zeitpunkt des Verbindungsaufbaus","Start time of the connection"},
+	// T_Name_des_Verbindungspartners
+	{"Name des Verbindungspartners","Name of the Couterpart"},
+	// T_Rufnummer_des_Verbindungspartners
+	{"Rufnummer des Verbindungspartners","Dial number of the counterpart"},
+	// T_Nebenstelle_hier
+	{"Nebenstelle hier","party line here"},
+	// T_Eigene_Rufnummer
+	{"Eigene Rufnummer","Own calling number"},
+	// T_CalledNr
+	{"angerufene Nr, meist überzählig","Called number, mostly redundant"},
+	// T_Nummerntyp
+	{"Nummerntyp","number type"},
+	// T_Port
+	{"Port","port"},
+	// T_Verbindungsdauer
+	{"Verbindungsdauer","Connection duration"},
+	// T_Zahl
+	{"Zahl","count"},
+	// T_Telefonprotokoll_der_Fritzbox
+	{"Telefonprotokoll der Fritzbox","Connection journal of the fritzbox"},
+	// T_eindeutige_Identifikation
+	{"eindeutige Identifiaktion","unique ID"},
+	// T_ID_aus_Fritzbox
+	{"ID aus der Fritzbox","ID from the fritzbox"},
+	// T_Benutzer_fuer_Fritzbox,
+	{"Benutzer fuer Fritzbox","password for fritzbox"},
+	// T_Passwort_fuer_Fritzbox,
+	{"Passwort fuer Fritzbox (Achtung: nur schwach verschluesselt!)","password for fritzbox (caution: only weakly encrypted!)"},
+	// T_fbusr_k,
+	{"fbusr","fbusr"},
+	// T_fbusr_l,
+	{"fbusr","fbusr"},
+	// T_fbpwd_k,
+	{"fbpwd","fbpwd"},
+	// T_fbpwd_l,
+	{"fbpwd","fbpwd"},
+	// T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt
+	{"verwendet fuer die Fritzbox den Benutzer <string> anstatt","takes the user <string> for the fritzbox instead of"},
+	// T_verwendet_fuer_die_Fritzbox_das_Passwort_string
+	{"verwendet fuer die Fritzbox das Passwort <string>","takes the password <string< for the fritzbox"},
+	// T_Liest_das_Fritzbox_Journal_Ueber_RogerRouter_aus_und_sammelt_es_in_einer_Datenbank
+	{"Liest das Fritzbox Journal über RogerRouter aus und sammelt es einer Datenbank",
+		"Reads the fritzbox journal via roger router and collects in in a database"},
+ {"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
 class TxB Tx((const char* const* const* const*)DPROG_T);
@@ -354,7 +357,9 @@ void hhcl::getcommandl0()
   obverb=0;
  }
  // Reihenfolge muss koordiniert werden mit lieskonfein und rueckfragen
- const char* const sarr[]={"language","host","muser","mpwd","datenbank","tabelle","fbusr","fbpwd","cronminut","autoupd","logvz","logdname","oblog"};
+ const char* const sarr[]={"language","logvz","logdname","oblog","cronminut","autoupd","host","muser","mpwd","datenbank","tabelle" //ω
+	 ,"fbusr","fbpwd"
+ }; //α
  agcnfA.initd(sarr,sizeof sarr/sizeof *sarr);
  gcl0();
 } // getcommandl0
@@ -382,21 +387,21 @@ void hhcl::lieskonfein(const string& dprog)
 {
  hcl::lieskonfein(dprog);
  lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&host); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&muser); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) mpwd=XOR(string(agcnfA[lfd].wert),pwk); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&dbq); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&tanrufe); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&fbusr); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) fbpwd=XOR(string(agcnfA[lfd].wert),pwk); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&cronminut); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&autoupd); else rzf=1; lfd++;
  if (logvneu) agcnfA[lfd].setze(&logvz);
  if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&logvz); else rzf=1; lfd++;
  if (logdneu) agcnfA[lfd].setze(&logdname);
  if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&logdname); else rzf=1; lfd++;
- if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&oblog); else rzf=1; lfd++;
- setzlog();
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&oblog); else rzf=1; lfd++; 
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&cronminut); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&autoupd); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&host); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&muser); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) mpwd=XOR(string(agcnfA[lfd].wert),pwk); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&dbq); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&tabelle); else rzf=1; lfd++; //ω
+ if (agcnfA[lfd].gelesen) agcnfA[lfd].hole(&fbusr); else rzf=1; lfd++;
+ if (agcnfA[lfd].gelesen) fbpwd=XOR(string(agcnfA[lfd].wert),pwk); else rzf=1; lfd++;
+ setzlog(); //α
  if (nrzf) rzf=0;
 } // void hhcl::lieskonfein
 
@@ -408,11 +413,10 @@ int hhcl::getcommandline()
  opts.push_back(/*2*/optioncl(T_muser_k,T_muser_l,&Tx, T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,0,&muser,psons,&agcnfA, "muser",&obkschreib));
  opts.push_back(/*2*/optioncl(T_mpwd_k,T_mpwd_l,&Tx, T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,0,&mpwd,psons,&agcnfA,"mpwd",&obkschreib));
  opts.push_back(/*2*/optioncl(T_db_k,T_datenbank_l,&Tx, T_verwendet_die_Datenbank_string_anstatt,0,&dbq,psons,&agcnfA,"datenbank",&obkschreib));
- opts.push_back(/*2*/optioncl(T_tb_k,T_tabelle_l,&Tx, T_verwendet_die_Tabelle_string_anstatt,0,&tanrufe,psons,&agcnfA,"tabelle",&obkschreib));
- opts.push_back(/*2*/optioncl(T_fbusr_k,T_fbusr_l,&Tx, T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,0,&fbusr,psons,&agcnfA, "fbusr",&obkschreib));
+ opts.push_back(/*2*/optioncl(T_tb_k,T_tabelle_l,&Tx, T_verwendet_die_Tabelle_string_anstatt,0,&tabelle,psons,&agcnfA,"tabelle",&obkschreib)); //ω
+ opts.push_back(/*2*/optioncl(T_fbusr_k,T_fbusr_l,&Tx, T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,0,&fbusr,psons,&agcnfA, "fbusr",&obkschreib)); 
  opts.push_back(/*2*/optioncl(T_fbpwd_k,T_fbpwd_l,&Tx, T_verwendet_fuer_die_Fritzbox_das_Passwort_string,0,&fbpwd,psons,&agcnfA,"fbpwd",&obkschreib));
- opts.push_back(/*3*/optioncl(T_cm_k,T_cronminuten_l,&Tx,T_Alle_wieviel_Minuten_soll,1,&meinname,T_aufgerufen_werden_0_ist_gar_nicht,&cronminut,
-			 pzahl, &agcnfA,"cronminut",&obkschreib));
+ opts.push_back(/*3*/optioncl(T_cm_k,T_cronminuten_l,&Tx,T_Alle_wieviel_Minuten_soll,1,&meinname,T_aufgerufen_werden_0_ist_gar_nicht,&cronminut, pzahl, &agcnfA,"cronminut",&obkschreib)); //α
  opts.push_back(/*4*/optioncl(T_autoupd_k,T_autoupd_l, &Tx, T_Programm_automatisch_aktualisieren,1,&autoupd,1,&agcnfA,"autoupd",&obkschreib));
  opts.push_back(/*4*/optioncl(T_sqlv_k,T_sql_verbose_l, &Tx, T_Bildschirmausgabe_mit_SQL_Befehlen,1,&ZDB,1));
  opts.push_back(/*4*/optioncl(T_rf_k,T_rueckfragen_l, &Tx, T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,1,&rzf,1));
@@ -433,12 +437,12 @@ int hhcl::getcommandline()
 			 else if (opts[optslsz].kurzi==T_mpwd_k) {
 				 const string pwdstr=XOR(mpwd,pwk);
 				 agcnfA.setze(string(Tx[T_mpwd_k]),pwdstr);
-			 } // 				if (opts[optslsz].kurzi==T_mpwd_k)
+			 } // 				if (opts[optslsz].kurzi==T_mpwd_k) //ω
 			 else if (opts[optslsz].kurzi==T_fbpwd_k) {
 				 const string pwdstr=XOR(fbpwd,pwk);
 				 agcnfA.setze(string(Tx[T_fbpwd_k]),pwdstr);
 			 } // 				if (opts[optslsz].kurzi==T_mpwd_k)
-			 break;
+			 break; //α
 		 } //       if (opts[optslsz].pruefpar(&argcmv,&i,&obhilfe,Tx.lgn))
 	 } // for(size_t i=0;i<argcmv.size();i++)
  } //   for(;optslsz<opts.size();optslsz++)
@@ -450,7 +454,9 @@ int hhcl::getcommandline()
 	 } //     if (!argcmv[i].agef)
  } //   for(size_t i=0;i<argcmv.size();i++)
 	stringstream erkl;
-	erkl<<blau<<Tx[T_Liest_das_Fritzbox_Journal_Ueber_RogerRouter_aus_und_sammelt_es_in_einer_Datenbank]<<schwarz;
+	erkl<<blau //ω
+		<<Tx[T_Liest_das_Fritzbox_Journal_Ueber_RogerRouter_aus_und_sammelt_es_in_einer_Datenbank]
+	<<schwarz; //α
  if (zeighilfe(&erkl)) 
 	 return 1;
 	Log(violetts+Txk[T_Ende]+"getcommandline()"+schwarz);
@@ -495,9 +501,9 @@ void hhcl::rueckfragen()
 		agcnfA[lfd].setze(&dbq);
 	} //     if (agcnfA[++lfd].wert.empty() || rzf)
 	if (agcnfA[++lfd].wert.empty() || rzf) {
-		tanrufe=Tippstr(string(Tx[T_Tabellenname_in])+dblau+dbq+schwarz+"'",&tanrufe);
-		agcnfA[lfd].setze(&tanrufe);
-	} //     if (agcnfA[++lfd].wert.empty() || rzf)
+		tabelle=Tippstr(string(Tx[T_Tabellenname_in])+dblau+dbq+schwarz+"'",&tabelle);
+		agcnfA[lfd].setze(&tabelle);
+	} //     if (agcnfA[++lfd].wert.empty() || rzf) //ω
 	if (agcnfA[++lfd].wert.empty() || rzf) {
 		const string Frage=Tx[T_Benutzer_fuer_Fritzbox];
 		fbusr=Tippstr(Frage.c_str(),&fbusr);
@@ -513,7 +519,7 @@ void hhcl::rueckfragen()
 		const string pwdstr=XOR(fbpwd,pwk);
 		agcnfA[lfd].setze(&pwdstr);
 	} // 		if (agcnfA[++lfd].wert.empty() || rzf)
-	if (agcnfA[++lfd].wert.empty() || rzf) {
+	if (agcnfA[++lfd].wert.empty() || rzf) { //α
 		cronminut=Tippzahl(Tx[T_Alle_wieviel_Minuten_soll]+meinname+Tx[T_aufgerufen_werden_0_ist_gar_nicht],&cronminut);
 		agcnfA[lfd].setze(&cronminut);
 	}
@@ -568,7 +574,7 @@ void hhcl::pruefggfmehrfach()
 		pruefmehrfach(meinname,nrzf);
 	}
 } // void hhcl::pruefggfmehrfach()
-
+//ω
 
 int hhcl::holanr()
 {
@@ -629,7 +635,7 @@ int hhcl::holanr()
 		} // 		for(size_t tzn=0;tzn<tz.size();tzn++)
 		dsz++;
 		ersetzAlle(ar.duration,":",".");
-		RS such(My,"SELECT datum FROM `"+tanrufe+"` WHERE typ="+ar.type+" and Datum='"+vts.str()+"' and Name ='"+ar.name+"'"\
+		RS such(My,"SELECT datum FROM `"+tabelle+"` WHERE typ="+ar.type+" and Datum='"+vts.str()+"' and Name ='"+ar.name+"'"\
 				" and Rufnummer=if(typ='3','"+ar.called+"','"+ar.caller+"')"\
 				" and EigeneNr=if(typ='3','"+ar.caller+"','"+ar.called+"') and Dauer='"+ar.duration+"'",aktc,ZDB);//Nst wg. Zeichensatz weggel.
 		if (!such.obfehl) {
@@ -649,7 +655,7 @@ int hhcl::holanr()
 				einf.push_back(/*2*/instyp(My->DBS,"Dauer",ar.duration));
 				einf.push_back(/*2*/instyp(My->DBS,"Zahl",ar.count));
 				// caus<<Tx[T_Fuege_ein]<<put_time(&vt,"%Y-%m-%d %H:%M")<<endl;
-				rins.tbins(tanrufe,&einf,aktc,/*sammeln=*/1,/*oberb=*/ZDB,/*idp=*/0,/*eindeutig=*/0);  // einfuegen
+				rins.tbins(tabelle,&einf,aktc,/*sammeln=*/1,/*oberb=*/ZDB,/*idp=*/0,/*eindeutig=*/0);  // einfuegen
 				if (!rins.fnr)
 					egz++;
 				::Log(blaus+ausg.str()+schwarz,1,oblog);
@@ -658,14 +664,14 @@ int hhcl::holanr()
 			} // 					if (!cerg || !*cerg)
 		} // 				if (!such.obfehl)
 	} // 	while ((pos=holraus(buffer,"Call",&nurl,pos)))
-	rins.tbins(tanrufe,0,aktc,/*sammeln=*/0,/*oberb=*/ZDB,/*idp=*/0,/*eindeutig=*/0);  // einfuegen
+	rins.tbins(tabelle,0,aktc,/*sammeln=*/0,/*oberb=*/ZDB,/*idp=*/0,/*eindeutig=*/0);  // einfuegen
 	::Log(blaus+ltoan(dsz)+schwarz+Tx[T_Datensaetze_gelesen],1,0);
 	::Log(blaus+ltoan(egz)+schwarz+Tx[T_Datensaetze_eingetragen],1,0);
 	// std::cout<<buffer<<std::endl;
 	return EXIT_SUCCESS;
 }
 
-// wird aufgerufen in: main
+// wird aufgerufen in: main //α
 int hhcl::initDB()
 {
 	Log(violetts+"initDB(), db: "+blau+dbq+schwarz);
@@ -705,10 +711,10 @@ int hhcl::pruefDB(const string& db)
 		}
 	} // 	if (!My)
 	return (My->fehnr); 
-} // pruefDB
+} // pruefDB //ω
 
 // wird aufgerufen in: main
-void hhcl::pruefanrufe(DB *My, const string& tanrufe, const int obverb, const int oblog, const uchar direkt/*=0*/)
+void hhcl::pruefanrufe(DB *My, const string& tabelle, const int obverb, const int oblog, const uchar direkt/*=0*/)
 {
 	Log(violetts+Tx[T_pruefanrufe]+schwarz,obverb,oblog);
 	const size_t aktc=0;
@@ -731,16 +737,16 @@ void hhcl::pruefanrufe(DB *My, const string& tanrufe, const int obverb, const in
 		Feld ifelder0[] = {Feld("Datum")};   Index i0("Datum",ifelder0,sizeof ifelder0/sizeof* ifelder0);
 		Index indices[]={i0};
 		// auf jeden Fall ginge "binary" statt "utf8" und "" statt "utf8_general_ci"
-		Tabelle taba(My,tanrufe,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,
+		Tabelle taba(My,tabelle,felder,sizeof felder/sizeof* felder,indices,sizeof indices/sizeof *indices,
 				Tx[T_Telefonprotokoll_der_Fritzbox]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
-			Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tanrufe,1,1);
+			Log(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tabelle,1,1);
 			exit(11);
 		}
 	} // if (!direkt)
 } // int hhcl::pruefanrufe(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
 
-
+//α
 int main(int argc,char** argv)
 {
  hhcl hhi(argc,argv); // hiesige Hauptinstanz
@@ -772,15 +778,15 @@ int main(int argc,char** argv)
 	 if (hhi.logdateineu) tuloeschen(logdt,"",hhi.obverb,hhi.oblog);
 	 hhi.Log(Tx[T_Logpfad]+drots+hhi.loggespfad+schwarz+Tx[T_oblog]+drot+ltoan((int)hhi.oblog)+schwarz+")");
 	 if (hhi.initDB())
-		 return 10;
-	 hhi.pruefanrufe(hhi.My,hhi.tanrufe, hhi.obverb,hhi.oblog);
- } // 	if (!hhi.keineverarbeitung)
+		 return 10; //ω
+	 hhi.pruefanrufe(hhi.My,hhi.tabelle, hhi.obverb,hhi.oblog);
+ } // 	if (!hhi.keineverarbeitung) //α
 
  hhi.pruefcron(nix); // soll vor Log(Tx[T_Verwende ... stehen
  if (!hhi.keineverarbeitung) {
-	 hhi.zeigueberschrift();
+	 hhi.zeigueberschrift(); //ω
 	 hhi.holanr();
-	 hhi.setzzaehler();
+	 hhi.setzzaehler(); //α
 	 hhi.schreibzaehler();
  } //  if (!hhi.keineverarbeitung)
 
@@ -789,4 +795,4 @@ int main(int argc,char** argv)
  hhi.schlussanzeige();
  Log(violetts+Txk[T_Ende]+schwarz,hhi.obverb,hhi.oblog);
  return 0;
-} // int main
+} // int main //ω

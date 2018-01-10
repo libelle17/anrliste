@@ -1,5 +1,5 @@
-#define DPROG "anrliste"
-
+#define DPROG "anrliste" //α
+//ω
 class anrufcl
 {
   public:
@@ -16,7 +16,7 @@ class anrufcl
   std::string duration;
   std::string count;
 };
-
+//α
 class hhcl:public hcl
 {
  private:
@@ -25,12 +25,14 @@ class hhcl:public hcl
 	uchar obvs=0;   // ob Quelldateien bearbeitet werden sollen
 	string host="localhost";  // fuer MySQL/MariaDB
 	string dbq="faxe"; // Datenbank
-	string tanrufe="anrufe"; // MariaDB-Tabelle fuer Anrufjournal
+	string tabelle  //ω
+		="anrufe" // MariaDB-Tabelle fuer Anrufjournal
+		;  //α
 	string muser; // Benutzer fuer Mysql/MariaDB
-	string mpwd;  // Passwort fuer Mysql/MariaDB
+	string mpwd;  // Passwort fuer Mysql/MariaDB //ω
 	string fbusr; // User für Fritzbox
 	string fbpwd; // Password für Fritzbox
-	const size_t maxconz=12;//aktc: 0=...
+	const size_t maxconz=12;//aktc: 0=... //α
 	uchar keineverarbeitung=0; // wenn cronminuten geaendert werden sollen, vorher abkuerzen
 	DB* My=0;
  private:
@@ -41,7 +43,7 @@ class hhcl:public hcl
 	void pruefggfmehrfach();
 	int  initDB();
 	int  pruefDB(const string& db);
-	void pruefanrufe(DB *My, const string& tanrufe, const int obverb, const int oblog, const uchar direkt=0);
+	void pruefanrufe(DB *My, const string& tabelle, const int obverb, const int oblog, const uchar direkt=0);
 	void getcommandl0();
 	void VorgbAllg();
 	void VorgbSpeziell()
@@ -52,8 +54,8 @@ class hhcl:public hcl
 	void MusterVorgb();
 	void lieskonfein(const string& dprog);
 	int getcommandline();
-	void rueckfragen();
+	void rueckfragen(); //ω
 	int holanr();
-	void autokonfschreib();
+	void autokonfschreib(); //α
 	void zeigueberschrift();
-}; // class hhcl
+}; // class hhcl //ω
