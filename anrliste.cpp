@@ -3,8 +3,8 @@
 // sed -n '/\/\/α/,/\/\/ω/p' test
 #include "kons.h" //α
 #include "DB.h" 
-#define VOMHAUPTCODE 
-#include "anrliste.h" //ω
+#define VOMHAUPTCODE // um Funktionsdefinition manchmal mit "__attribute__((weak)) " versehen zu können //ω
+#include "anrliste.h" 
 #include "tr64.h"
 
 // für verschiedene Sprachen //α

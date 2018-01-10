@@ -246,6 +246,7 @@ else :; fi
 }
 
 # hier geht's los ...
+printf "Fuehre aus/executing: $0 ...\r"
 #// string substitution geht nur in bash, nicht in dash, was auf deb-Systemen standardmaessig durch sh aufgerufen wird
 #// => in diesem Fall Aufruf in bash-Aufruf umwandeln; dies wird zwar hier nicht gebraucht, jedoch sourct dieses Programm
 #// install.sh, wo derselbe Aufruf steht 

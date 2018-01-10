@@ -1,5 +1,5 @@
-#define DPROG "anrliste" //α
-//ω
+#define DPROG "anrliste"
+
 class anrufcl
 {
   public:
