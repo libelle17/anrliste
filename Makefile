@@ -229,6 +229,14 @@ neu: anzeig distclean weiter
 .PHONY: weiter
 weiter: compiler $(EXEC) $(GZS) 
 
+
+define setz_gitv
+	 @D=$(1)/.git/config; GITV=$$([ -f $$D ]&&sed -n '/ *url =.*com/{s/.*com\/\([^/]*\).*/\1/p}' $$D);\
+	 sed -i 's/^\(\[ -z .* \]&& GITV=\).*;/\1'$$GITV';/g' $(1)/install.sh;\
+	 [ -z "$$GITV" ]&& GITV=$(EXEC);\
+	 [ "$$GITV" = "$(sed 's/"//g' $(1)/gitvdt)" ]|| echo \"$$GITV\">$(1)/gitvdt;:;
+endef
+
 # davor:
 # git clone ssh://git@github.com/<user>/<reponame>.git
 # git clone ssh://git@github.com/libelle17/autofax.git # https://www.github.com/libelle17/autofax
@@ -559,13 +567,5 @@ neuproj:
 		sh viall;\
 		echo Weiter mit/Go on with: \"cd ../"$$Z"\";
 
-
-
-define setz_gitv
-	 @D=$(1)/.git/config; GITV=$$([ -f $$D ]&&sed -n '/ *url =.*com/{s/.*com\/\([^/]*\).*/\1/p}' $$D);\
-	 sed -i 's/^\(\[ -z .* \]&& GITV=\).*;/\1'$$GITV';/g' $(1)/install.sh;\
-	 [ -z "$$GITV" ]&& GITV=$(EXEC);\
-	 [ "$$GITV" = "$(sed 's/"//g' $(1)/gitvdt)" ]|| echo \"$$GITV\">$(1)/gitvdt;:;
-endef
 
 -include $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS)))
