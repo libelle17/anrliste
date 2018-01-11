@@ -559,6 +559,8 @@ neuproj:
 	@Z=;while [ -z "$$Z" -o -d ../"$$Z" ]; do echo Programmname/program name?; read Z;done;mkdir -p ../"$$Z";cp -ai kons.cpp kons.h DB.cpp DB.h Makefile .exrc configure install.sh man_?? viall* ../"$$Z";\
     sed -n "/\/\/α/,/\/\/ω/p;/VOMHAUPTCODE/i#include \"$$Z.h\"" "$(DPROG).cpp">"../$$Z/$$Z.cpp";\
     sed -n "/\/\/α/,/\/\/ω/p;1i#define DPROG \"$$Z\"" "$(DPROG).h">"../$$Z/$$Z.h";\
+		M=man_de;K=KURZ;D=DEINST;[ -f $$M ]&&sed -n "1,/^\.SH $$K/p;/^\.SH $$K/,/^\.SH $$D/{/^\.SH $$K/d;/^\.SH /p};/^\.SH $$D/,\$${/^\.SH $$D/d;p}" $$M>../"$$Z"/$$M;\
+		M=man_en;K=SHORT;D=UNINST;[ -f $$M ]&&sed -n "1,/^\.SH $$K/p;/^\.SH $$K/,/^\.SH $$D/{/^\.SH $$K/d;/^\.SH /p};/^\.SH $$D/,\$${/^\.SH $$D/d;p}" $$M>../"$$Z"/$$M;\
 		cd ../"$$Z";\
 		echo 0.1>versdt; touch entwickeln; echo $$Z>pname;\
 		L="\"/var/log/\" DPROG \"vorgabe.log\"";\
