@@ -15,7 +15,9 @@ class anrufcl
   std::string date;
   std::string duration;
   std::string count;
+	void clear();
 };
+
 //α
 class hhcl:public hcl
 {

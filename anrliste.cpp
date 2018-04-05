@@ -185,7 +185,7 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"vi","vi"},
 	// T_vi_l
 	{"vi","vi"},
-	// T_vc_k
+	// T_h_k
 	{"h","h"},
 	// T_lh_k
 	{"lh","lh"},
@@ -320,7 +320,6 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
 class TxB Tx((const char* const* const* const*)DPROG_T);
-
 uchar ZDB=0; // fuer Zusatz-Debugging (SQL): ZDB 1, sonst: 0
 const char *logdt="/var/log/" DPROG "vorgabe.log";//darauf wird in kons.h verwiesen; muss dann auf lgp zeigen;
 const string& pwk = "4893019320jfdksalö590ßs89d0qÃ9m0943Ã09Ãax"; // fuer Antlitzaenderung
@@ -333,6 +332,21 @@ const DBSTyp myDBS=Postgres;
 const DBSTyp myDBS=MySQL;
 #endif // mitpostgres else
 
+void anrufcl::clear()
+{
+	id.clear();
+	type.clear();
+	caller.clear();
+	called.clear();
+	callednumber.clear();
+	name.clear();
+	numbertype.clear();
+	device.clear();
+	port.clear();
+	date.clear();
+	duration.clear();
+	count.clear();
+}
 
 hhcl::hhcl(const int argc, const char *const *const argv):hcl(argc,argv)
 {
@@ -361,8 +375,8 @@ void hhcl::getcommandl0()
 	 ,"fbusr","fbpwd"
  }; //α
  agcnfA.initd(sarr,sizeof sarr/sizeof *sarr);
- gcl0();
-} // getcommandl0
+ gcl0(); //ω
+} // void hhcl::getcommandl0(int argc, char** argv) //α
 
 void hhcl::VorgbAllg()
 {
@@ -602,6 +616,7 @@ int hhcl::holanr()
   //std::cout<<buffer<<std::endl;
   holraus(buffer,"NewCallListURL",&nurl);
   holurl(nurl,&buffer);
+	// caus<<buffer<<endl;
   size_t pos=0,enr=0;
 	RS rins(My); 
 	while ((pos=holraus(buffer,"Call",&nurl,pos))) {
@@ -613,8 +628,9 @@ int hhcl::holanr()
 		anrufcl ar;
 		for(size_t tzn=0;tzn<tz.size();tzn++) {
 			std::string it;
-			ipos=holraus(nurl,tz[tzn],&it,ipos);
-			switch (tzn) {
+			size_t tza=(ar.type=="3"?(tzn==2?3:(tzn==3?2:tzn)):tzn);
+			ipos=holraus(nurl,tz[tza],&it,ipos);
+			switch (tza) {
 				case 0: ar.id=it;break;
 				case 1: ar.type=it;break;
 				case 2: ar.caller=it;break;
