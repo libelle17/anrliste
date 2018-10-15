@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "05.04.18" "Version 0.1003" "\fB²DPROG²\fR man page"
+.TH man 1 "15.10.18" "Version 0.1003" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -95,9 +95,9 @@ Depending on operating system, accessability and preferences the users thus coul
 .br
 \fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently '\fB/var/log\fR'
 .br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of '\fBanrliste.log\fR'
+\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of '\fBanrlistealt.log\fR'
 .br
-\fB -l, --log\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter)
+\fB -l, --log\fR: put detailed logs in file '\fB/var/log/anrlistealt.log\fR' (otherwise shorter)
 .br
 \fB -host, --host <string>\fR: takes the database on host <string> instead of '\fBlocalhost\fR'
 .br
@@ -113,7 +113,7 @@ Depending on operating system, accessability and preferences the users thus coul
 .br
 \fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
 .br
-\fB -cm, --cronminutes <zahl>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  '\fB2\fR'
+\fB -cm, --cronminutes <zahl>\fR: every how many minutes shall \fBanrlistealt\fR be called in crontab (0=not at all), instead of  '\fB2\fR'
 .br
 \fB -autoupd, --autoupdate\fR: Update program automatically\fB or not\fR
 -1lg.SH FUNCTIONALITY
