@@ -35,7 +35,8 @@
 # "make verschieb" => wie transfer, mit ../<DPROG>rein als Zielverzeichnis
 # "make vsneu" => wie verschieb, löscht vorher das als Zielverzeichnis (geht nur, wenn das github-Repository vorher gelöscht ist)
 # "make ruf" => ruft das Programm auf
-# "make uninstall" => deinstalliert alles, frägt noch manchmal rücke
+# "make rufv" => ruft das Programm mit -v auf
+# "make uninstall" => deinstalliert alles, frägt noch manchmal rück
 # "make allesweg" => deinstalliert alles, beantwortet Rückfragen mit 'y'
 # "make neuproj" => kopiert Dateien für neues Projekt in Verzeichnis fuer neues Projekt
 
@@ -260,10 +261,17 @@ git: README.md
 	@grep remote\ \"origin\"] .git/config >/dev/null 2>&1||git remote add origin https://github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git
 	@git push -u origin master
 
+.PHONY: giterlaub
 giterlaub:
 	@git config credential.helper store	
 	@git config --global credential.helper 'cache --timeout=36000'
 
+.PHONY: pull
+pull:
+	@git pull
+	@sh configure
+
+.PHONY: anzeig
 anzeig:
 # 'echo -e' geht nicht z.B. in ubuntu
 	@[ "$(DPROG)" ]||{ printf "Datei/File %b'vars'%b fehlerhaft/faulty, bitte vorher/please call %b'./install.sh'%b aufrufen/before!\n" \
@@ -276,6 +284,7 @@ anzeig:
 	@printf " Target path for/Zielpfad fuer '%bmake install%b': %b%s%b\n" $(blau) $(reset) $(blau) "'$(EXPFAD)'" $(reset) >$(BA)
 	-@rm -f fehler.txt $(KF)
 
+.PHONY: debug debugnew debugneu
 debug debugnew debugneu: DEBUG=-g 
 debug: all
 debugneu debugnew: neu
@@ -283,7 +292,7 @@ debugneu debugnew: neu
 $(EXEC): $(OBJ)
 	-@printf " linking/verlinke %s to/zu %b%s%b ..." "$(OBJ)" $(blau) "$@" $(reset) >$(BA)
 	-@df --output=ipcent / |tail -n1|grep - && $(SUDC)pkill postdrop;:
-	-@man>$(KR);[ $$? -gt 1 ]&&{ ./configure inst _ man verbose;}||:;
+	-@man>$(KR);[ $$? -gt 1 ]&&{ sh configure inst _ man verbose;}||:;
 	-@printf " (Version: %b%s%s%b\n " $(blau) "$$(cat versdt)" ")" $(reset) >$(BA)
 	$(CC) $^ $(DEBUG)-o $@ $(LDFLAGS)
 	-@ls .d/*.Td >$(KR) &&{ for datei in .d/*.Td; do mv -f $${datei} $${datei%.Td}.d; done;};:
@@ -317,19 +326,19 @@ $(error Variable 'SPR' nicht belegt, bitte vorher './install.sh' aufrufen!)
 endif
 	@[ "$(GCCOK)" = "1" ]||{ \
 	[ "$(DISTR)" = "1" ]&&{ $(SUDC)add-apt-repository ppa:ubuntu-toolchain-r/test;$(SUDC)apt-get update;};:;\
-	{ printf "Installiere/Installing Compiler ...\n" >$(BA);./configure inst "$(CCInst)" "$(COMP)";:;};}
+	{ printf "Installiere/Installing Compiler ...\n" >$(BA);sh configure inst "$(CCInst)" "$(COMP)";:;};}
 	-@[ "$(libmac)" ]&&{ for r in 1 2;do [ $$r = 1 ]&&{ lc="$(libmcd)";:;}||lc="$(libmc1d)";\
 	[ -f /usr/include/mysql/mysql.h>$(KR) ]&& \
 	find $$(find /usr -maxdepth 1 -type d -name "lib*" $(KF)|sort -r) -regextype egrep -regex ".*libm(ysql|ariadb)client.so" -print -quit $(KF)|\
 	grep ''>$(KR)&& break;\
-	./configure inst _ "$$lc" verbose; done;}||:
-	-@[ -z $$mitpg ]||$(SPR) $(pgd)>$(KR)||{ ./configure inst _ "$(pgd)" verbose;$(slc);};
+	sh configure inst _ "$$lc" verbose; done;}||:
+	-@[ -z $$mitpg ]||$(SPR) $(pgd)>$(KR)||{ sh configure inst _ "$(pgd)" verbose;$(slc);};
 # 3.5.17: auch libtiff5 hat gefehlt
 	-@[ "$(LT)" ]&& for r in 1 2;do \
 	[ $$r = 1 ]&& LTakt="$(LT)" ||{ [ -z "$(LT5)" ]&&break;LTakt="$(LT5)";};\
 	find /usr/include /usr/local/include -name tiff.h -print -quit $(KF)|grep ''>$(KR)&&\
 	find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -maxdepth 2 -type l -xtype f -name "libtiff.so" -print -quit $(KF)|grep ''>$(KR)&& break;\
-	./configure inst _ "$$LTakt" verbose;\
+	sh configure inst _ "$$LTakt" verbose;\
 	done; :;
 #	P=tiff_copy;T=$$P.tar.gz;M=$$P-master;wget https://github.com/$(GITV)/$$P/archive/master.tar.gz -O $$T&&{ rm -rf $$P;tar xpvf $$T;} &&\
 	mv $$M $$P&& cd $$P&&{ sed -i.bak s'/(thandle_t) client_data.fd);/(thandle_t) \&client_data.fd);/' tools/fax2tiff.c;\
@@ -337,17 +346,16 @@ endif
 	bef="cd `pwd`;make uninstall;cd -;";grep -q $$bef $(UNF)||printf "$$bef\n">>$(UNF);\
 	$(SUDC)ldconfig;cd ..;};
 
-	-@[ "$(LACL)" ]&&{ [ -f /usr/include/sys/acl.h ]|| ./configure inst _ "$(LACL)" verbose;}||:
-	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h ]|| ./configure inst _ "$(LCURL)" verbose;}||:
-	-@[ "$(LBOOST)" ]&&{ $(SPR) $(LBOOST)>$(KR)|| ./configure inst _ "$(LBOOST)" verbose;}||:
-	-@[ "$(LBIO)" ]&&{ $(SPR) "$(LBIO)">$(KR)||./configure inst _ "$(LBIO)" verbose;}||:
-	-@[ "$(LBLO)" ]&&{ $(SPR) "$(LBLO)">$(KR)||./configure inst _ "$(LBLO)" verbose;}||:
-#//	-@[ -f /usr/include/boost/iostreams/device/mapped_file.hpp -o -f /usr/share/doc/libboost-dev ]|| ./configure inst _ "$(LBOOST)" verbose;
+	-@[ "$(LACL)" ]&&{ [ -f /usr/include/sys/acl.h ]|| sh configure inst _ "$(LACL)" verbose;}||:
+	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h ]|| sh configure inst _ "$(LCURL)" verbose;}||:
+	-@[ "$(LBOOST)" ]&&{ $(SPR) $(LBOOST)>$(KR)|| sh configure inst _ "$(LBOOST)" verbose;}||:
+	-@[ "$(LBIO)" ]&&{ $(SPR) "$(LBIO)">$(KR)||sh configure inst _ "$(LBIO)" verbose;}||:
+	-@[ "$(LBLO)" ]&&{ $(SPR) "$(LBLO)">$(KR)||sh configure inst _ "$(LBLO)" verbose;}||:
+#//	-@[ -f /usr/include/boost/iostreams/device/mapped_file.hpp -o -f /usr/share/doc/libboost-dev ]|| sh configure inst _ "$(LBOOST)" verbose;
 # ggf. Korrektur eines Fehlers in libtiff 4.0.7, notwendig fuer hylafax+, 17.1.17 in Programm verlagert
 	@printf "                                  \r" >$(BA)
 
-.PHONY: stumminst
-.PHONY: stumm
+.PHONY: stumm stumminst
 stumm stumminst: BA::=/dev/null
 stumm stumminst: BFA::=
 stumm stumminst: rot::=""
@@ -391,7 +399,7 @@ endef
 define priv_html
 	-@printf " erstelle/generating:%b$(1)%b\n" $(blau) $(reset)
 	-@groff -mandoc -Thtml -v >$(KR);EXC="$$$$?"; \
-	for p in $(PGROFF); do { [ $$$${EXC} -gt 1 ]|| ! which groff>$(KR)|| ! $(SPR) $$$$p>$(KR);}&&{ ./configure inst _ $$$$p verbose;}; done; :;
+	for p in $(PGROFF); do { [ $$$${EXC} -gt 1 ]|| ! which groff>$(KR)|| ! $(SPR) $$$$p>$(KR);}&&{ sh configure inst _ $$$$p verbose;}; done; :;
 	-@rm -f $(1).html
 	-@sed -e 's/²gitv²/$(GITV)/g;s/²DPROG²/$(DPROG)/g;'\
 	 -e 's/Ä/\&Auml;/g;s/Ö/\&Ouml;/g;s/Ü/\&Uuml;/g;s/ä/\&auml;/g;s/ö/\&ouml;/g;s/ü/\&uuml;/g;s/ß/\&szlig;/g;'\
@@ -403,6 +411,7 @@ define priv_html
 endef
 
 # Aufruf des Programms mit -sh, um die Optionen in den manpages zu aktualisieren
+# falls hier Berechtigungsfehler, dann z.B. home-Partion ohne exec
 define manges
 $(1).html: $(EXEC) $(1)
 	$(call priv_html, $(1))
@@ -410,7 +419,13 @@ $(1).gz: $(EXEC) $(1)
 	-@printf " aktualisiere/updating %b$(1)%b\n" $(blau) $(reset)
 	-@sed -i "s/\(Version \)[^\"]*/\1$$$$(cat versdt)/;s/\(\.TH[^\"]*\)\"[^\"]*/\1\"$$$$(date +'%d.%m.%y')/" $(1)
 	-@Lang=$(shell echo $(1)|cut -d_ -f2|head -c1);\
-	 TMP=tmp_opt_$$$$Lang;./$(EXEC) -1lg $$$$Lang -sh|sed -e 's/^/.br\n/;s/\[[01];3.m/\\fB/g;s/\[0m/\\fR/g;'|sed ':a;N;$$$$!ba'>$$$$TMP; \
+		TMP=tmp_opt_$$$$Lang;chmod +x $(EXEC);\
+		EX="./$(EXEC) -1lg $$$$Lang -sh";\
+		W1="sed -e s/^/.br\n/;s/\\[[01]\\;3.m/\\\\fB/g;s/\\[0m/\\\\fR/g";\
+		W1a=$$$$(echo $$$$W1|sed -e "s/"`printf \\\\033`"/\(ESC\)/g;s/\\\\n/\\\\\\\\n/g");\
+		W2="sed :a;N;$$$$!ba";\
+		printf " rufe auf/calling: '%b$$$$EX |$$$$W1a |$$$$W2 >$$$$TMP%b'\n" $(blau) $(reset);\
+		$$$$EX|$$$$W1|$$$$W2>$$$$TMP; \
 	 nlinit=`echo 'nl="'; echo '"'`; eval "$$$$nlinit"; \
 	 von=".SH $$(OPN)"; bis=".SH $$(FKT)"; sed -i.bak "/$$$$von/,/$$$$bis/{/$$$$von/{n;p;r $$$$TMP$$$$nl};/$$$$bis/p;d}" $(1);
 	@sed 's/²gitv²/$(GITV)/g;s/²DPROG²/$(DPROG)/g;s/\\fB/\\fI/g' $(1)|gzip -c >$$@
@@ -488,6 +503,10 @@ vsneu: verschieb
 ruf:
 	@$(EXPFAD)/$(EXEC)
 
+.PHONY: rufv
+rufv:
+	@$(EXPFAD)/$(EXEC) -v
+
 .PHONY: version
 version: dovers
 .PHONY: dovers
@@ -554,17 +573,20 @@ dotrans:
 	@$(call setz_gitv,$(Ziel))
 	@sh -c "cd $(Ziel);./configure; " && printf "%b./configure%b in %b$(Ziel)%b aufgerufen\n" $(blau) $(reset) $(blau) $(reset);\
 
+.PHONY: newproj
+newproj: neuproj
 .PHONY: neuproj
 neuproj:
-	@Z=;while [ -z "$$Z" -o -d ../"$$Z" ]; do echo Programmname/program name?; read Z;done;mkdir -p ../"$$Z";cp -ai kons.cpp kons.h DB.cpp DB.h Makefile .exrc configure install.sh man_?? viall* ../"$$Z";\
-    sed -n "/\/\/α/,/\/\/ω/p;/VOMHAUPTCODE/i#include \"$$Z.h\"" "$(DPROG).cpp">"../$$Z/$$Z.cpp";\
-    sed -n "/\/\/α/,/\/\/ω/p;1i#define DPROG \"$$Z\"" "$(DPROG).h">"../$$Z/$$Z.h";\
+	@Z=;while [ -z "$$Z" -o -d ../"$$Z" ]; do [ ! -z "$$Z" -a -d ../"$$Z" ]&& echo \'..\\"$$Z"\' gibt es schon/already exists.; echo Programmname/program name?; read Z;done;mkdir -p ../"$$Z";cp -ai kons.cpp kons.h DB.cpp DB.h Makefile .exrc configure install.sh man_?? viall* ../"$$Z";\
+		sed -n ":Start;/\/\/α.*\/\/ω/{p;n;bStart};/\/\/α/,/\/\/ω/p;/VOMHAUPTCODE/i#include \"$$Z.h\"" "$(DPROG).cpp">"../$$Z/$$Z.cpp";\
+    sed -n ":Start;/\/\/α.*\/\/ω/{p;n;bStart};/\/\/α/,/\/\/ω/p;1i#define DPROG \"$$Z\"" "$(DPROG).h">"../$$Z/$$Z.h";\
 		M=man_de;K=KURZ;D=DEINST;[ -f $$M ]&&sed -n "1,/^\.SH $$K/p;/^\.SH $$K/,/^\.SH $$D/{/^\.SH $$K/d;/^\.SH /p};/^\.SH $$D/,\$${/^\.SH $$D/d;p}" $$M>../"$$Z"/$$M;\
 		M=man_en;K=SHORT;D=UNINST;[ -f $$M ]&&sed -n "1,/^\.SH $$K/p;/^\.SH $$K/,/^\.SH $$D/{/^\.SH $$K/d;/^\.SH /p};/^\.SH $$D/,\$${/^\.SH $$D/d;p}" $$M>../"$$Z"/$$M;\
 		cd ../"$$Z";\
 		echo 0.1>versdt; touch entwickeln; echo $$Z>pname;\
 		L="\"/var/log/\" DPROG \"vorgabe.log\"";\
 		sh configure;\
+		sed -i '/\$DTN [^'\'']/s/ +.* -pNu/ -pNu/' viall;\
 		sed -i.bak '/\$DTN [^'\'']/s/\$DTN /\$DTN +'\''tabfirst|tab sview ..\/$(DPROG)\/$(DPROG).cpp|tabnext|tab sview ..\/$(DPROG)\/$(DPROG).h|tabfirst'\'' /' viall;\
 		sh viall;\
 		echo Weiter mit/Go on with: \"cd ../"$$Z"\";

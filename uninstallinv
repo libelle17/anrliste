@@ -1,3 +1,3 @@
-rpm -e --nodeps  libcurl-devel
-# zypper -n --gpg-auto-import-keys in -f libcurl-devel
-printf "(Inst: 2018-01-02 00:09:57): $blau%s$reset\n" "rpm -e --nodeps  libcurl-devel"
+rm -f /root/rootscrontab;crontab -l|sed '/anrliste -noia/d'>/root/rootscrontab; crontab /root/rootscrontab;
+# sh -c 'rm -f /root/rootscrontab;crontab -l|sed '/anrliste -noia/d'>/root/rootscrontab; crontab /root/rootscrontab;'
+printf "(Inst: 2018-10-16 15:29:03): $blau%s$reset\n" "rm -f /root/rootscrontab;crontab -l|sed '/anrliste -noia/d'>/root/rootscrontab; crontab /root/rootscrontab;"

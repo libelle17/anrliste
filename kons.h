@@ -32,6 +32,8 @@
 #define vector_incl
 #endif // vector_incl
 #include <sys/wait.h> // fuer waitpid
+#include <map> // fuer Optionen
+#include <memory> // fuer shared_ptr
 
 using namespace std;
 extern const string& instvz; // in kons.cpp, z.B. /root/autofax
@@ -40,8 +42,8 @@ extern const int sfeh[]; // T_Dienst_laeuft, T_Dienst_inexistent, ...
 extern const double& versnr; // Programmversion
 extern const string& spath; // PATH-Variable für root
 string* loeschefarbenaus(string *zwi);
-int Log(const short screen,const short file, const bool oberr,const short klobverb, const char *format, ...);
-int Log(const string& text,const short screen=1,const short file=1,const bool oberr=0,const short klobverb=0);
+int yLog(const short screen,const short file, const bool oberr,const short klobverb, const char *format, ...);
+int fLog(const string& text,const short screen=1,const short file=1,const bool oberr=0,const short klobverb=0);
 
 #ifdef _MSC_VER
 #define fileno _fileno // sonst Warnung posix deprecated
@@ -78,7 +80,7 @@ int Log(const string& text,const short screen=1,const short file=1,const bool ob
 #endif
 
 #include <sys/stat.h> // stat, lstat, S_IFMT, S_IFDIR ...
-// #include <boost/algorithm/string.hpp> // clock, numeric_limits
+// #include <boost/algorithm/string.hpp> // clock, numeric_limits, boost::iequals
 #include <boost/locale.hpp> // fuer to_upper und to_lower
 // #include <limits>
 extern const boost::locale::generator gen; // fuer to_upper, to_lower
@@ -88,12 +90,12 @@ typedef unsigned char uchar; // 1 Byte
 enum binaer:uchar {falsch,wahr};
 enum Sprache {deutsch,englisch,SprachZahl};
 extern const char *const dir;
-extern const char *const tmmoegl[2];
+extern const char *const tmmoegl[];
 //extern const string datei;
 // extern const char *rot, *weinrot, *schwarz, *blau, *gelb; // muss spaeter kompilerunabhaengig
 extern const char *const schwarz, *const dgrau, *const drot, *const rot, *const gruen, *const hgruen, *const braun, *const gelb,
 			 *const blau, *const dblau, *const violett, *const hviolett, *const tuerkis, *const htuerkis, *const hgrau, *const weiss, *const umgek;
-extern const string drots,rots,schwarzs,blaus,dblaus,gelbs,tuerkiss,hgraus,violetts,gruens;
+extern const string drots,rots,schwarzs,blaus,dblaus,gelbs,tuerkiss,hgraus,violetts,hvioletts,gruens;
 #ifdef linux
 extern const char *_rot, *_hrot, *_schwarz, *_blau, *_gelb, *_tuerkis, *_hgrau;
 #endif // linux
@@ -102,6 +104,8 @@ extern const char *_rot, *_hrot, *_schwarz, *_blau, *_gelb, *_tuerkis, *_hgrau;
 #include <regex.h> // regex_t, regex, regcomp, regexec
 #include <chrono> // fuer sleep_for 
 #include <thread> // fuer sleep_for
+#include <iconv.h> // fuer ic_cl (Konversion von Dos-Dateien in utf-8)
+#include <utime.h>  // fuer utimbuf und utime
 
 #define neufind
 #define altfind
@@ -133,6 +137,7 @@ enum {
 #define caus cout // nur zum Debuggen
 #define exitt exit // fuer threads
 extern pthread_mutex_t getmutex, printf_mutex, timemutex;
+size_t thr_strftime(const struct tm* timeptr,string *ziel,const char* format="%d.%m.%Y %H.%M.%S");
 extern const string devtty;
 
 typedef unsigned long long ull;
@@ -147,10 +152,12 @@ extern el2set::iterator it2;
 class elem3;
 extern set<elem3>::iterator it3;
 
-extern const string nix/*=""*/;
+extern const string nix/*=string()*/;
 extern const string eins/*="1"*/;
 extern const string sudc/*="sudo "*/;
 extern const string sudhc/*="sudo -H "*/;
+struct linst_cl;
+extern linst_cl* linstp/*=0*/; // globales Objekt
 // typedef const char *TCtp[][SprachZahl];
 typedef const char * const * const TCtp[SprachZahl];
 class TxB // Text-Basisklasse
@@ -159,7 +166,7 @@ class TxB // Text-Basisklasse
   Sprache lgn; // Sprache numerisch
 //  TCtp* TCp;
   const char * const * const * const *TCp;
-	TxB(const char* const* const* const *TCp):TCp(TCp){}
+	TxB(const char* const* const* const *TCp);
   inline const char* operator[](long const& nr) const {
     TCtp *hilf = reinterpret_cast<TCtp*>(TCp);
     return (const char*)hilf[nr][lgn];
@@ -187,7 +194,7 @@ enum Tkons_
   T_nicht_mit_fopen_zum_Anhaengen_oeffnen,
   T_Bitte_mit,
   T_beenden,
-  T_stern_zeile,
+  // T_stern_zeile,
   T_Rueckmeldung,
   T_Suchbefehl,
   T_Fuehre_aus,
@@ -197,7 +204,8 @@ enum Tkons_
   T_kein_Verzeichnis_nochmal,
   T_nicht_gefunden_soll_ich_es_erstellen,
   T_Fehlender_Parameter_string_zu,
-  T_oder,
+	T_Fehlender_Parameter_Datum_zu,
+	T_oder,
   T_Fehler_Parameter,
   T_ohne_gueltigen,
   T_mit_Datei_als,
@@ -222,8 +230,11 @@ enum Tkons_
   T_nicht_gefunden_versuche_ihn_einzurichten,
   T_Aktiviere_Dienst,
   T_Program,
-  T_laeuft_schon_einmal_Breche_ab,
-  T_Wert,
+  T_laeuft_schon_einmal_seit,
+	T_sec_Breche_ab,
+	T_laueft_schon_einmal_aber,
+	T_wird_deshalb_abgebrochen,
+	T_Wert,
   T_Dauer,
   T_Dienst,
   T_geladen,
@@ -330,7 +341,7 @@ enum Tkons_
 	T_libtest,
 	T_protokolliert_ausfuehrlich_in_Datei,
 	T_sh,
-	T_lieskonfein,
+	T_virtlieskonfein,
 	T_pruefcron,
 	T_cronzuplanen,
 	T_Kein_cron_gesetzt_nicht_zu_setzen,
@@ -341,7 +352,7 @@ enum Tkons_
 	T_gar_nicht,
 	T_aufgerufen,
 	T_statt,
-	T_schlussanzeige,
+	T_virtschlussanzeige,
 	T_Zeit_Doppelpunkt,
 	T_Fertig_mit,
 	T_eigene,
@@ -376,6 +387,80 @@ enum Tkons_
 	T_Gebrauch,
 	T_Optionen_die_nicht_gespeichert_werden,
 	T_Optionen_die_in_der_Konfigurationsdatei_gespeichert_werden,
+	T_autokonfschreib,
+	T_zu_schreiben,
+	T_rueckzufragen,
+	T_schreibe_Konfiguration,
+	T_h_k,
+	T_lh_k,
+	T_hilfe_l,
+	T_lhilfe_l,
+	T_fgz_k,
+	T_fgz_l,
+	T_Erklaerung_haeufiger_Optionen,
+	T_Erklaerung_aller_Optionen,
+	T_cm_k,
+	T_cronminuten_l,
+	T_Alle_wieviel_Minuten_soll,
+	T_aufgerufen_werden_0_ist_gar_nicht,
+	T_vi_k,
+	T_vi_l,
+	T_Konfigurationsdatei,
+	T_Logdatei_usw_bearbeiten_sehen,
+	T_vs_k,
+	T_vs_l,
+	T_Quelldateien_in,
+	T_bearbeiten_sehen,
+	T_nicht_erkannt,
+	T_autoupd_k,
+	T_autoupd_l,
+	T_Programm_automatisch_aktualisieren,
+	T_rf_k,
+	T_rueckfragen_l,
+	T_krf_k,
+	T_keinerueckfragen_l,
+	T_keine_Rueckfragen_zB_aus_Cron,
+	T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,
+	T_info_k,
+	T_version_l,
+	T_Zeigt_die_Programmversion_an,
+	T_zeigvers,
+	T_Sollen_neue_Programmversionen_von,
+	T_automatisch_installiert_werden,
+	T_Logverzeichnis,
+	T_Logdateiname,
+	T_Oblog_ausf_Protok,
+	T_Aufrufintervall,
+	T_kein_Aufruf,
+	T_Minute,
+	T_Logpfad,
+	T_oblog,
+	T_in_main_pidv_am_Schluss,
+	T_parsecl,
+	T_lies,
+	T_verarbeitkonf,
+	T_kauswert,
+	T_optausg,
+	T_einzutragen,
+	T_schon_eingetragen,
+	T_wird_jetzt_eingetragen,
+	T_lieszaehlerein,
+	T_Parameter,
+	T_gefunden,
+	T_rueckzufragen_wegen,
+	T_virtlgnzuw_langu,
+	T_mit_w_werden_die_Einstellungen_noch_ausfuehrlicher_angezeigt,
+	T_keine_Daten_zum_Anzeigen_Bearbeiten,
+	T_Maximaldauer_ueberschritten,
+	T_Fehler_in_setfaclggf,
+	T_Fehler_in_find2cl,
+	T_nach_sh_viall_beendet,
+	T_nach__,
+	T_unbek,
+	T_Progvers,
+	T_verwendet_wird,
+	T_Ausgabezeile,
+	T_pruefmehrfach,
 	T_konsMAX
 }; // Tkons_
 
@@ -392,6 +477,8 @@ class Txkonscl : public TxB
 };
 */
 extern class TxB Txk;
+extern char const *DPROG_T[][SprachZahl];
+extern class TxB Tx;
 
 extern uchar nrzf; // nicht rueckzufragen, fuer Aufruf aus Cron
 
@@ -423,6 +510,22 @@ class argcl
  argcl(const int i, const char *const *const argv);
 };
 
+// Gebrauch, z.B.: ic_cl ic("UTF8","CP850");
+////			caus<<ic.convert(inh)<<endl;
+class ic_cl 
+{
+	iconv_t ict;
+	static const size_t grenze=500, 
+							 reserve=4*grenze;
+	char ergcont[reserve],
+			 *ergdyn=0;
+	public:
+	char *ergebnis;
+	ic_cl(const char* nach, const char* von); 
+	~ic_cl();
+	char *convert(string& eing,size_t ab=0);
+};
+
 class perfcl
 {
  public:
@@ -451,11 +554,14 @@ class mdatei: public fstream
 // Zeitausgabeklasse, um time_t-Variablen formatiert in ostream-Objekte ausgeben zu koennen, z.B. <<ztacl(zt,"%F %T")<<
 class ztacl {
 	private:
+		tm tmloc;
 		const time_t zt;
-		const char* fmt;
+		const char* const fmt;
 	public:
-		explicit ztacl(time_t &pzt,const char* pfmt):zt(pzt),fmt(pfmt) {
-		}
+		explicit ztacl(const time_t &pzt,const char* const pfmt="%d.%m.%Y %H.%M.%S");
+		// folgendes würde die Werte fuer nachfolgenden Wertvergleich mit memcmp verfälschen:
+		// explicit ztacl(tm *const tm,const char* const pfmt="%d.%m.%Y %H.%M.%S %z %Z");
+		explicit ztacl(const tm *const tm,const char* const pfmt="%d.%m.%Y %H.%M.%S %z %Z");
 		std::ostream &operator()(std::ostream& out) const;
 }; // ztacl
 ostream &operator<<(ostream &out,ztacl ztaus);
@@ -512,8 +618,10 @@ inline int isnumeric(const char* str)
   }
   return 1;
 } // inline int isnumeric(char* str)
+
+string zuzahl(const string& q);
  
-string* anfzweg(string& quel);
+string* anfzweg(string *quel);
 char ers(const char roh);
 
 // Gesamt-Trim
@@ -525,6 +633,11 @@ inline std::string *gtrim(std::string *str) {
 
 inline std::string *ltrim(std::string *str) {
   str->erase(0, str->find_first_not_of("\t "));       //prefixing spaces
+  return str;
+} // inline std::string *ltrim(std::string *str)
+
+inline std::string *rtrim(std::string *str) {
+  str->erase(str->find_last_not_of("\t ")+1);         //surfixing spaces
   return str;
 } // inline std::string *ltrim(std::string *str)
 
@@ -543,7 +656,7 @@ string *loeschealleaus(string *u, const char* alt);
 string ersetze(const char *const u, const char* const alt, const char* const neu);
 string *sersetze(string *src, string const& target, string const& repl);
 // wstring ersetze(const wstring& u, const wchar_t* alt, const wchar_t* neu); 
-string nersetze(const string& quelle,string was, string durch);
+string nersetze(const string& quelle, string const& was, string const& durch);
 
 string ersetzAllezu(const string& quelle, const string& alt, const string& neu);
 void ersetzAlle(string& quelle, const string& alt, const string& neu);
@@ -570,41 +683,78 @@ std::string string_to_hex(const std::string& input);
 int dateivgl(const string& d1, const string& d2,uchar obzeit=0);
 void kuerzevtz(string *vzp);
 
-#ifdef notcpp
-class Schluessel {
-  public:
-    char key[90];
-    char val[100];
-    template <typename T> void hole(T *var) { *var=atol(val); }
-    template <typename T> void setze(T *var) { strncpy(val,ltoan(*var),sizeof val-1);val[sizeof val-1]=0; }
-};
-template <> inline void Schluessel::hole < char* > (char** var) { *var = val; }
-template <> inline void Schluessel::hole < const char* > (const char** var) { *var = val; }
-template <> inline void Schluessel::hole < string > (string *var) { *var = val; }
-template <> inline void Schluessel::hole < binaer > (binaer *var) { *var = (binaer)atoi(val); }
-template <> inline void Schluessel::setze < char* > (char** var) { strncpy(val,*var,sizeof val-1);val[sizeof val-1]=0; }
-template <> inline void Schluessel::setze < const char* > (const char** var) { strncpy(val,*var,sizeof val-1);val[sizeof val-1]=0; }
-template <> inline void Schluessel::setze < string > (string *var) { strncpy(val,var->c_str(),sizeof val-1);val[sizeof val-1]=0;}
-#endif // notcpp
+struct svec: public vector<std::string>
+{
+	inline svec& operator<<(const std::string& str) {
+		this->push_back(str);
+		return *this;
+	}
+}; // class svec: public vector<std::string>
 
-class cppSchluess {
+//svec& operator<<(svec& v, const std::string& str);
+template<typename T>
+class tsvec: public vector<T>
+{
   public:
-    string name;
-    uchar gelesen=0;
-    string wert;
+    inline tsvec<T>& operator<<(const T& str) {
+      this->push_back(str);
+//      ((T&)str).init();
+      return *this;
+    } // inline tsvec
+}; // template<typename T> class tsvec: public vector<T>
+
+
+template <typename SCL> class schAcl;
+
+enum par_t:uchar {pstri,pdez,ppwd,pverz,pfile,puchar,pbin,pint,plong,pdat}; // Parameterart: Sonstiges, Verzeichnis, Datei, uchar, int, long, Datum (struct tm)
+////enum war_t:uchar {wlong,wbin,wstr,wdat}; // Parameterart: Sonstiges, Verzeichnis, Zahl, binär
+// Wertepaargrundklasse, für WPcl und optcl
+struct wpgcl 
+{ 
+		string pname;
+		uchar ausgewertet=0;
+    const void *pptr=0; // Zeiger auf Parameter, der hier eingestellt werden kann
     string bemerk;
-//    inline cppSchluess& operator=(cppSchluess zuzuw){name=zuzuw.name;wert=zuzuw.wert; return *this;} // wird nicht benoetigt
-    template <typename T> void hole(T *var) { *var=atol(wert.c_str()); }
-    template <typename T> void setze(T *var) { wert=ltoan(*var); }
+    par_t part=pstri; // Parameterart
+    uchar gelesen=0;
+		uchar eingetragen=0; // Hilfsvariable zur genau einmaligen Eintragung einer Option mit name=pname in Konfigurationsdatei
+		wpgcl(const string& pname,const void* pptr,par_t part);
+		string virtholstr() const;
+    virtual const string& virtmachbemerk(const Sprache lg,const binaer obfarbe=wahr);
+		void virtweisomapzu(void *schlp);
+		int tusetzstr(const char* const neuw,uchar *const tuschreibp,const uchar ausDatei=0,const uchar keineprio=0);
+		virtual int setzstr(const char* const neuw,uchar *const obzuschreib=0,const uchar ausDatei=0)=0;
+		const uchar virteinzutragen(/*schAcl<optcl>**/void *schlp,int obverb);
+    void virttusetzbemerkwoher(const string& ibemerk,const uchar vwoher);
+		void virtfrisch();
+		void virtoausgeb() const;
+};
+
+// fuer Wertepaare, die nur aus Datei gezogen werden und nicht zusaetzlich ueber die Befehlszeile eingegeben werden koennen
+// Wertepaarklasse
+struct WPcl:wpgcl 
+{ 
+    string wert;
+		WPcl(const string& pname,const void* pptr=0,par_t part=pstri);
+		int setzstr(const char* const neuw,uchar *const obzuschreib=0,const uchar ausDatei=0);
+		int setzstr(const string& neus,uchar *const obzuschreib=0,const uchar ausDatei=0);
+		string virtholstr() const;
+		//    inline WPcl& operator=(WPcl zuzuw){pname=zuzuw.pname;wert=zuzuw.wert; return *this;} // wird nicht benoetigt
+//    template <typename T> void hole(T *var) { *var=atol(wert.c_str()); }
+//    template <typename T> void setze(T *var) { wert=ltoan(*var); }
 //    template <typename T> void setze(T *var,string& bem) { wert=ltoan(*var); bemerk=bem;}
-		void hole (struct tm *tmp);
-}; // class cppSchluess
-template <> inline void cppSchluess::hole < char* > (char** var) {*var = (char*)wert.c_str(); }
-template <> inline void cppSchluess::hole < const char* > (const char** var) {*var = wert.c_str(); }
-template <> inline void cppSchluess::hole < string > (string *var) {*var = wert; }
-template <> inline void cppSchluess::hole < binaer > (binaer *var) { *var = (binaer)atoi(wert.c_str()); }
+//		void hole(struct tm *tmp);
+		void virtoausgeb() const;
+		void virtfrisch();
+}; // class WPcl
 /*
-template <> inline void cppSchluess::hole < struct tm > (struct tm *tmp) {
+template <> inline void WPcl::hole < char* > (char** var) {*var = (char*)wert.c_str(); }
+template <> inline void WPcl::hole < const char* > (const char** var) {*var = wert.c_str(); }
+template <> inline void WPcl::hole < string > (string *var) {*var = wert; }
+template <> inline void WPcl::hole < binaer > (binaer *var) { *var = (binaer)atoi(wert.c_str()); }
+*/
+/*
+template <> inline void WPcl::hole < struct tm > (struct tm *tmp) {
 	if (!wert.empty()) {
 		for(unsigned im=0;im<sizeof tmmoegl/sizeof *tmmoegl;im++) {
 			if (strptime(wert.c_str(), tmmoegl[im], tmp)) break;
@@ -613,50 +763,130 @@ template <> inline void cppSchluess::hole < struct tm > (struct tm *tmp) {
 	}
 }
 */
-template <> inline void cppSchluess::setze < char* > (char** var) {wert=*var;  }
-template <> inline void cppSchluess::setze < const char* > (const char** var) {wert=*var; }
-template <> inline void cppSchluess::setze < string > (string *var) {wert=*var;}
-template <> inline void cppSchluess::setze < const string > (const string *var) {wert=*var; }
-template <> inline void cppSchluess::setze < struct tm > (struct tm *tmp) {
+/*
+template <> inline void WPcl::setze < char* > (char** var) {wert=*var;  }
+template <> inline void WPcl::setze < const char* > (const char** var) {wert=*var; }
+template <> inline void WPcl::setze < string > (string *var) {wert=*var;}
+template <> inline void WPcl::setze < const string > (const string *var) {wert=*var; }
+template <> inline void WPcl::setze < struct tm > (struct tm *tmp) {
 	char buf[30];
 	strftime(buf, sizeof(buf), "%d.%m.%y %T", tmp);
 	wert=buf;
 }
-/*
-template <> inline void cppSchluess::setze < char* > (char** var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem; }
-template <> inline void cppSchluess::setze < const char* > (const char** var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem;}
-template <> inline void cppSchluess::setze < string > (string *var, string& bem) {wert=*var;if (!bem.empty()) bemerk=bem;}
-template <> inline void cppSchluess::setze < const string > (const string *var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem;}
 */
-class svec;
+/*
+template <> inline void WPcl::setze < char* > (char** var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem; }
+template <> inline void WPcl::setze < const char* > (const char** var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem;}
+template <> inline void WPcl::setze < string > (string *var, string& bem) {wert=*var;if (!bem.empty()) bemerk=bem;}
+template <> inline void WPcl::setze < const string > (const string *var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem;}
+*/
 
-class schlArr {
- public:
- cppSchluess *schl=0; 
- size_t zahl;
- schlArr();
- schlArr(const char* const* sarr,size_t vzahl);
- void neu(size_t vzahl=0);
- void init(size_t vzahl, ...);
- void init(vector<cppSchluess*> *sqlvp);
- void initd(const char* const* sarr,size_t vzahl);
- inline /*const*/ cppSchluess& operator[](size_t const& nr) const { return schl[nr]; }
- int setze(const string& name, const string& wert/*, const string& bem=nix*/);
- const string& hole(const string& name);
- void setzbemv(const string& name,TxB *TxBp,size_t Tind,uchar obfarbe=0,svec *fertige=0);
- void aschreib(mdatei *const f);
- int fschreib(const string& fname);
- void ausgeb();
- void reset();
- ~schlArr();
-}; // class schlArr
+// neue Klasse für map
+// fuer Wertepaare, die aus Datei gezogen werden und zusaetzlich ueber die Befehlszeile eingegeben werden koennen
+struct optcl:wpgcl
+{
+		const int kurzi=-1;
+		const int langi=-1;
+    TxB *TxBp=0; // nicht const, da lgn geändert werden muß
+    const long Txi=0;
+		const uchar wi=0; // Wichtigkeit: 1= wird mit -lh oder -h, 0= nur mit -lh, 255 (-1) = gar nicht angezeigt
+    const long Txi2=-1;
+    const string rottxt; // ggf rot zu markierender Text zwischen Txi und Txi2
+//    string oerkl;
+    int iwert; // Wert, der pptr zugewiesen wird, falls dieser Parameter gewaehlt wird; -1= Wert steht im nächsten Parameter, 1=pro Nennung in der Kommandozeile wert um 1 erhöhen
+//    string *zptr=0; // Zeiger auf Zusatzparameter, der hier eingegeben werden kann (z.B. Zahl der Zeilen nach -n (Zeilenzahl)
+//    schAcl<WPcl> *cpA=0; // Konfigurationsarray, das ggf. geschrieben werden muss
+//    uchar ogefunden=0; // braucht man nicht, ist in argcl
+		// ermittelte Optionen:
+		uchar woher=0; // 1= ueber Vorgaben, 2= ueber Konfigurationsdatei, 3= ueber Befehlszeile gesetzt
+    const uchar obno=0; // ob auch die Option mit vorangestelltem 'no' eingefuegt werden soll
+		uchar gegenteil=0;
+		uchar nichtspeichern=0;
+		const uchar virteinzutragen(/*schAcl<optcl>**/void *schlp,int obverb);
+		void virtweisomapzu(/*schAcl<optcl>**/void *schlp);
+//		void virtloeschomaps(/*schAcl<optcl>**/void *schlp);
+		void virtloeschomaps(schAcl<optcl> *schlp);
+		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
+				const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno=0);
+		void setzwert();
+		int setzstr(const char* const neuw,uchar *const obzuschreib=0,const uchar ausDatei=0);
+		void virttusetzbemerkwoher(const string& ibemerk,const uchar vwoher);
+		void virtoausgeb() const;
+		int pzuweis(const char *const nacstr, const uchar vgegenteil=0, const uchar vnichtspeichern=0);
+		virtual const string& virtmachbemerk(const Sprache lg,const binaer obfarbe=wahr);
+		void hilfezeile(Sprache lg);
+		void virtfrisch();
+		~optcl();
+}; // struct optcl
 
-class abSchl {
+// fuer Commandline-Optionen
+// enum par_t:uchar {pstri,pdez,ppwd,pverz,pfile,puchar,pbin,pint,plong,pdat}; // Parameterart: Sonstiges, Verzeichnis, Datei, uchar, int, long, Datum (struct tm)
+
+struct aScl {
+   const string name;
+   const string *wertp;
+   aScl(const string& name, const string *wertp):name(name),wertp(wertp) {}
+}; // class aScl
+
+struct aSvec:vector<aScl>
+{
+	inline aSvec& operator<<(const aScl& aS) {
+		this->push_back(aS);
+		return *this;
+	}
+}; // class aSvec: public vector<std::string>
+
+template <typename SCL> class schAcl {
  public:
-   string name;
-   string wert;
-   abSchl(string& vname, string& vwert):name(vname),wert(vwert) {}
-}; // class abSchl
+	string name;
+// WPcl *schl=0; 
+	//vector<SCL*> schl; // Schlüsselklasse Schlüssel
+	vector<shared_ptr<SCL>> schl; // Schlüsselklasse Schlüssel
+//// inline schAcl& operator<<(const SCL& sch) { sch.virtweisomapzu(this); schl.push_back(sch); return *this; }
+//// schAcl& operator<<(SCL& sch);
+//// inline schAcl& operator<<(SCL *schp) { schp->virtweisomapzu(this); schl.push_back(*schp); return *this; }
+ schAcl& operator<<(SCL *schp);
+ schAcl& operator<<(shared_ptr<SCL> schp);
+ // schAcl& operator<<(shared_ptr<SCL> schp);
+// inline const SCL* operator[](size_t const& nr) const { return schl[nr].get(); }
+// inline SCL* operator[](size_t const& nr) { return schl[nr].get(); }
+ inline const shared_ptr<const SCL> operator[](size_t const& nr) const { return schl[nr];}
+ inline shared_ptr<SCL> operator[](size_t const& nr) { return schl[nr];} // fuer hilfezeile, virtmachbemerk
+ inline size_t size(){return schl.size();}
+ inline shared_ptr<SCL> letzter() {return schl[schl.size()-1];} 
+ schAcl(const string& name);
+ schAcl(const string& name, vector<aScl> *v);
+#ifdef false
+ schAcl(const string& name, vector<aScl> v);
+#endif
+// schAcl(const string& name, const char* const* sarr,size_t vzahl);
+ // void neu(size_t vzahl=0);
+ void sinit(size_t vzahl, ...);
+ void sinit(vector<shared_ptr<SCL>> sqlvp);
+ map<string,SCL*> omap; // map der Optionen
+ map<const char* const,SCL const*> okmap; // map der Optionen, sortiert nach Tx[<kurzi>]
+ map<const char* const,SCL const*> olmap; // map der Optionen, sortiert nach Tx[<langi>]
+ typename map<string,SCL*>::iterator omit; // Optionen-Iterator
+ //		void omapzuw(); // Optionen an omap zuweisen
+ // void initd(const char* const* sarr,size_t vzahl);
+ // void initv(vector<optcl*> optpv,vector<size_t> optsv);
+ // int setze(const string& pname, const string& wert/*, const string& bem=nix*/);
+ // const string& hole(const string& pname);
+ void setzbemv(const string& pname,TxB *TxBp,size_t Tind,uchar obfarbe=0,svec *fertige=0);
+ void setzbemerkwoher(SCL *optp,const string& ibemerk,const uchar vwoher);
+ void schAschreib(mdatei *const f,int obverb); // Schluessel-Array-schreib
+ int confschreib(const string& fname,ios_base::openmode modus=ios_base::out,const string& mpfad=nix,const uchar faclbak=1,int obverb=0,int oblog=0);
+ void zeigschoen();
+ void gibaus(const int nr=0);
+ void oausgeb(const char* const farbe,int obverb=0,int oblog=0);
+ void gibomapaus();
+ void eintrinit();
+ void frisch();
+ ~schAcl();
+}; // class schAcl
+template <> void schAcl<WPcl>::sinit(size_t vzahl, ...);
+template <> void schAcl<WPcl>::eintrinit();
+template <> void schAcl<optcl>::eintrinit();
 
 // Linux-System-Enum
 enum lsysen:uchar {usys,sus,deb,fed};
@@ -713,119 +943,42 @@ struct color {
 };
 
 #endif // _WIN32
-class svec: public vector<std::string>
-{
-  public:
-    inline svec& operator<<(const std::string& str) {
-      this->push_back(str);
-      return *this;
-    }
-}; // class svec: public vector<std::string>
-
-//svec& operator<<(svec& v, const std::string& str);
-template<class T>
-class tsvec: public vector<T>
-{
-  public:
-    inline tsvec<T>& operator<<(const T& str) {
-      this->push_back(str);
-      ((T&)str).init();
-      return *this;
-    } // inline tsvec
-}; // template<class T> class tsvec: public vector<T>
-
 
 // Abschnitt einer Konfigurationsdatei
-class absch
+struct absch
 {
- public:
  string aname;
- vector<abSchl> av;
- const string& suche(const char* const sname);
- const string& suche(const string& sname);
+ vector<aScl> av;
+ const string *suche(const char* const sname);
+ const string *suche(const string& sname);
  void clear();
 }; // class absch
 
-class confdat
+struct paarcl
 {
-  private:
-  public:
-    uchar obgelesen=0;
-    svec zn;
-    string name;
-    vector<absch> abschv;
-    size_t richtige;
-    confdat(const string& fname, int obverb);
-    confdat(const string& fname, schlArr *sA, int obverb=0, const char tz='=');
-		confdat();
-		void init(const string& fname, schlArr *sA, int obverb=0, const char tz='=');
-////    confdat(const string& fname,cppSchluess *conf, size_t csize, int obverb=0, char tz='=');
-    int lies(const string& fname,int obverb);
-    void auswert(schlArr *sA, int obverb=0, const char tz='=');
-////    void auswert(cppSchluess *conf, size_t csize, int obverb=0, char tz='=');
-    void Abschn_auswert(int obverb=0, const char tz='=');
-}; // class confdat
+	string name;
+	string wert;
+	string bemerk;
+	paarcl(const string& name, const string *wert, const string& bemerk);
+}; // kpaar
 
-// fuer Commandline-Optionen
-enum par_t:uchar {psons,pverz,pfile,pzahl}; // Parameterart: Sonstiges, Verzeichnis, Zahl
-
-
-class optioncl
+// Konfigurationsdatei-Klasse, Nachfolger von confdat
+struct confdcl 
 {
-  public:
-//    const string kurz;
-//    const string lang;
-		const int kurzi=0;
-		const int langi=0;
-    TxB *TxBp=0;
-    const long Txi=0;
-		uchar wi=0; // Wichtigkeit: 1= wird mit -lh oder -h, 0= nur mit -lh, 255 (-1) = gar nicht angezeigt
-    const string *rottxt=0; // ggf rot zu markierender Text zwischen Txi und Txi2
-    long Txi2=-1;
-//    string oerkl;
-    uchar *pptr=0; // Zeiger auf binären Parameter, der hier eingestellt werden kann
-    int wert; // Wert, der pptr zugewiesen wird, falls dieser Parameter gewaehlt wird
-    string *zptr=0; // Zeiger auf Zusatzparameter, der hier eingegeben werden kann (z.B. Zahl der Zeilen nach -n (Zeilenzahl)
-    const par_t art; // Parameterart
-    schlArr *cpA=0; // Konfigurationsarray, das ggf. geschrieben werden muss
-    const char *pname; // Name des Konfigurationsparameters
-    uchar *obschreibp=0; // ob Konfiguration geschrieben werden muss
-//    uchar ogefunden=0; // braucht man nicht, ist in argcl
-    const uchar obno=0; // ob auch die Option mit vorangestelltem 'no' eingefueft werden soll
-    string bemerkung;
-		uchar obcl=0; // ob die Option ueber die Kommandozeile gesetzt wurde
-  private:
-    void setzebem(schlArr *cpA,const char *pname);
-  public:
-///*1*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi) : 
-//               kurz(kurz),lang(lang),TxBp(TxBp),Txi(Txi),wi(wi) {}
-// /*2*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,string *zptr,par_t art,schlArr *cpA=0,const char *pname=0,uchar* obschreibp=0);
-/*2a*/optioncl(int kurzi,int langi,TxB *TxBp,long Txi,uchar wi,string *zptr,par_t art,schlArr *cpA=0,const char *pname=0,uchar* obschreibp=0);
-// /*3*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,const string *rottxt,long Txi2,string *zptr,par_t art,schlArr *cpA=0, const char *pname=0,uchar* obschreibp=0);
-/*3a*/optioncl(int kurzi,int langi,TxB *TxBp,long Txi,uchar wi,const string *rottxt,long Txi2,string *zptr,par_t art,schlArr *cpA=0,
-              const char *pname=0,uchar* obschreibp=0);
-/*3b*/optioncl(int kurzi,int langi,TxB *TxBp,long Txi,uchar wi,const string *rottxt,long Txi2,int *pptr,par_t art,schlArr *cpA=0,
-              const char *pname=0,uchar* obschreibp=0);
-// /*4a*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,uchar *pptr,int wert,schlArr *cpA=0,const char *pname=0,uchar* obschreibp=0);
-/*4*/optioncl(int kurzi,int langi,TxB *TxBp,long Txi,uchar wi,uchar *pptr,int wert,schlArr *cpA=0,const char *pname=0,uchar* obschreibp=0);
-///*5*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,string *rottxt,long Txi2,uchar *pptr,int wert) : 
-//               kurz(kurz),lang(lang),TxBp(TxBp),Txi(Txi),wi(wi),rottxt(rottxt),Txi2(Txi2),pptr(pptr),wert(wert) {}
-// /*6*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,const string *rottxt,long Txi2,uchar *pptr,int wert) : kurz(kurz),lang(lang),TxBp(TxBp),Txi(Txi),wi(wi),rottxt((string*)rottxt),Txi2(Txi2),pptr(pptr),wert(wert) {}
-/*6a*/optioncl(int kurzi,int langi,TxB *TxBp,long Txi,uchar wi,const string *rottxt,long Txi2,uchar *pptr,int wert) : 
-               kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),rottxt((string*)rottxt),Txi2(Txi2),pptr(pptr),wert(wert),art(psons) {}
-///*7*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,binaer *pptr,int wert) : 
-//               kurz(kurz),lang(lang),TxBp(TxBp),Txi(Txi),wi(wi),pptr((uchar*)pptr),wert(wert) {}
-///*8*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,int *pptr,int wert) : 
-//               kurz(kurz),lang(lang),TxBp(TxBp),Txi(Txi),wi(wi),pptr((uchar*)pptr),wert(wert) {}
-// /*9*/optioncl(string kurz,string lang,TxB *TxBp,long Txi,uchar wi,string *rottxt,long Txi2,int *pptr,int wert) : kurz(kurz),lang(lang),TxBp(TxBp),Txi(Txi),wi(wi),rottxt(rottxt),Txi2(Txi2),pptr((uchar*)pptr),wert(wert) {}
-/*9a*/optioncl(int kurzi,int langi,TxB *TxBp,long Txi,uchar wi,string *rottxt,long Txi2,int *pptr,int wert) : 
-               kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),rottxt(rottxt),Txi2(Txi2),pptr((uchar*)pptr),wert(wert),art(psons) {}
-    int pruefpar(vector<argcl> *const argcvm , size_t *const akt, uchar *hilfe, Sprache lg); // 1 = das war der Parameter, 0 = nicht
-    string& machbemerkung(Sprache lg,binaer obfarbe=wahr);
-    void hilfezeile(Sprache lg);
-}; // class optioncl
-
-#endif // kons_H_DRIN
+	string fname; // Dateiname
+	svec zn;
+	vector<paarcl> paare;
+	uchar obgelesen;
+	uchar obzuschreib;
+	uchar mitabsch{0};
+	size_t richtige;
+	vector<absch> abschv;
+	confdcl(const string& fname, int obverb, const char tz='=');
+	confdcl();
+	int lies(const string& vfname, int obverb, const char tz='=');
+	template <typename SCL> void kauswert(schAcl<SCL> *sA, int obverb=0,const uchar mitclear=1);
+	void Abschn_auswert(int obverb=0, const char tz='=');
+};
 
 extern const char *logdt;
 
@@ -841,25 +994,22 @@ void aufiSplit(vector<string> *tokens, const string& text, const string& sep,boo
 void aufSplit(vector<string> *tokens, const string& text, const char* const sep, bool auchleer=1);
 size_t irfind(const string& wo, const string& was); // suche von hinten und ignoriere Gross- und Kleinschreibung
 void getstammext(const string *const ganz, string *stamm, string *exten);
-// int cpplies(string fname,cppSchluess *conf,size_t csize,vector<string> *rest=0,char tz='=',short obverb=0);
+// int cpplies(string fname,WPcl *conf,size_t csize,vector<string> *rest=0,char tz='=',short obverb=0);
 string XOR(const string& value, const string& key);
-#ifdef notcpp
-int Schschreib(const char *fname, Schluessel *conf, size_t csize);
-#endif // notcpp
-int cppschreib(const string& fname, cppSchluess *conf, size_t csize);
-// int multicppschreib(const string& fname, cppSchluess **conf, size_t *csizes, size_t cszahl);
-int multischlschreib(const string& fname, schlArr *const *const confs, const size_t cszahl,const string& mpfad=nix);
+int cppschreib(const string& fname, WPcl *conf, size_t csize);
+// int multicppschreib(const string& fname, WPcl **conf, size_t *csizes, size_t cszahl);
+template <typename SCL> int multischlschreib(const string& fname, schAcl<SCL> *const *const confs, const size_t cszahl,const string& mpfad=nix);
 std::string base_name(const std::string& path); // Dateiname ohne Pfad
 std::string dir_name(const std::string& path);  // Pfadname einer Datei
-int systemrueck(const string& cmd, char obverb=0, int oblog=0, vector<string> *rueck=0, const uchar obsudc=0,
+int systemrueck(const string& cmd, int obverb=0, int oblog=0, vector<string> *rueck=0, const uchar obsudc=0,
                 const int verbergen=0, int obergebnisanzeig=wahr, const string& ueberschr=nix,vector<errmsgcl> *errm=0,uchar obincron=0,
 								stringstream *ausgp=0,uchar obdirekt=0);
 void pruefplatte();
-void pruefmehrfach(const string& wen=nix,uchar obstumm=0);
-void setfaclggf(const string& datei,int obverb=0,int oblog=0,const binaer obunter=falsch,int mod=4,uchar obimmer=0,
-                uchar faclbak=0,const string& user=nix,uchar fake=0,stringstream *ausgp=0);
+void pruefmehrfach(const string& wen=nix,int obverb=0,uchar obstumm=0);
+int setfaclggf(const string& datei,int obverb=0,int oblog=0,const binaer obunter=falsch,int mod=4,uchar obimmer=0,
+                uchar faclbak=0,const string& user=string(),uchar fake=0,stringstream *ausgp=0,const uchar obprot=1);
 int pruefverz(const string& verz,int obverb=0,int oblog=0, uchar obmitfacl=0, uchar obmitcon=0,
-              const string& besitzer=nix, const string& benutzer=nix, const uchar obmachen=1);
+              const string& besitzer=string(), const string& benutzer=string(), const uchar obmachen=1,const uchar obprot=1);
 string aktprogverz();
 char Tippbuchst(const string& frage, const string& moegl,const char *berkl[], const char* erlaubt=0, const char *vorgabe=0);
 // vorgabe fur vorgabe = T_j_k; alternativ='n'
@@ -870,10 +1020,11 @@ string Tippzahl(const char *frage, const char *vorgabe=0);
 string Tippzahl(const char *frage, const string *vorgabe);
 string Tippzahl(const string& frage, const string *vorgabe);
 long Tippzahl(const string& frage,const long& vorgabe);
-string Tippstr(const char *frage, const string *vorgabe=0,const uchar obnichtleer=1);
+string Tippstr(const char *const frage, const string *const vorgabe=0,const uchar obnichtleer=1);
 // char* Tippcstr(const char *frage, char* buf, unsigned long buflen, const char* vorgabe=nix);
-string Tippstr(const string& frage, const string *vorgabe=0,const uchar obnichtleer=1);
-string Tippverz(const char *frage,const string *vorgabe=0);
+string Tippstr(const string& frage, const string *const vorgabe=0,const uchar obnichtleer=1);
+string Tippverz(const string& frage,const string *const vorgabe=0);
+string Tippverz(const char *const frage,const string *const vorgabe=0);
 uchar VerzeichnisGibts(const char* vname);
 int tuloeschen(const string& zuloe,const string& cuser=nix,int obverb=0, int oblog=0,stringstream *ausgp=0);
 int attrangleich(const string& zu, const string& gemaess,const string* const zeitvondtp=0, int obverb=0, int oblog=0);
@@ -888,9 +1039,9 @@ FILE*
 oeffne(const string& datei, uchar art, uchar* erfolg,uchar faclbak=1,int obverb=0, int oblog=0);
 #endif // falsch
 
-class linst_cl
+enum distroenum{unbek=-1,Mint,Ubuntu,Debian,Suse,Fedora,Fedoraalt,Mageia,Manjaro};
+struct linst_cl
 {
- public:
  instprog ipr=keinp; // installiertes Program
  string schau; // Befehl zum Pruefen auf Vorhandensein ueber das Installationssystem
  string instp; // Befehl zum Installieren ueber das Installationnssystem
@@ -939,7 +1090,7 @@ class servc {
 		int lief();
 		int obsvfeh(int obverb=0,int oblog=0); // ob service einrichtungs fehler
 		uchar spruef(const string& sbez,uchar obfork,const string& parent, const string& sexec, const string& CondPath, const string& After, 
-                 linst_cl *linstp, int obverb=0,int oblog=0, uchar mitstarten=1);
+                 int obverb=0,int oblog=0, uchar mitstarten=1);
     int restart(int obverb=0, int oblog=0);
     void start(int obverb=0, int oblog=0);
     int startundenable(int obverb=0, int oblog=0);
@@ -949,7 +1100,7 @@ class servc {
     void pkill(int obverb=0,int oblog=0);
     int enableggf(int obverb=0,int oblog=0);
     int machfit(int obverb=0, int oblog=0, binaer nureinmal=falsch);
-		void semodpruef(linst_cl *linstp,int obverb=0,int oblog=0);
+		void semodpruef(int obverb=0,int oblog=0);
 		void semanpruef(int obverb=0,int oblog=0,const string& mod="getty_t");
 		static void daemon_reload(int obverb=0, int oblog=0);
 };
@@ -957,9 +1108,8 @@ class servc {
 void printBits(size_t const size, void const * const ptr); // Binaerausgabe, fuer Debugging
 
 #ifdef altfind
-class elem2
+struct elem2
 {
-  public:
     string pfad;
     struct stat dst={0};
     int sterg;
@@ -997,9 +1147,8 @@ class find2cl: elem2
 #ifdef neufind
 #include <ftw.h>
 // Fundelement
-class elem3
+struct elem3
 {
-  public:
     string pfad;
     const struct stat sb={0};
     int tflag;
@@ -1012,9 +1161,8 @@ class elem3
 };
 
 // Wurzelelement
-class wele
+struct wele
 {
-  public:
     const string pfad;
     const long maxd;
     wele(const string& pfad=nix, const long& maxd=-1):pfad(pfad),maxd(maxd){}
@@ -1023,9 +1171,8 @@ class wele
 }; // class wele
 
 // nur eine Instanz der Klasse kann gleichzeitig gefuellt werden wegen der statischen Elemente
-class find3cl
+struct find3cl
 {
-  public:
     int flags = 0;
     long maxdepth=-1;
     static long *maxdepthp;
@@ -1061,18 +1208,16 @@ void findfile(svec *qrueck,uchar findv,int obverb=0,int oblog=0,uchar anteil=0,
 		time_t _mab=0,time_t _mbis=0,int obicase=0,int nurexec=0,int obnoext=0,uchar nureins=0);
 #endif
 
-class pidcl
+struct pidcl
 {
- public:
  pid_t pid;
  string name;
  pidcl(const pid_t pid,const string& name):pid(pid),name(name){}
 }; // pidcl
 
 //Vector von pid- und string-Pärchen
-class pidvec: public vector<pidcl>
+struct pidvec: public vector<pidcl>
 {
- public:
  inline pidvec& operator<<(const pidcl& pd) {
 	 this->push_back(pd);
 	 return *this;
@@ -1086,17 +1231,23 @@ extern const string s_dampand; // =" && ";
 extern const string s_gz; // ="gz";
 extern const string& defvors; // ="https://github.com/"+gitv+"/";
 extern const string& defnachs; // ="/archive/master.tar.gz";
-void viadd(string *cmd,const string& datei,const uchar ro=0,const uchar hinten=0, const uchar unten=0);
+void viadd(string *cmdp,string* zeigp,const string& datei,const uchar ro=0,const uchar hinten=0, const uchar unten=0);
+int schluss(const int fnr,string text=string(),int oblog=0);
+
+extern class lsyscl lsys;
 
 // Haupt-Klasse
 class hcl
 {
+	private:
+		uchar obsetz=1; // setzzaehler
+		uchar mitpids=0; // mehrere pids
 	protected:
+		pidvec pidv;
+		const char* const DPROG;
     double tstart, tende;
     size_t optslsz=0; // last opts.size()
-		unsigned lfd;
-    uchar rzf=0; // rueckzufragen
-		confdat afcd;
+		confdcl hccd;
 		string tmpcron; // fuer crontab
     string cronminut; // Minuten fuer crontab; 0 = kein Crontab-Eintrag
 		uchar nochkeincron;
@@ -1106,24 +1257,45 @@ class hcl
 		static const string edit;
 		static const string passwddt, groupdt, sudoersdt;
 		static const char* const smbdt;// "/etc/samba/smb.conf"
-		uchar autoupd;  // 1=Programm automatisch updadaten
+		int autoupd=-1;  // 1=Programm automatisch updadaten
+//		string tabl  //ω
+//			;  //α
+		string muser; // Benutzer fuer Mysql/MariaDB
+		string mpwd;  // Passwort fuer Mysql/MariaDB //ω
+		stringstream uebers; // Ueberschrift fuer Verarbeitungslauf
+		const uchar mitcron; // ob Programm auch in Cron eingetragen werden kann; kann im Konstruktor angegeben werden
+		unsigned tmmoelen;
+#ifdef _WIN32
+    char cpt[255];
+    DWORD dcpt;
+#elif linux // _WIN32
+    char cpt[MAXHOSTNAMELEN]; 
+    size_t cptlen;
+#endif // _WIN32 else
 	public:
-    int obverb=0; // verbose
-    int oblog=0;  // mehr Protokollieren
+		int retu{0}; // Return-Value
+		int obverb=0; // verbose
+		int oblog=0;  // mehr Protokollieren
+    uchar rzf=0; // rueckzufragen
+		uchar obvi=0; // ob Konfigurationsdatei editiert werden soll
+		uchar obvs=0;   // ob Quelldateien bearbeitet werden sollen
+		uchar keineverarbeitung=0; // wenn cronminuten geaendert werden sollen, vorher abkuerzen
     string langu; // Sprache (Anfangsbuchstabe)
     string logdname; // Logdatei-Name ohne Pfad <DPROG>.log
     string logvz; // nur das Verzeichnis /var/log
     string loggespfad; // Gesamtpfad, auf den dann die in kons.h verwiesene und oben definierte Variable logdt zeigt
                        // bei jeder Aenderung muss auch logdt neu gesetzt werden!
     string cmd; // string fuer command fuer Betriebssystembefehle
+		schAcl<optcl> opn=schAcl<optcl>("opn"); // Optionen
+#ifdef alt
     vector<optioncl> opts;
+#endif
 		vector<argcl> argcmv; // class member vector
 		ulong aufrufe=0; // Zahl der bisherigen Programmaufrufe
 		struct tm laufrtag={0}; // Tag des letztes Aufrufs
 		ulong tagesaufr=0; // Zahl der bisherigen Programmaufrufe heute
 		ulong monatsaufr=0; // Zahl der bisherigen Programmaufrufe heute
     uchar oblgschreib=0; // Konfigurationsdatei seitens der Sprache voraussichtlich schreiben
-    uchar obkschreib=0; // Konfigurationsdatei schreiben
     uchar logdneu=0;    // Logdatei geaendert
     uchar logvneu=0;    // Logverzeichnis geaendert
     uchar logdateineu=0; // logdt vorher loeschen
@@ -1133,49 +1305,104 @@ class hcl
     string mpfad;  // meinpfad()
     string meinname; // base_name(meinpfad()) // argv[0] // <DPROG>
     string akonfdt; // name der Konfigurationsdatei
-    schlArr agcnfA; // Gesamtkonfiguration
+//    schAcl<WPcl> agcnfA; // Gesamtkonfiguration
 		string azaehlerdt; // akonfdt+".zaehl"
-		schlArr zcnfA; // Zaehlkonfiguration
+		schAcl<WPcl> zcnfA=schAcl<WPcl>("zcnfA"); // Zaehlkonfiguration
 		string vorcm; // Vor-Cron-Minuten
-		linst_cl* linstp=0;
 		vector<string> benutzer; // Benutzer aus /etc/passwd, bearbeitet durch setzbenutzer(&user)
 		uchar obsotiff=0; // 1 = tiff wird von der source verwendet
-	protected:
-    virtual void lgnzuw(); // in vorgaben, lieskonfein, getcommandl0, getcommandline, rueckfragen
-		void setztmpcron();
+		stringstream erkl; // Erklärung für die Hilfe
+		/*
+		map<string,optcl*> omap; // map der Optionen
+		map<string,optcl*> okmap; // map der Optionen, sortiert nach Tx[<kurzi>]
+		map<string,optcl*> olmap; // map der Optionen, sortiert nach Tx[<langi>]
+		map<string,optcl*>::iterator omit; // Optionen-Iterator
+		*/
+	private:
 		void tucronschreib(const string& zsauf,const uchar cronzuplanen,const string& cbef);
-		void vischluss(string& erg);
-	public:
-		hcl(const int argc, const char *const *const argv);
-		~hcl();
-		int Log(const string& text,const bool oberr=0,const short klobverb=0) const;
+		void dodovi(const svec d1,const svec d2);
+	protected:
+		void vischluss(string& erg,string& zeig);
+		void holbefz0(const int argc, const char *const *const argv);
+    virtual void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
     int pruefinstv();
-    void lieskonfein(const string& DPROG);
 		void setzlog();
+
+		void setztmpcron();
+
+		virtual void virtVorgbAllg();
+		virtual void pvirtVorgbSpeziell()=0;
+		virtual void virtinitopt();
+		void parsecl();
+		virtual void pvirtmacherkl()=0;
+    virtual void virtMusterVorgb();
+    virtual void virtlieskonfein();
+    void verarbeitkonf();
 		int zeighilfe(const stringstream *const erkl);
-		void pruefsamba(const vector<const string*>& vzn,const svec& abschni,const svec& suchs,const char* DPROG,const string& cuser);
-#ifdef immerwart
-		void lieszaehlerein(ulong *arp=0,ulong *tap=0,ulong *map=0,struct tm *lap=0, string *obempfp=0,string *obgesap=0,const uchar obstumm=0);
-		void schreibzaehler(const string* obempfp=0, const string* obgesap=0);
-#else // immerwart
-		void lieszaehlerein(ulong *arp=0,ulong *tap=0,ulong *map=0,struct tm *lap=0, const uchar obstumm=0);
-		void schreibzaehler();
-#endif // immerwart
+		virtual void virttesterg()=0;
+		virtual void pvirtvorzaehler()=0;
+		void lieszaehlerein();
 		void setzzaehler();
+		void schreibzaehler();
+		void dovi();
+		virtual void virtzeigversion(const string& ltiffv=nix);
+		virtual void pvirtvorrueckfragen()=0;
+		virtual void virtrueckfragen();
+		virtual void pvirtvorpruefggfmehrfach()=0;
+		void pruefggfmehrfach();
+		virtual void virtpruefweiteres();
+		uchar pruefcron(const string& cm);
+		virtual void virtzeigueberschrift();
+    virtual void pvirtfuehraus()=0;
+		virtual void virtautokonfschreib(); 
+		void gitpull(const string& DPROG);
+		virtual void virtschlussanzeige();
+	public:
+		void pruefcl(); // commandline mit omap und mit argcmv parsen
+		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron);
+		~hcl();
+		void lauf();
+		int hLog(const string& text,const bool oberr=0,const short klobverb=0) const; 
+		void pruefsamba(const vector<const string*>& vzn,const svec& abschni,const svec& suchs,const char* DPROG,const string& cuser);
 		int holvomnetz(const string& datei,const string& vors=defvors,const string& nachs=defnachs);
 		int kompilbase(const string& was,const string& endg);
 		int kompiliere(const string& was,const string& endg,const string& vorcfg=nix,const string& cfgbismake=s_dampand);
 		int kompilfort(const string& was,const string& vorcfg=nix,const string& cfgbismake=s_dampand,uchar ohneconf=0);
-		double progvers(const string& prog);
+		double progvers(const string& prog,string* ergptr=0);
 		void prueftif(string aktvers);
-		void zeigversion(const string& ltiffv=nix);
 		void zeigkonf();
-		void gcl0();
-		uchar pruefcron(const string& cm);
-		void dodovi(const svec d1,const svec d2);
-		void dovi();
-		virtual void schlussanzeige();
-		void update(const string& DPROG);
 		void reduzierlibtiff();
 		void setzbenutzer(string *user);
 }; // class hcl
+/*
+// sollte dann unnötig werden
+template<typename SCL> void schAcl<SCL>::initv(vector<optcl*> optpv,vector<size_t> optsv)
+{
+	schl.clear();
+	vector<optcl*>::iterator opp=optpv.begin();
+	vector<size_t>::iterator ops=optsv.begin();
+	for(;opp!=optpv.end();opp++,ops++) {
+		for(size_t iru=0;iru<*ops;iru++) {
+			optcl *op=&((optcl*)(*opp))[iru];
+			if (!op->pname.empty()) {
+				uchar gefunden=0;
+				for(vector<WPcl>::iterator sit=schl.begin();sit!=schl.end();sit++) {
+					if (sit->pname==op->pname) {
+						gefunden=1;
+						break;
+					}
+				}
+				if (!gefunden) {
+					const string wert=op->art==plong?ltoan(*(long*)op->pptr):
+						                op->art==pint?ltoan(*(int*)op->pptr):
+													  op->art==puchar?ltoan(*(uchar*)op->pptr):
+														                       *(string*)op->pptr;
+					schl.push_back(WPcl(op->pname,wert));
+				}
+			}
+		}
+	}
+} // void schAcl::initv(vector<optcl*> optpv,vector<size_t> optsv)
+*/
+
+#endif // kons_H_DRIN
