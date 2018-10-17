@@ -100,6 +100,22 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"verwendet fuer die Fritzbox den Benutzer <string> anstatt","takes the user <string> for the fritzbox instead of"},
 	// T_verwendet_fuer_die_Fritzbox_das_Passwort_string
 	{"verwendet fuer die Fritzbox das Passwort <string>","takes the password <string< for the fritzbox"},
+	// T_listt_k
+	{"listt","listt"},
+	// T_listtel_l
+	{"listtel","listtel"},
+	// T_tu_listt
+	{"tu_listt()","do_listt()"},
+	// T_listet_Datensaetze_aus
+	{"listet Datensaetze aus `","lists entries from `"},
+	// T_mit_Erfolgskennzeichen_auf
+	{"` mit Erfolgskennzeichen auf","` with success flag"},
+	// T_s_k
+	{"s","s"},
+	// T_suche_l
+	{"suche","search"},
+	// T_suche_in_verarbeiteten_Faxen_nach
+	{"Suche in verarbeiteten Faxen nach <string>: ","Look in processed faxes for <string>: "},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -156,6 +172,8 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/"tabname",/*pptr*/&tabname,/*part*/pstri,T_tb_k,T_tabname_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!tabname.empty());
 	opn<<new optcl(/*pname*/"fbusr",/*pptr*/&fbusr,/*part*/pstri,T_fbusr_k,T_fbusr_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbusr.empty());
 	opn<<new optcl(/*pname*/"fbpwd",/*pptr*/&fbpwd,/*part*/ppwd,T_fbpwd_k,T_fbpwd_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbpwd.empty());
+	opn<<new optcl(/*pname*/"",/*pptr*/&listt,/*art*/puchar,T_listt_k,T_listtel_l,/*TxBp*/&Tx,/*Txi*/T_listet_Datensaetze_aus,/*wi*/1,/*Txi2*/T_mit_Erfolgskennzeichen_auf,/*rottxt*/tabname,/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"",/*pptr*/&suchstr,/*art*/pstri,T_s_k,T_suche_l,/*TxBp*/&Tx,/*Txi*/T_suche_in_verarbeiteten_Faxen_nach,/*wi*/1,/*Txi2*/T_MAX,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pname*/"",/*pptr*/&dszahl,/*art*/pdez,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1); //α //ω
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt
@@ -255,11 +273,19 @@ void hhcl::anhalten()
 void hhcl::pvirtvorpruefggfmehrfach()
 {
 	// if (initDB()) exit(schluss(10,Tx[T_Datenbank_nicht_initialisierbar_breche_ab]));  //ω
+		if (initDB()) {
+			exit(schluss(10,Tx[T_Datenbank_nicht_initialisierbar_breche_ab]));
+		}
+		if (listt ||!suchstr.empty()) {
+			tu_listt("1",suchstr);
+		}
 } // void hhcl::pvirtvorpruefggfmehrfach //α
 //ω
 void hhcl::pvirtfuehraus() //α
 { //ω
-  holanr();
+	if (!listt && suchstr.empty()) {
+		holanr();
+	}
 } // void hhcl::pvirtfuehraus  //α
 
 // wird aufgerufen in lauf
@@ -431,6 +457,38 @@ void hhcl::pruefanrufe(DB *My, const string& tabelle, const int obverb, const in
 		}
 	} // if (!direkt)
 } // int hhcl::pruefanrufe(DB *My, string touta, int obverb, int oblog, uchar direkt=0)
+
+// wird aufgerufen in: main (2x)
+void hhcl::tu_listt(const string& oberfolg, const string& suchstr)
+{
+	// "... submid id ()" wuerde zu Mysql-Fehler fuehren
+	hLog(violetts+Tx[T_tu_listt]+schwarz);
+	const size_t aktc=0;
+	char ***cerg;
+/*	RS listt(My,"SELECT Ueberm p0, Submid p1, Faxname p2, Empfaenger p3, Fax p4, Erfolg p5 FROM ("
+			"SELECT * FROM ("
+			"SELECT DATE_FORMAT(transe,'%d.%m.%y %H:%i:%s') Ueberm, Submid, RIGHT(CONCAT(space(75),LEFT(Docname,75)),75) Faxname, "
+			"RIGHT(CONCAT(SPACE(30),LEFT(rcname,30)),30) Empfaenger, rcfax Fax, Erfolg, transe "
+			"FROM `"+touta+"` WHERE "+(submids.length()<=2?"Erfolg = "+oberfolg+" ":"submid in "+submids+" ")+
+			" ORDER BY transe DESC"+(submids.length()<=2?" LIMIT "+dszahl:"")+") i "
+			" ORDER BY transe LIMIT 18446744073709551615) i",aktc,ZDB); */
+	RS lista(My,"SELECT * FROM ("
+		"SELECT Datum,case Typ when 1 then '->' when 2 then '->|' when 3 then '<-' when 9 then '->>' when 11 then 'fx<-' else Typ end,Name,Rufnummer,Nebenstelle,EigeneNr,angerNr,Dauer,Nummerntyp,Port,Id,eind from faxeinp.anrufe "
+		+(suchstr.empty()?"":" WHERE Rufnummer LIKE '%"+suchstr+"%' ")+
+		"ORDER BY eind DESC LIMIT "+dszahl+
+		") i ORDER BY datum;",aktc,ZDB);
+	/*if (submids.length()<=2)
+		cout<<violett<<Tx[T_Letzte]<<blau<<dszahl<<violett<<(oberfolg=="1"?Tx[T_erfolgreich]:Tx[T_erfolglos])<<Tx[T_versandte_Faxe]<<schwarz<<endl; */
+	while (cerg=lista.HolZeile(),cerg?*cerg:0) {
+		cout<<blau<<setw(17)<<cjj(cerg,0)<<"|"<<violett<<setw(4)<<cjj(cerg,1)<<schwarz<<"|"<<blau<<setw(30)<<cjj(cerg,2)
+			<<"|"<<schwarz<<setw(15)<<cjj(cerg,3)<<"|"<<blau<<setw(10)<<cjj(cerg,4)
+			<<"|"<<schwarz<<setw(11)<<cjj(cerg,5)<<"|"<<blau<<setw(6)<<cjj(cerg,6)
+			<<"|"<<schwarz<<setw(5)<<cjj(cerg,7)<<"|"<<blau<<setw(3)<<cjj(cerg,8)
+			<<"|"<<schwarz<<setw(2)<<cjj(cerg,9)<<"|"<<blau<<setw(5)<<cjj(cerg,10)
+			<<"|"<<schwarz<<setw(5)<<cjj(cerg,11)
+			<<"|"<<schwarz<<endl;
+	} // while (cerg=lista.HolZeile(),cerg?*cerg:0) 
+} // tu_listt
 
 int main(int argc,char** argv) //α
 {

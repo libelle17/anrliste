@@ -47,6 +47,14 @@ enum T_
 	T_fbpwd_l,
 	T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,
 	T_verwendet_fuer_die_Fritzbox_das_Passwort_string,
+	T_listt_k,
+	T_listtel_l,
+	T_tu_listt,
+	T_listet_Datensaetze_aus,
+	T_mit_Erfolgskennzeichen_auf,
+	T_s_k,
+	T_suche_l,
+	T_suche_in_verarbeiteten_Faxen_nach,
 	T_MAX //α
 }; // enum T_ //ω
 
@@ -75,6 +83,8 @@ class hhcl:public dhcl
 		string dszahl="30"; // Datensatzzahl fuer Tabellenausgaben
 		string host="localhost";  // fuer MySQL/MariaDB
 		//ω
+		uchar listt=0;   // liste Archiv auf
+		string suchstr;  // Nummernteil, nach dem in Telefonnummern gesucht werden soll
 	protected: //α
 		string p1;
 		int p2;
@@ -83,6 +93,7 @@ class hhcl:public dhcl
 		long listz=30; //ω
 		string fbusr; // User für Fritzbox
 		string fbpwd; // Password für Fritzbox
+		uchar oblistt=0;
 	public: //α //ω
 		string tabname  //ω
 			="anrufe" // MariaDB-Tabelle fuer Anrufjournal
@@ -92,6 +103,7 @@ class hhcl:public dhcl
 		void virtlieskonfein();
 		void virtautokonfschreib();
 		void anhalten(); //ω
+    void tu_listt(const string& oberfolg,const string& suchstr=nix);
 	protected: //α
 		// void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, lieskonfein, hcl::hcl nach holsystemsprache
 		void virtVorgbAllg();
