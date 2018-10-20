@@ -2162,7 +2162,8 @@ my_ulonglong RS::tbupd(const vector<instyp>& einf,int obverb, const string& bedi
 my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/,
 		int obverb/*=0*/,string *const idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/,uchar mitupd/*=0*/) 
 {
-	fLog(violetts+"tbins: "+blau+table+" "+schwarz,obverb,0);
+	if (obverb!=-2) 
+		fLog(violetts+"tbins: "+blau+table+" "+schwarz+", obverb: "+ltoan(obverb),obverb,0);
 	my_ulonglong zl=0;
 	ulong locks=0;
 	uchar obhauptfehl=0;
