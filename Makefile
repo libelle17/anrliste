@@ -347,7 +347,7 @@ endif
 	$(SUDC)ldconfig;cd ..;};
 
 	-@[ "$(LACL)" ]&&{ [ -f /usr/include/sys/acl.h ]|| sh configure inst _ "$(LACL)" verbose;}||:
-	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h ]|| sh configure inst _ "$(LCURL)" verbose;}||:
+	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h -o -f /usr/include/x86_64-linux-gnu/curl/curl.h ]|| sh configure inst _ "$(LCURL)" verbose;}||:
 	-@[ "$(LBOOST)" ]&&{ $(SPR) $(LBOOST)>$(KR)|| sh configure inst _ "$(LBOOST)" verbose;}||:
 	-@[ "$(LBIO)" ]&&{ $(SPR) "$(LBIO)">$(KR)||sh configure inst _ "$(LBIO)" verbose;}||:
 	-@[ "$(LBLO)" ]&&{ $(SPR) "$(LBLO)">$(KR)||sh configure inst _ "$(LBLO)" verbose;}||:

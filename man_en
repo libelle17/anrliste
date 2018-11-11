@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "20.10.18" "Version 0.10031" "\fB²DPROG²\fR man page"
+.TH man 1 "12.11.18" "Version 0.10037" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -16,7 +16,7 @@
 .SH FUNCTIONALITY
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10037 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -40,7 +40,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -77,7 +77,7 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10036 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -101,7 +101,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -138,7 +138,7 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10035 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -162,7 +162,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -199,12 +199,14 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10034 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
+\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+.br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
@@ -221,7 +223,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -258,12 +260,14 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10033 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
+\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+.br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
@@ -280,7 +284,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -317,12 +321,14 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10032 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
+\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+.br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
@@ -339,7 +345,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -376,12 +382,14 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10031 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
+\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+.br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
@@ -398,7 +406,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -435,12 +443,14 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10031 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
+\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+.br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
@@ -457,7 +467,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -494,12 +504,14 @@
 \fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
 .SH FUNCTIONALITY
 .br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
+  \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.10031 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
+\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+.br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
 \fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
@@ -516,7 +528,7 @@
 .br
 \fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
@@ -539,1319 +551,6 @@
 \fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
 .br
 \fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10031 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10030 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10029 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10028 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10027 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10024 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10023 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10022 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxe\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10021 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxe\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10019 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -st, --stop\fR: stop anrliste (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -tb, --' succeeded, user ' <string>\fR: uses the table <string> instead of ('\fBanrufe\fR')
-.br
-\fB -fbusr, --fbusr <string>\fR: takes the user <string> for the fritzbox instead of ('\fB\fR')
-.br
-\fB -fbpwd, --fbpwd <string>\fR: takes the password <string< for the fritzbox
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxe\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10017 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -st, --stop\fR: stop anrliste (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxe\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10010 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -st, --stop\fR: stop anrliste (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxe\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10002 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -st, --stop\fR: stop anrliste (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxe\fR')
-.br
-\fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
-.br
-\fB -ldr, --logdir <path>\fR: choses <path> as log directory, currently ('\fB/var/log\fR')
-.br
-\fB -lf, --logfilename <string>\fR: log file <string> (in path '\fB/var/log\fR') will be used instead of ('\fBanrliste.log\fR')
-.br
-\fB -l, --log <zahl>\fR: put detailed logs in file '\fB/var/log/anrliste.log\fR' (otherwise shorter) (\fB0\fR)
-.br
-\fB -cm, --cronminutes <string>\fR: every how many minutes shall \fBanrliste\fR be called in crontab (0=not at all), instead of  ('\fB0\fR')
-.br
-\fB -autoupd, --autoupdate <zahl>\fR: Update program automatically (\fB1\fR)
-.SH FUNCTIONALITY
-.br
-    \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.10001 \fR
-.br
-\fBOptions which are not saved (current value in parentheses): \fR
-.br
-\fB -st, --stop\fR: stop anrliste (\fB0\fR)
-.br
-\fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
-.br
-\fB -sqlv, --sql-verbose\fR: screen output with SQL commands (\fB0\fR)
-.br
-\fB -v, --verbose\fR: screen output more verbose (\fB0\fR)
-.br
-\fB -lfn, --logfilenew\fR: delete log file afore (\fB0\fR)
-.br
-\fB -cf, --conffile <string>\fR: uses configuration file <string> instead of ('\fB\fR')
-.br
-\fB -h, --help\fR: Explanation of frequent options (\fB3\fR)
-.br
-\fB -lh, --longhelp\fR: Explanation of all options (\fB3\fR)
-.br
-\fB -vi, --vi\fR: edit/view configuration file , log file etc. (finish with ':qa') (\fB0\fR)
-.br
-\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
-.br
-\fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
-.br
-\fB -noia, --nointeraction\fR: no questions, e.g. for a call from within cron (\fB0\fR)
-.br
-\fB -info, --version\fR: shows the program version (\fB0\fR)
-.br
-\fBOptions to be saved in the configuration file: (preced. '1'=don't save, 'no'=contrary, e.g. '-noocra','-1noocri'):\fR
-.br
-\fB -host, --host <string>\fR: takes the database on host <string> instead of ('\fBlocalhost\fR')
-.br
-\fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
-.br
-\fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
-.br
-\fB -db, --database <string>\fR: uses the database <string> instead of ('\fB\fR')
 .br
 \fB -lg, --language <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBe\fR')
 .br

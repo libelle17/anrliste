@@ -116,6 +116,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"suche","search"},
 	// T_suche_in_verarbeiteten_Faxen_nach
 	{"Suche in verarbeiteten Faxen nach <string>: ","Look in processed faxes for <string>: "},
+	//  T_holanr,
+	{"holanr()","fetchcall()"},
 	{"",""} //α
 }; // char const *DPROG_T[T_MAX+1][SprachZahl]=
 
@@ -328,8 +330,9 @@ void hhcl::virtlieskonfein()
 } // void hhcl::virtlieskonfein() //ω
 
 // Kernprogramm, holt die Anrufe und traegt sie ein
-int hhcl::holanr()
+int hhcl::holanr() // fetchcall()
 {
+	hLog(violetts+Tx[T_holanr]+schwarz);
 	const size_t aktc{0};
 	size_t dsz=0,egz=0;
   std::vector<std::string> tz;
@@ -352,8 +355,9 @@ int hhcl::holanr()
   tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList",&buffer);
 
   //std::cout<<buffer<<std::endl;
-  holraus(buffer,"NewCallListURL",&nurl);
-  holurl(nurl,&buffer);
+	// bei falschem Passwort hier noch Fehler 401 abfangen
+  holraus(buffer,"NewCallListURL",&nurl,0,obverb);
+  holurl(nurl,&buffer,obverb);
 	// caus<<buffer<<endl;
   size_t pos=0,enr=0;
 	RS rins(My,tabname); 

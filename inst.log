@@ -84,3 +84,100 @@ Abrufen: global-6.6.1-1.1.x86_64.rpm [.fertig (1,1 MiB/s)]
 (2/3) Installieren: idutils-lang-4.6-2.8.noarch [..........fertig]
 (3/3) Installieren: global-6.6.1-1.1.x86_64 [............fertig]
 IP: ''
+
+Rueckmeldung bei einricht libcurl4-openssl-dev:
+Paketlisten werden gelesen...
+Abhängigkeitsbaum wird aufgebaut....
+Statusinformationen werden eingelesen....
+Die folgenden Pakete wurden automatisch installiert und werden nicht mehr benötigt:
+  iio-sensor-proxy:i386 libavahi-glib1:i386 libjpeg62:i386 libmbim-glib4:i386
+  libmm-glib0:i386 libpolkit-gobject-1-0:i386 libqmi-glib5:i386 libxtst6:i386
+  modemmanager:i386
+Verwenden Sie »sudo apt autoremove«, um sie zu entfernen.
+0 aktualisiert, 0 neu installiert, 1 erneut installiert, 0 zu entfernen und 1 nicht aktualisiert.
+Es müssen 294 kB an Archiven heruntergeladen werden.
+Nach dieser Operation werden 0 B Plattenplatz zusätzlich benutzt.
+Holen:1 http://de.archive.ubuntu.com/ubuntu bionic-updates/main amd64 libcurl4-openssl-dev amd64 7.58.0-2ubuntu3.5 [294 kB]
+Es wurden 294 kB in 0 s geholt (735 kB/s).
+(Lese Datenbank ... (Lese Datenbank ... 5%(Lese Datenbank ... 10%(Lese Datenbank ... 15%(Lese Datenbank ... 20%(Lese Datenbank ... 25%(Lese Datenbank ... 30%(Lese Datenbank ... 35%(Lese Datenbank ... 40%(Lese Datenbank ... 45%(Lese Datenbank ... 50%(Lese Datenbank ... 55%(Lese Datenbank ... 60%(Lese Datenbank ... 65%(Lese Datenbank ... 70%(Lese Datenbank ... 75%(Lese Datenbank ... 80%(Lese Datenbank ... 85%(Lese Datenbank ... 90%(Lese Datenbank ... 95%(Lese Datenbank ... 100%(Lese Datenbank ... 329143 Dateien und Verzeichnisse sind derzeit installiert.)
+Vorbereitung zum Entpacken von .../libcurl4-openssl-dev_7.58.0-2ubuntu3.5_amd64.deb ...
+Entpacken von libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) über (7.58.0-2ubuntu3.5) ...
+Trigger für man-db (2.8.3-2ubuntu0.1) werden verarbeitet ...
+libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) wird eingerichtet ...
+IP: ''
+
+Rueckmeldung bei einricht libcurl4-openssl-dev:
+Paketlisten werden gelesen...
+Abhängigkeitsbaum wird aufgebaut....
+Statusinformationen werden eingelesen....
+Die folgenden Pakete wurden automatisch installiert und werden nicht mehr benötigt:
+  iio-sensor-proxy:i386 libavahi-glib1:i386 libjpeg62:i386 libmbim-glib4:i386
+  libmm-glib0:i386 libpolkit-gobject-1-0:i386 libqmi-glib5:i386 libxtst6:i386
+  modemmanager:i386
+Verwenden Sie »sudo apt autoremove«, um sie zu entfernen.
+0 aktualisiert, 0 neu installiert, 1 erneut installiert, 0 zu entfernen und 1 nicht aktualisiert.
+Es müssen noch 0 B von 294 kB an Archiven heruntergeladen werden.
+Nach dieser Operation werden 0 B Plattenplatz zusätzlich benutzt.
+(Lese Datenbank ... (Lese Datenbank ... 5%(Lese Datenbank ... 10%(Lese Datenbank ... 15%(Lese Datenbank ... 20%(Lese Datenbank ... 25%(Lese Datenbank ... 30%(Lese Datenbank ... 35%(Lese Datenbank ... 40%(Lese Datenbank ... 45%(Lese Datenbank ... 50%(Lese Datenbank ... 55%(Lese Datenbank ... 60%(Lese Datenbank ... 65%(Lese Datenbank ... 70%(Lese Datenbank ... 75%(Lese Datenbank ... 80%(Lese Datenbank ... 85%(Lese Datenbank ... 90%(Lese Datenbank ... 95%(Lese Datenbank ... 100%(Lese Datenbank ... 329509 Dateien und Verzeichnisse sind derzeit installiert.)
+Vorbereitung zum Entpacken von .../libcurl4-openssl-dev_7.58.0-2ubuntu3.5_amd64.deb ...
+Entpacken von libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) über (7.58.0-2ubuntu3.5) ...
+Trigger für man-db (2.8.3-2ubuntu0.1) werden verarbeitet ...
+libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) wird eingerichtet ...
+IP: ''
+
+Rueckmeldung bei einricht libcurl4-openssl-dev:
+Paketlisten werden gelesen...
+Abhängigkeitsbaum wird aufgebaut....
+Statusinformationen werden eingelesen....
+Die folgenden Pakete wurden automatisch installiert und werden nicht mehr benötigt:
+  iio-sensor-proxy:i386 libavahi-glib1:i386 libjpeg62:i386 libmbim-glib4:i386
+  libmm-glib0:i386 libpolkit-gobject-1-0:i386 libqmi-glib5:i386 libxtst6:i386
+  modemmanager:i386
+Verwenden Sie »sudo apt autoremove«, um sie zu entfernen.
+0 aktualisiert, 0 neu installiert, 1 erneut installiert, 0 zu entfernen und 1 nicht aktualisiert.
+Es müssen noch 0 B von 294 kB an Archiven heruntergeladen werden.
+Nach dieser Operation werden 0 B Plattenplatz zusätzlich benutzt.
+(Lese Datenbank ... (Lese Datenbank ... 5%(Lese Datenbank ... 10%(Lese Datenbank ... 15%(Lese Datenbank ... 20%(Lese Datenbank ... 25%(Lese Datenbank ... 30%(Lese Datenbank ... 35%(Lese Datenbank ... 40%(Lese Datenbank ... 45%(Lese Datenbank ... 50%(Lese Datenbank ... 55%(Lese Datenbank ... 60%(Lese Datenbank ... 65%(Lese Datenbank ... 70%(Lese Datenbank ... 75%(Lese Datenbank ... 80%(Lese Datenbank ... 85%(Lese Datenbank ... 90%(Lese Datenbank ... 95%(Lese Datenbank ... 100%(Lese Datenbank ... 329509 Dateien und Verzeichnisse sind derzeit installiert.)
+Vorbereitung zum Entpacken von .../libcurl4-openssl-dev_7.58.0-2ubuntu3.5_amd64.deb ...
+Entpacken von libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) über (7.58.0-2ubuntu3.5) ...
+Trigger für man-db (2.8.3-2ubuntu0.1) werden verarbeitet ...
+libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) wird eingerichtet ...
+IP: ''
+
+Rueckmeldung bei einricht libcurl4-openssl-dev:
+Paketlisten werden gelesen...
+Abhängigkeitsbaum wird aufgebaut....
+Statusinformationen werden eingelesen....
+Die folgenden Pakete wurden automatisch installiert und werden nicht mehr benötigt:
+  iio-sensor-proxy:i386 libavahi-glib1:i386 libjpeg62:i386 libmbim-glib4:i386
+  libmm-glib0:i386 libpolkit-gobject-1-0:i386 libqmi-glib5:i386 libxtst6:i386
+  modemmanager:i386
+Verwenden Sie »sudo apt autoremove«, um sie zu entfernen.
+0 aktualisiert, 0 neu installiert, 1 erneut installiert, 0 zu entfernen und 1 nicht aktualisiert.
+Es müssen noch 0 B von 294 kB an Archiven heruntergeladen werden.
+Nach dieser Operation werden 0 B Plattenplatz zusätzlich benutzt.
+(Lese Datenbank ... (Lese Datenbank ... 5%(Lese Datenbank ... 10%(Lese Datenbank ... 15%(Lese Datenbank ... 20%(Lese Datenbank ... 25%(Lese Datenbank ... 30%(Lese Datenbank ... 35%(Lese Datenbank ... 40%(Lese Datenbank ... 45%(Lese Datenbank ... 50%(Lese Datenbank ... 55%(Lese Datenbank ... 60%(Lese Datenbank ... 65%(Lese Datenbank ... 70%(Lese Datenbank ... 75%(Lese Datenbank ... 80%(Lese Datenbank ... 85%(Lese Datenbank ... 90%(Lese Datenbank ... 95%(Lese Datenbank ... 100%(Lese Datenbank ... 329509 Dateien und Verzeichnisse sind derzeit installiert.)
+Vorbereitung zum Entpacken von .../libcurl4-openssl-dev_7.58.0-2ubuntu3.5_amd64.deb ...
+Entpacken von libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) über (7.58.0-2ubuntu3.5) ...
+Trigger für man-db (2.8.3-2ubuntu0.1) werden verarbeitet ...
+libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) wird eingerichtet ...
+IP: ''
+
+Rueckmeldung bei einricht libcurl4-openssl-dev:
+Paketlisten werden gelesen...
+Abhängigkeitsbaum wird aufgebaut....
+Statusinformationen werden eingelesen....
+Die folgenden Pakete wurden automatisch installiert und werden nicht mehr benötigt:
+  iio-sensor-proxy:i386 libavahi-glib1:i386 libjpeg62:i386 libmbim-glib4:i386
+  libmm-glib0:i386 libpolkit-gobject-1-0:i386 libqmi-glib5:i386 libxtst6:i386
+  modemmanager:i386
+Verwenden Sie »sudo apt autoremove«, um sie zu entfernen.
+0 aktualisiert, 0 neu installiert, 1 erneut installiert, 0 zu entfernen und 1 nicht aktualisiert.
+Es müssen noch 0 B von 294 kB an Archiven heruntergeladen werden.
+Nach dieser Operation werden 0 B Plattenplatz zusätzlich benutzt.
+(Lese Datenbank ... (Lese Datenbank ... 5%(Lese Datenbank ... 10%(Lese Datenbank ... 15%(Lese Datenbank ... 20%(Lese Datenbank ... 25%(Lese Datenbank ... 30%(Lese Datenbank ... 35%(Lese Datenbank ... 40%(Lese Datenbank ... 45%(Lese Datenbank ... 50%(Lese Datenbank ... 55%(Lese Datenbank ... 60%(Lese Datenbank ... 65%(Lese Datenbank ... 70%(Lese Datenbank ... 75%(Lese Datenbank ... 80%(Lese Datenbank ... 85%(Lese Datenbank ... 90%(Lese Datenbank ... 95%(Lese Datenbank ... 100%(Lese Datenbank ... 329509 Dateien und Verzeichnisse sind derzeit installiert.)
+Vorbereitung zum Entpacken von .../libcurl4-openssl-dev_7.58.0-2ubuntu3.5_amd64.deb ...
+Entpacken von libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) über (7.58.0-2ubuntu3.5) ...
+Trigger für man-db (2.8.3-2ubuntu0.1) werden verarbeitet ...
+libcurl4-openssl-dev:amd64 (7.58.0-2ubuntu3.5) wird eingerichtet ...
+IP: ''

@@ -1,7 +1,14 @@
 #include <curl/curl.h>
+extern class TxB Txt;
+enum Ttr_ 
+{
+	T_holurl,
+	T_holraus,
+	T_trMAX,
+}; // Tkons_
 
-size_t holraus(const std::string xml,std::string tag,std::string *ergp,size_t anf=0); // XML-Inhalt ermitteln
-int holurl(const std::string url, std::string* bufp);
+size_t holraus(const std::string xml,std::string tag,std::string *ergp,size_t anf=0,int obverb=0); // XML-Inhalt ermitteln
+int holurl(const std::string url, std::string* bufp,int obverb=0);
 
 class tr64cl {
 	public:
