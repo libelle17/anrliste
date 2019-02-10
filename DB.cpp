@@ -340,10 +340,10 @@ Tabelle::Tabelle(const DB* dbp,const string& vtbname,const size_t aktc,int obver
 	lesespalten(aktc,obverb,oblog);
 }
 
-const string DB::defmyengine="InnoDB";
-const string DB::defmycharset="utf8";
-const string DB::defmycollat="utf8_unicode_ci";
-const string DB::defmyrowform="DYNAMIC";
+const string DB::defmyengine{"InnoDB"};
+const string DB::defmycharset{"utf8"};
+const string DB::defmycollat{"utf8_unicode_ci"};
+const string DB::defmyrowform{"DYNAMIC"};
 
 // statische Variable, 1= mariadb=geprueft
 uchar DB::oisok=0;
@@ -1864,7 +1864,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 ////									transform(sql.begin(),sql.end(),std::back_inserter(SQL),::toupper);
 									string suchstr[2]={"INSERT INTO ","UPDATE "}; // Problem: "ON DUPLICATE KEY UPDATE"
 									uchar neuerversuch=0;
-									for(unsigned uru=0;uru<sizeof suchstr/sizeof *suchstr;uru++) {
+									for(unsigned uru=0;uru<elemzahl(suchstr);uru++) {
 										if ((p1=SQL.find(suchstr[uru]))!=string::npos) {
 											p1+=suchstr[uru].length();
 											if ((p2=SQL.find_first_of(" (",p1)+1)) {
@@ -1883,7 +1883,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 												} // 												for(unsigned spnr=0;spnr<aktt.spzahl;spnr++)
 											} // 											if ((p2=SQL.find_first_of(" (",p1)+1))
 										} // 										if ((p1=SQL.find(suchstr[uru]))!=string::npos)
-									} // 									for(unsigned uru=0;uru<sizeof suchstr/sizeof *suchstr;uru++)
+									} // 									for(unsigned uru=0;uru<elemzahl(suchstr);uru++)
 									if (neuerversuch)
 										continue;
 								} // 								if ((p2=fehler.find("'",p1)+1))
@@ -2453,12 +2453,12 @@ void RS::dsclear()
 
 void dhcl::virtinitopt()
 {
-	opn<<new optcl(/*pname*/"host",/*pptr*/&host,/*part*/pstri,T_host_k,T_host_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!host.empty());
-	opn<<new optcl(/*pname*/"muser",/*pptr*/&muser,/*part*/pstri,T_muser_k,T_muser_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!muser.empty());
-	opn<<new optcl(/*pname*/"mpwd",/*pptr*/&mpwd,/*part*/ppwd,T_mpwd_k,T_mpwd_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mpwd.empty());
-	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty());
+	opn<<new optcl(/*pname*/"host",/*pptr*/&host,/*part*/pstri,T_host_k,T_host_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!host.empty(),T_Host_fuer_MySQL_MariaDB_Datenbank);
+	opn<<new optcl(/*pname*/"muser",/*pptr*/&muser,/*part*/pstri,T_muser_k,T_muser_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!muser.empty(),T_Benutzer_fuer_MySQL_MariaDB);
+	opn<<new optcl(/*pname*/"mpwd",/*pptr*/&mpwd,/*part*/ppwd,T_mpwd_k,T_mpwd_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mpwd.empty(),T_Passwort_fuer_MySQL_MariaDB);
+	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty(),T_Datenbankname_fuer_MySQL_MariaDB_auf);
 //	opn<<optcl(/*pname*/"tabl",/*pptr*/&tabl,/*art*/pstri,T_tb_k,T_tabelle_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1);
-	opn<<new optcl(/*pname*/"",/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
 	hcl::virtinitopt();
 } // void hhcl::virtinitopt
 

@@ -1,11 +1,14 @@
 #!/bin/sh
 still() {
-	"$@" >/dev/null 2>&1
+	"$@" >/dev/null 2>&1;
+}
+leise() {
+	"$@" >/dev/null;
 }
 
 #kf kein Fehler
 kf() {
-	"$@" 2>/dev/null
+	"$@" 2>/dev/null;
 }
 
 # Installationsprogramm ermitteln
@@ -25,7 +28,7 @@ getIPR() {
 	# echo $os
 	case "$os" in 
 		*Mint*) osnr=1;;
-		*Ubunto*) osnr=2;; 
+		*Ubuntu*) osnr=2;; 
 		*Debian*) osnr=3;; 
 		*SUSE*) osnr=4;; 
 		*Fedora*) osnr=5;; 
@@ -34,9 +37,9 @@ getIPR() {
 	esac;
 	[ $osnr -eq 0 ]&&{
 		#	echo unvergeben;
-	which apt-get>/dev/null&&osnr=2||
-		which rpm>/dev/null&&{ { which zypper>/dev/null&&osnr=4; }||{ which dnf>/dev/null&&osnr=5; }||{ which yum>/dev/null&&osnr=6; }||{ which urpmi.update>/dev/null&&osnr=7; } }||
-		{ which pacman>/dev/null&&osnr=8; } }
+	leise which apt-get&&osnr=2|| 
+			leise which rpm&&{ { leise which zypper&&osnr=4; }||{ leise which dnf&&osnr=5; }||{ leise which yum&&osnr=6; }||
+		{ leise which urpmi.update&&osnr=7; } }|| { leise which pacman&&osnr=8; } }
 #	echo osnr: $osnr;
 # openSUSE
 	{ [ $osnr = 4 ]&&
@@ -75,6 +78,7 @@ getIPR() {
 			COMP="build-essential linux-headers-\$(shell uname -r)";
 			LT=${_LT}-${dev};
 			CTAGS=exuberant-ctags;
+			LCURS="$(apt-cache search 'libncurses[0-9]+-dev$'|sort -r|head -n1|cut -d'-' -f1) $(apt-cache search 'libncursesw[0-9]+-dev$'|sort -r|head -n1|cut -d'-' -f1)";
 		} 
 	} || 
 	{ [ $osnr = 5 ]&&
@@ -96,7 +100,7 @@ getIPR() {
 			UPR="${SUDC}urpme ";
 			dev=devel;
 			LT=${_LT}-${dev};
-			libmac=lib64mariadb;
+			libmdb=lib64mariadb;
 			COMP="make automake gcc-c++ kernel-devel";
 		} 
 	} || 
@@ -109,14 +113,13 @@ getIPR() {
 			COMP="make automake base-devel";
 			UPR="${SUDC}pacman -R ";
 			SPR="pacman -Qi ";
-			libmac="libmysqlclient libmysqlclient"
+			libmdb=libmysqlclient;
 			UDPR="${SUDC}pacman -Rd ";
 		};
 	}
 	[ $osnr = 5 -o $osnr = 6 ]&& 
 	{ 
-		libmc=mysql;
-		libmac=mariadb;
+		libmdb="mariadb mysql";
 		COMP="make automake gcc-c++ kernel-devel";
 		IP_R="${SUDC}$IdPR";
 		LBOOST=boost-${dev};
@@ -145,21 +148,28 @@ getIPR() {
 			UDPR="${SUDC}apt-get -f install; ${SUDC}dpkg -r --force-depends ";
 		};
 	}
-	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<mysql.h>" "$A" &&break;done ||libmac=;
+	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<mysql.h>" "$A" &&break;done ||libmdb=;
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<boost" "$A" &&break;done ||LBOOST=;
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include[ ]*<tiffio.h>" "$A" &&break;done ||LT=;
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include .*acl.h>" "$A" &&break;done ||LACL=;
 	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include .*curl.h>" "$A" &&break;done ||LCURL=;
+	for A in $(ls|grep "\.cpp$\|\.h$");do [ -f "$A" ]&& grep -q "^#include .*curses.h>" "$A" &&break;done ||LCURS=;
 	IPR="${SUDC}$IdPR";
-	DTN="`find . -maxdepth 1 -name ${DPROG}.cpp -printf '%f '``find . -maxdepth 1 -name ${DPROG}.h -printf '%f '``find . -maxdepth 1 \( -name '*.cpp' -or -name '*.h' \) -not -name "${DPROG}*" -printf '%f\\n'|sort|tr '\\n' ' '` man_?? Makefile configure install.sh viall .exrc $UNF $ILOG"
+	DTN="`find . -maxdepth 1 -name ${DPROG}.cpp -printf '%f '`\
+		   `find . -maxdepth 1 -name ${DPROG}.h -printf '%f '`\
+			 `find . -maxdepth 1 \( -name '*.cpp' -or -name '*.h' \) -not -name "${DPROG}*" -printf '%f\\n'|sort|tr '\\n' ' '`\
+			  man_?? Makefile configure \
+			 `find . -maxdepth 1 -name '*.sh' -printf '%f '`\
+			  viall .exrc $UNF $ILOG"
 }
 
 exportvars() {
 	rm -f vars;
-	for v in KR KF IPR IP_R UPR UDPR SPR UNROH UNF AUNF ILOG PGROFF LT LT5 LBOOST LBIO LBLO LACL LCURL LM18 dev libmc libmac REPOS UREPO COMP GITV DTN DPROG; do
+	for v in KR KF IPR IP_R UPR UDPR SPR UNROH UNF AUNF ILOG PGROFF LT LT5 LBOOST LBIO LBLO LACL LCURL LCURS LM18 dev libmdb REPOS UREPO COMP GITV DTN DPROG; do
 		eval nv=\$$v; 
 		printf "$v::=$nv\n">>vars; 
 	done;
+#	printf "testvar::=rot gelb grün\n">>vars
 }
 
 ausricht() {
@@ -255,7 +265,7 @@ einricht() {
 	fi
 }
 LOG=inst_$(echo $2|sed 's/ //g').log; # Leerzeichen entfernen
-printf "Befehl/Command: ${CMD}$2\n";
+printf "${blau}Befehl/Command${reset}: ${CMD}$2\n";
 ${CMD}$2|tee $LOG # "$2" geht bei mehreren Wörtern nicht, z.B. "groff-base groff"
 printf "\nRueckmeldung bei einricht $2:\n">>$GILOG;
 ausricht "$LOG" $1 "${IPR}$2";
@@ -279,8 +289,8 @@ KR="$DN 2>&1" # keine Rueckmeldung
 KF=" 2>$DN" # keine Fehlermeldung
 PGROFF="groff-base groff"
 dev=devel
-libmc=libmysqlclient
-libmac=libmariadbclient
+libmdb="libmariadb libmariadbclient libmysql libmysqlclient"
+LCURS=ncurses;
 osnr=0 # 1=Mint, 2=Ubuntu, 3=Debian, 4=SUSE, 5=Fedora, 6=Fedoraalt, 7=Mageia, 8=Manjaro
 Z=""
 [ "$(id -u)" -ne "0" ]&&SUDC="sudo "
