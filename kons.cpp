@@ -1126,7 +1126,7 @@ int getcols()
 #elif linux
 int getcols() 
 {
-  winsize w;
+  winsize w{0};
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   return w.ws_col;
 } // int getcols() 
@@ -1246,7 +1246,7 @@ int kuerzelogdatei(const char* logdatei,int obverb)
 	while (logf.getline (Zeile, sizeof(Zeile))) {
 		////		Zeilen.push_back(Zeile); //haengt einfach den Inhalt der Zeile als Vektorelement an das Ende des Vektors
 		if (!abhier) {
-			tm *atm = new tm; // int aktz;
+			tm atm{0};
 			////	for(aktz=Zeilen.size()-1;aktz>=0;aktz--) KLA
 			////         fLog(string("aktz=") + ltoa_(aktz,buffer,10),obverb,0);
 			int verwertbar{0}, index;
@@ -1259,19 +1259,19 @@ int kuerzelogdatei(const char* logdatei,int obverb)
 				}
 				switch (index) {
 					case 0: 
-						if (sscanf(Zeile,"%2d.%2d.%2d %2d:%2d:%2d%*s",&atm->tm_mday,&atm->tm_mon,&atm->tm_year,&atm->tm_hour,&atm->tm_min,&atm->tm_sec)==6) {
+						if (sscanf(Zeile,"%2d.%2d.%2d %2d:%2d:%2d%*s",&atm.tm_mday,&atm.tm_mon,&atm.tm_year,&atm.tm_hour,&atm.tm_min,&atm.tm_sec)==6) {
 							if (!verwertbar) {
 								verwertbar=1;
 								j=2;
 							}
-							atm->tm_mon--;
-							atm->tm_year+=100; // 2000-1900
-							////	  <<atm->tm_mday<<"."<<atm->tm_mon+1<<"."<<atm->tm_year<<"."<<atm->tm_hour<<"."<<atm->tm_min<<"."<<atm->tm_sec<<endl;
-							atm->tm_isdst=-1; // sonst wird ab und zu eine Stunde abgezogen
+							atm.tm_mon--;
+							atm.tm_year+=100; // 2000-1900
+							////	  <<atm.tm_mday<<"."<<atm.tm_mon+1<<"."<<atm.tm_year<<"."<<atm.tm_hour<<"."<<atm.tm_min<<"."<<atm.tm_sec<<endl;
+							atm.tm_isdst=-1; // sonst wird ab und zu eine Stunde abgezogen
 						} else if (verwertbar) verwertbar=0;
 						break;
 					case 1:
-						if (strptime(Zeile,"%a %b %d %T %Y", atm)) {
+						if (strptime(Zeile,"%a %b %d %T %Y", &atm)) {
 							if (!verwertbar) {
 								verwertbar=2;
 								j=2;
@@ -1280,18 +1280,18 @@ int kuerzelogdatei(const char* logdatei,int obverb)
 				} //             switch (index)
 			} //           for(unsigned j=0;j<2;j++)
 			if (verwertbar) {
-				time_t gesz=mktime(atm);
+				time_t gesz{mktime(&atm)};
 				////          	  char tbuf[20];
 				////              strftime(tbuf, 18,"%d.%m.%y %X",localtime(&gesz));
 				////              <<"Datum: "<<tbuf<<endl;
-				time_t jetzt=time(0);
-				long sekunden=(long)(jetzt-gesz);
+				time_t jetzt{time(0)};
+				long sekunden{(long)(jetzt-gesz)};
 				if (sekunden<1209600) {// juenger als zwei Wochen => behalten
 					abhier=1;
 				}
 				////	  <<jetzt<<"- "<<gesz<<"="<<sekunden<<endl;
 			} // if (sscanf(Zeile
-			delete[] atm;
+//			delete atm;
 		} // (!abhier)
 		if (abhier) {
 			outfile<<Zeile<<endl;

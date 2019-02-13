@@ -44,18 +44,21 @@
 ICH::=$(firstword $(MAKEFILE_LIST))
 SRCS::=$(wildcard *.cpp)
 OBJ::=$(SRCS:.cpp=.o)
+DN::=>/dev/null # DevNull
+KR::= $(DN) 2>&1 # keine Rueckmeldung
+KF::= 2$(DN) # keine Fehlermeldung
 # wenn aus vi aufgerufen, kein unnoetigen Ausgaben, BA=bedingte Ausgabe, BFA=bedingte Fehlerausgabe
-BA::=&1
+BA::=>&1
 BFA::=2>>fehler.txt
 ifdef ausvi
- BA::=/dev/null
+ BA::=$(DN)
 endif
 #PROGRAM::=$(shell basename $(CURDIR))
 #EXPFAD=/usr/local/sbin
 EXPFAD::=$(shell echo $(PATH) | tr -s ':' '\n' | grep /usr/ | head -n 1)
 EXPFAD::=$(shell echo $(PATH) | tr -s ':' '\n' | grep /usr/ | awk '{ print length, $$0 }' | sort -n -s | cut -d" " -f2- | head -n1)
 
-#// ifneq ($(shell g++-6 --version >$(KR); echo $$?),0)
+#// ifneq ($(shell g++-6 --version $(KR); echo $$?),0)
 #//  CCName::=g++
 #//  CFLAGS::=$(CFLAGS) -std=gnu++11 # 7.8.17 nicht nötig für opensuse42, hinderlich für fedora; 5.9.17: geht nicht mehr (wg. auto)
 #// else
@@ -69,21 +72,20 @@ MINGCCNR::=6
 #// endif
 # maximal verfügbare g++-Version, falls die Verknüpfungen in /usr/bin stehen und evtl. /usr/bin/g++ nicht auf die höchste verknüpft ist
 # deren Hauptversionsnummer
-MAXGCCNR::=$(shell erg=0;for i in $$(seq 50 -1 1);do which g++-$$i >/dev/null 2>&1&&{ erg=$$i;break;};done;echo $$erg) # {50..1} geht bei dash nicht
+MAXGCCNR::=$(shell erg=0;for i in $$(seq 50 -1 1);do which g++-$$i $(KR)&&{ erg=$$i;break;};done;echo $$erg) # {50..1} geht bei dash nicht
 #1=verfügbare Version höher als die minimal notwendige, 0=nicht
 # 1=minimal notwendige Version verfügbar, 0=nicht
 GCCOK::=$(shell expr $(MAXGCCNR) \>\= $(MINGCCNR))
 # 1=Debian usw., 2=Opensuse, 3=Fedora usw., 4=Magieia, 5=Manjaro usw.
 # DISTR::=$(shell which apt >/dev/null 2>&1&&echo 1||{ which zypper >/dev/null 2>&1&&echo 2||{ which dnf >/dev/null 2>&1||which yum >/dev/null 2>&1&&echo 3||{ which urpmi.update >/dev/null 2>&1&&echo 4||{ which pacman >/dev/null 2>&1&&echo 5||echo 0;};};};})
 # #	osnr=0 # 1=Mint, 2=Ubuntu, 3=Debian, 4=SUSE, 5=Fedora, 6=Fedoraalt, 7=Mageia, 8=Manjaro
-RP:=)
-DISTR::=$(shell os=$$(cat /etc/os-release|grep '^NAME=');[ -z "$$os" ]&& os=$$(cat /etc/lsb-release|grep '^DISTRIB_ID=');os=$$(echo $$os|cut -d= -f2|sed 's/"\(.*\)"/\1/'); case "$$os" in *Mint*$(RP) osnr=1;; *Ubunto*$(RP) osnr=1;; *Debian*$(RP) osnr=1;; *SUSE*$(RP) osnr=2;; *Fedora*$(RP) osnr=3;; *Mageia*$(RP) osnr=4;; *Manjaro*$(RP) osnr=5;; esac;echo $$osnr;)
+-include vars # wird durch install.sh generiert; DPROG und GDAT dürfen nur nachher verwendet werden
 ifeq ($(GCCOK),0)
 	# wenn minimal notwendige Version nicht verfügbar ist, dann diese neu als maximal installierbare definieren und später installieren
-	ifeq ($(DISTR),1)
+  ifeq ($(shell expr $(OSNR) \<= 3),1)
   	MINVGCC::=$(shell apt-cache search '^g\+\+-[0-9]+$$' -n|cut -f2 -d'-'|sort -nr|head -n1)
-  else ifeq ($(DISTR),2)
-	  MINVGCC::=$(shell which zypper >/dev/null 2>&1&&zypper se /gcc[^-]$*-c\\+\\+$$/|tail -n1|cut -dc -f3|cut -d- -f1||echo 0;)
+  else ifeq ($(OSNR),4)
+	  MINVGCC::=$(shell which zypper $(KR)&&zypper se /gcc[^-]$*-c\\+\\+$$/|tail -n1|cut -dc -f3|cut -d- -f1||echo 0;)
   endif
   ifeq ($(shell expr $(MINVGCC) \> $(MINGCCNR)),1)
 	  MINGCCNR::=$(MINVGCC)
@@ -93,20 +95,24 @@ ifeq ($(shell expr $(MAXGCCNR) \> $(MINGCCNR)),1)
 	MINGCCNR::=$(MAXGCCNR)
 endif
 CCName::=g++-$(MINGCCNR)
-ifeq ($(DISTR),1)
+ifeq ($(shell expr $(OSNR) \<= 3),1)
 	CCInst::=gcc-$(MINGCCNR) g++-$(MINGCCNR)
 	DName::="Debian/Ubuntu/Mint"
-else ifeq ($(DISTR),2)
+else ifeq ($(OSNR),4)
 	CCInst::=gcc$(MINGCCNR) gcc$(MINGCCNR)-c++
 	DName::="OpenSuse"
-else ifeq ($(DISTR),3)
+else ifeq ($(OSNR),5)
 	DName::="Fedora"
-else ifeq ($(DISTR),4)
+else ifeq ($(OSNR),6)
+	DName::="Fedoraalt"
+else ifeq ($(OSNR),7)
 	DName::="Mageia"
-else ifeq ($(DISTR),5)
+else ifeq ($(OSNR),8)
 	DName::="Manjaro"
 endif
--include vars # wird durch install.sh generiert; CCInst muss vorher definiert werden, DPROG und GDAT dürfen nur nachher verwendet werden
+ifeq ($(shell expr $(OSNR) \<= 4),1)
+	COMP::=$(COMP) $(CCInst)
+endif
 CFLAGS::=-c -Wall
 LDFLAGS::=
 ifneq ($(libmdb),)
@@ -138,9 +144,6 @@ INSTEXEC::=$(EXPFAD)/$(EXEC)
 GDAT::=$(DTN:inst.log=)
 GDAT::=$(GDAT:uninstallinv=)
 GDAT::=$(GDAT:Makefile=Makefile.roh)
-ifeq ($(DISTR),1)
-	COMP::=$(COMP) $(CCInst)
-endif
 CC::=$(CCName) # CC=$(SUDC)$(CCName)
 pgd::=postgresql-$(dev)
 SUDC::=
@@ -163,15 +166,15 @@ slc::=$(SUDC)/sbin/ldconfig
 # i_unins=$(IP_R)$(1) &&{ $(call sunins,$(1),$(2))};
 # i_uninsd=$(IP_R)$(1) &&{ $(call suninsd,$(1),$(2))}; # direkt
 # Programm suchen, ggf. installieren und ...
-# siunins= $(SPR)$(1) >$(KR)||{ $(call iunins,$(1),$(2))};
-# siuninsd= $(SPR)$(1) >$(KR)||{ $(call iuninsd,$(1),$(2))}; # direkt
+# siunins= $(SPR)$(1) $(KR)||{ $(call iunins,$(1),$(2))};
+# siuninsd= $(SPR)$(1) $(KR)||{ $(call iuninsd,$(1),$(2))}; # direkt
 # i1siun=$(call siunins,$(1),$(1))
 # i1siund=$(call siuninsd,$(1),$(1)) # direkt
-# si_unins=$(SPR)$(1) >$(KR)||{ $(call i_unins,$(1),$(2))};
+# si_unins=$(SPR)$(1) $(KR)||{ $(call i_unins,$(1),$(2))};
 # GROFFCHECK::=$(call i1siund,$(PGROFF)):
 
 DEPDIR ::= .d
-$(shell mkdir -p $(DEPDIR) >$(KR))
+$(shell mkdir -p $(DEPDIR) $(KR))
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 
 # POSTCOMPILE = mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d 2>/dev/null
@@ -251,16 +254,16 @@ git: README.md
 	@$(call machvers);
 	@printf " Copying files from/ Kopiere Dateien von: %b%s%b (Version %b%s%b) -> git (%b%s%b)\n" \
 		$(blau) "$(PWD)" $(reset) $(blau) $$(cat versdt) $(reset) $(blau) \
-		"$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;};[ -d .git ]&&cat .git/./config|sed -n '/url =/p')" $(reset) >$(BA) 
+		"$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;};[ -d .git ]&&cat .git/./config|sed -n '/url =/p')" $(reset) $(BA) 
 	-@cp -au Makefile Makefile.roh
 	@[ -d .git ]||{ \
-		curl -u "$(DPROG)" https://api.github.com/user/repos -d "{\"name\":\"$(DPROG)\"}" >/dev/null; git init;git add $(GDAT:vgb.cpp=) versdt README.md;\
+		curl -u "$(DPROG)" https://api.github.com/user/repos -d "{\"name\":\"$(DPROG)\"}" $(DN); git init;git add $(GDAT:vgb.cpp=) versdt README.md;\
 	}
 	$(call setz_gitv,".")
 	@git config --global push.default simple
 	@git add -u
 	@git commit -m "Version $$(cat versdt)"
-	@grep remote\ \"origin\"] .git/config >/dev/null 2>&1||git remote add origin https://github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git
+	@grep remote\ \"origin\"] .git/config $(KR)||git remote add origin https://github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git
 	@git push -u origin master
 
 .PHONY: giterlaub
@@ -279,12 +282,12 @@ anzeig:
 # 'echo -e' geht nicht z.B. in ubuntu
 	@[ "$(DPROG)" ]||{ printf "Datei/File %b'vars'%b fehlerhaft/faulty, bitte vorher/please call %b'./install.sh'%b aufrufen/before!\n" \
 	       $(blau) $(reset) $(blau) $(reset);let 0;}
-	@printf " %bGNU Make%b, Target file/Zieldatei: %b%s%b, before/vorher:                        \n" $(gruen) $(reset) $(rot) "$(EXEC)" $(reset) >$(BA)
-	@printf " '%b%s%b'\n" $(blau) "$$(ls -l --time-style=+' %d.%m.%Y %H:%M:%S' --color=always $(EXEC) $(KF))" $(reset) >$(BA)
-	@printf " Source files/Quelldateien: %b%s%b\n" $(blau) "$(SRCS)" $(reset) >$(BA)
+	@printf " %bGNU Make%b, Target file/Zieldatei: %b%s%b, before/vorher:                        \n" $(gruen) $(reset) $(rot) "$(EXEC)" $(reset) $(BA)
+	@printf " '%b%s%b'\n" $(blau) "$$(ls -l --time-style=+' %d.%m.%Y %H:%M:%S' --color=always $(EXEC) $(KF))" $(reset) $(BA)
+	@printf " Source files/Quelldateien: %b%s%b\n" $(blau) "$(SRCS)" $(reset) $(BA)
 	@printf " Compiler: %b%s%b, installed as/installiert als: %b%s%b; Compiler Parameter: %b%s%b\n"\
 	        $(blau) "$(CCName)" $(reset) $(blau) "$(CCInst)" $(reset) $(blau) "$(CFLAGS)" $(reset)
-	@printf " Target path for/Zielpfad fuer '%bmake install%b': %b%s%b\n" $(blau) $(reset) $(blau) "'$(EXPFAD)'" $(reset) >$(BA)
+	@printf " Target path for/Zielpfad fuer '%bmake install%b': %b%s%b\n" $(blau) $(reset) $(blau) "'$(EXPFAD)'" $(reset) $(BA)
 	-@rm -f fehler.txt $(KF)
 endif
 
@@ -296,14 +299,14 @@ debugneu debugnew: neu
 ifeq (,$(SRCS))
 else
 $(EXEC): $(OBJ)
-	-@printf " linking/verlinke %s to/zu %b%s%b ..." "$(OBJ)" $(blau) "$@" $(reset) >$(BA)
+	-@printf " linking/verlinke %s to/zu %b%s%b ..." "$(OBJ)" $(blau) "$@" $(reset) $(BA)
 	-@df --output=ipcent / |tail -n1|grep - && $(SUDC)pkill postdrop;:
-	-@man >$(KR);[ $$? -gt 1 ]&&{ sh configure inst _ man verbose;}||:;
+	-@man $(KR);[ $$? -gt 1 ]&&{ sh configure inst _ man verbose;}||:;
 #	-@find /usr/lib -iname zlib.so -exec false {}+&&{ sh configure inst _ zlib-$(dev) verbose;};:
-	-@ld -lz 2>/dev/null||{ sh configure inst _ zlib-$(dev) verbose;};:
-	-@printf " (Version: %b%s%s%b\n " $(blau) "$$(cat versdt)" ")" $(reset) >$(BA)
+	-@ld -lz $(KF)||{ sh configure inst _ zlib-$(dev) verbose;};:
+	-@printf " (Version: %b%s%s%b\n " $(blau) "$$(cat versdt)" ")" $(reset) $(BA)
 	$(CC) $^ $(DEBUG)-o $@ $(LDFLAGS)
-	-@ls .d/*.Td >$(KR) &&{ for datei in .d/*.Td; do mv -f $${datei} $${datei%.Td}.d; done;};:
+	-@ls .d/*.Td $(KR) &&{ for datei in .d/*.Td; do mv -f $${datei} $${datei%.Td}.d; done;};:
 	$(shell touch *.o $${EXEC})
 	-@printf " Fertig mit/Finished with %b$(ICH)%b, Target: %b$@%b:, nachher/afterwords:\n" $(blau) $(reset) $(blau) $(reset)
 	-@printf " '%b%s%b'\n" $(blau) "$$(ls -l --time-style=+' %d.%m.%Y %H:%M:%S' --color=always $(EXEC))" $(reset)
@@ -313,8 +316,8 @@ endif
 %.o : %.cpp $(DEPDIR)/%.d
 	@[ $@ = $(DPROG).o ]&&{ $(call machvers);if test -f entwickeln; then awk "BEGIN {print `cat versdt`+0.00001}" >versdt;\
 	else printf " %bFile '%bentwickeln%b' missing, keeping the version number stable/ Datei '%bentwickeln%b' fehlt, lasse die Version gleich%b\n" \
-	$(schwarz) $(grau) $(schwarz) $(grau) $(schwarz) $(reset) >$(BA); fi;}; :;
-	@printf " kompiliere %b%s%b: " $(blau) "$<" $(reset) >$(BA);
+	$(schwarz) $(grau) $(schwarz) $(grau) $(schwarz) $(reset) $(BA); fi;}; :;
+	@printf " kompiliere %b%s%b: " $(blau) "$<" $(reset) $(BA);
 #	-@if ! test -f instvz; then printf \"$$(getent passwd $$(logname)|cut -d: -f6)\" >instvz; fi;
 	-@if ! test -f instvz; then printf \"$$(pwd)\" >instvz; fi; # wird in kons.cpp verwendet
 	-$(CC) $(DEBUG)$(DEPFLAGS) $(CFLAGS) -c $< $(BFA);
@@ -329,8 +332,8 @@ $(DEPDIR)/%.d: ;
 ifeq (,$(SRCS))
 else
 compiler:
-	@printf " DISTR: %b%s%b, untersuche/examining Compiler ...\n" $(blau) "$(DName)" $(reset) >$(BA)
-	@printf " Untersuche/Examining Compiler ...\n" >$(BA)
+	@printf " DISTR: %b%s%b, untersuche/examining Compiler ...\n" $(blau) "$(DName)" $(reset) $(BA)
+	@printf " Untersuche/Examining Compiler ...\n" $(BA)
 	@if test "$(GCCOK)" = "0"; then printf " GCCOK: %b%s%b\n" $(blau) "$(GCCOK)" $(reset); fi;
 	@if test "$(GCCOK)" = "0"; then printf " MINVGCC: %b%s%b\n" $(blau) "$(MINVGCC)" $(reset); fi;
 	@if test "$(GCCOK)" = "0"; then printf " MINGCCNR: %b%s%b\n" $(blau) "$(MINGCCNR)" $(reset); fi;
@@ -343,29 +346,29 @@ $(warning Variable 'SPR' not assigned, please call './install.sh' before!)
 $(error Variable 'SPR' nicht belegt, bitte vorher './install.sh' aufrufen!)
 endif
 	@[ "$(GCCOK)" = "1" ]||{ \
-		[ "$(DISTR)" = "1" ]&&{ \
+		[ "$(OSNR)" -le 3 ]&&{ \
 			src=/etc/apt/sources.list;[ -f $$src -a -s $$src ]||$(SUDC)cp -a /usr/share/doc/apt/examples/sources.list $$src;:;\
-			grep toolchain /etc/apt/sources.list||ls /etc/apt/sources.list.d/*toolchain* 2>/dev/null||{ \
+			grep toolchain /etc/apt/sources.list||ls /etc/apt/sources.list.d/*toolchain* $(KF)||{ \
 				$(SUDC)add-apt-repository ppa:ubuntu-toolchain-r/test;$(SUDC)apt-get update;\
 			};\
 		};\
-		printf "Installiere/Installing Compiler \"$(COMP)\" ...\n" >$(BA);\
+		printf "Installiere/Installing Compiler \"$(COMP)\" ...\n" $(BA);\
 		sh configure inst _ "$(COMP)";:;\
 	}
 	-@[ "$(libmdb)" ]&&{ \
 		for kand in $(libmdb);do \
-			[ -f /usr/include/mysql/mysql.h >$(KR) ]&& \
+			[ -f /usr/include/mysql/mysql.h $(KR) ]&& \
 			find $$(find /usr -maxdepth 1 -type d -name "lib*" $(KF)|sort -r) -regextype egrep -regex ".*libm(ysql|ariadb)client.so" -print -quit $(KF)|\
-			grep '' >$(KR)&& break;\
+			grep '' $(KR)&& break;\
 			sh configure inst _ $$kand-$(dev) verbose; \
 		done;\
 	}||:
-	-@[ -z $$mitpg ]||$(SPR) $(pgd) >$(KR)||{ sh configure inst _ "$(pgd)" verbose;$(slc);};
+	-@[ -z $$mitpg ]||$(SPR) $(pgd) $(KR)||{ sh configure inst _ "$(pgd)" verbose;$(slc);};
 # 3.5.17: auch libtiff5 hat gefehlt
 	-@[ "$(LT)" ]&& for r in 1 2;do \
 		[ $$r = 1 ]&& LTakt="$(LT)" ||{ [ -z "$(LT5)" ]&&break;LTakt="$(LT5)";};\
-		find /usr/include /usr/local/include -name tiff.h -print -quit $(KF)|grep '' >$(KR)&&\
-		find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -maxdepth 2 -type l -xtype f -name "libtiff.so" -print -quit $(KF)|grep '' >$(KR)&& break;\
+		find /usr/include /usr/local/include -name tiff.h -print -quit $(KF)|grep '' $(KR)&&\
+		find /usr/lib64 /usr/lib /usr/local/lib64 /usr/local/lib -maxdepth 2 -type l -xtype f -name "libtiff.so" -print -quit $(KF)|grep '' $(KR)&& break;\
 		sh configure inst _ "$$LTakt" verbose;\
 	done;:;
 #	P=tiff_copy;T=$$P.tar.gz;M=$$P-master;wget https://github.com/$(GITV)/$$P/archive/master.tar.gz -O $$T&&{ rm -rf $$P;tar xpvf $$T;} &&\
@@ -376,16 +379,16 @@ endif
 	-@[ "$(LACL)" ]&&{ [ -f /usr/include/sys/acl.h ]|| sh configure inst _ "$(LACL)" verbose;}||:
 	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h -o -f /usr/include/x86_64-linux-gnu/curl/curl.h ]|| sh configure inst _ "$(LCURL)" verbose;}||:
 	-@[ "$(LCURS)" ]&&{ [ -f /usr/include/ncursesw/ncurses.h -o -f /usr/include/x86_64-linux-gnu/ncursesw/ncurses.h ]||{ for kand in $(LCURS);do sh configure inst _ "$$kand-$(dev)" verbose;done;};}||:
-	-@[ "$(LBOOST)" ]&&{ $(SPR) $(LBOOST) >$(KR)|| sh configure inst _ "$(LBOOST)" verbose;}||:
-	-@[ "$(LBIO)" ]&&{ $(SPR) "$(LBIO)" >$(KR)||sh configure inst _ "$(LBIO)" verbose;}||:
-	-@[ "$(LBLO)" ]&&{ $(SPR) "$(LBLO)" >$(KR)||sh configure inst _ "$(LBLO)" verbose;}||:
+	-@[ "$(LBOOST)" ]&&{ $(SPR) $(LBOOST) $(KR)|| sh configure inst _ "$(LBOOST)" verbose;}||:
+	-@[ "$(LBIO)" ]&&{ $(SPR) "$(LBIO)" $(KR)||sh configure inst _ "$(LBIO)" verbose;}||:
+	-@[ "$(LBLO)" ]&&{ $(SPR) "$(LBLO)" $(KR)||sh configure inst _ "$(LBLO)" verbose;}||:
 #//	-@[ -f /usr/include/boost/iostreams/device/mapped_file.hpp -o -f /usr/share/doc/libboost-dev ]|| sh configure inst _ "$(LBOOST)" verbose;
 # ggf. Korrektur eines Fehlers in libtiff 4.0.7, notwendig fuer hylafax+, 17.1.17 in Programm verlagert
-	@printf "                                  \r" >$(BA)
+	@printf "                                  \r" $(BA)
 endif
 
 .PHONY: stumm stumminst
-stumm stumminst: BA::=/dev/null
+stumm stumminst: BA::=$(DN)
 stumm stumminst: BFA::=
 stumm stumminst: rot::=""
 stumm stumminst: blau::=""
@@ -399,7 +402,7 @@ stumminst: install
 ifeq (,$(SRCS))
 else
 $(INSTEXEC): $(EXEC)
-	@printf " Copying program/ Kopiere Programmdatei: %b%s%b -> %b%s%b\n" $(blau) "$(EXEC)" $(reset) $(blau) "$(INSTEXEC)" $(reset) >$(BA)
+	@printf " Copying program/ Kopiere Programmdatei: %b%s%b -> %b%s%b\n" $(blau) "$(EXEC)" $(reset) $(blau) "$(INSTEXEC)" $(reset) $(BA)
 	-@$(SUDC)pkill $(EXEC) $(KF); $(SUDC)pkill -9 $(EXEC) $(KF); $(SUDC)cp -p "$(EXEC)" "$(INSTEXEC)"
 endif
 
@@ -430,8 +433,8 @@ endef
 
 define priv_html
 	-@printf " erstelle/generating:%b$(1)%b\n" $(blau) $(reset)
-	-@groff -mandoc -Thtml -v >$(KR);EXC="$$$$?"; \
-	for p in $(PGROFF); do { [ $$$${EXC} -gt 1 ]|| ! which groff >$(KR)|| ! $(SPR) $$$$p >$(KR);}&&{ sh configure inst _ $$$$p verbose;}; done; :;
+	-@groff -mandoc -Thtml -v $(KR);EXC="$$$$?"; \
+	for p in $(PGROFF); do { [ $$$${EXC} -gt 1 ]|| ! which groff $(KR)|| ! $(SPR) $$$$p $(KR);}&&{ sh configure inst _ $$$$p verbose;}; done; :;
 	-@rm -f $(1).html
 	-@sed -e 's/²gitv²/$(GITV)/g;s/²DPROG²/$(DPROG)/g;'\
 	 -e 's/Ä/\&Auml;/g;s/Ö/\&Ouml;/g;s/Ü/\&Uuml;/g;s/ä/\&auml;/g;s/ö/\&ouml;/g;s/ü/\&uuml;/g;s/ß/\&szlig;/g;'\
@@ -463,7 +466,7 @@ $(1).gz: $(EXEC) $(1)
 	@sed 's/²gitv²/$(GITV)/g;s/²DPROG²/$(DPROG)/g;s/\\fB/\\fI/g' $(1)|gzip -c >$$@
 $(INST$(patsubst man_%,%,$(1))MAN): $(1).gz
 	@$(SUDC)mkdir -p $$$$(dirname $$@)
-	@printf " Copying Manual/ Kopiere Hilfedatei: %b%s%b -> %b%s%b\n" $(blau) "$(1)" $(reset) $(blau) "$$@" $(reset) >$(BA)
+	@printf " Copying Manual/ Kopiere Hilfedatei: %b%s%b -> %b%s%b\n" $(blau) "$(1)" $(reset) $(blau) "$$@" $(reset) $(BA)
 	@$(SUDC)cp -a $(1).gz $$@
 endef
 $(foreach prog,$(wildcard man_??),$(eval $(call manges,$(prog))))
@@ -476,7 +479,7 @@ distclean: clean
 
 .PHONY: clean
 clean: 
-	@printf " Bereinige/Cleaning ...\n" >$(BA)
+	@printf " Bereinige/Cleaning ...\n" $(BA)
 	@ZUL="$(EXEC) $(OBJ) .d/* $(HTMLS)";GEL=$$(ls -1 $$ZUL $(KF)|tr '\n' ' '); rm -f $$ZUL $(KF); \
 	[ -z "$$(echo $$GEL|sed 's/ *$$//')" ]&&GEL="Hier/here: Nichts/nothing";printf " %b$$GEL%b geloescht/deleted!\n" $(blau) $(reset); 
 
@@ -493,20 +496,20 @@ confclean:
 	-@sh -c 'D=$(INSTEXEC).conf;test -f "$$D" &&{ \
 		printf "Do You really want to delete/ Wollen Sie \"%b$$D%b\" wirklich loeschen (y/j/n)? " $(blau) $(reset); read anw; \
 		if echo "$$anw"|grep -iq "^j\|^y";then \
-			$(SUDC)rm -r "$$D" >$(KR)&&printf "\"%b%s%b\" deleted/ geloescht!\n" $(blau) "$(INSTEXEC).conf" $(reset); \
+			$(SUDC)rm -r "$$D" $(KR)&&printf "\"%b%s%b\" deleted/ geloescht!\n" $(blau) "$(INSTEXEC).conf" $(reset); \
 		fi;:;\
 	}||{ printf "configuration file/ Konfigurationsdatei \"%b$$D%b\" missing/ fehlt.\n" $(blau) $(reset);}'
 
 .PHONY: uninstall
 uninstall: instclean
 	-@tac $(UNF) >tmp_$(UNROH)&& $(SUDC)blau=$(blau) reset=$(reset) bash tmp_$(UNROH);: # uninstallinv von hinten nach vorne abarbeiten
-	-@[ "$(DISTR)" = "1" ]&&{ $(SUDC)apt-get -f install;};:;
+	-@[ "$(OSNR)" -le 3 ]&&{ $(SUDC)apt-get -f install;};:;
 	-@printf "uninstall finished/ Fertig mit uninstall!\n"
 
 .PHONY: allesweg
 allesweg: instclean
 	-@tac $(UNF) >tmp_$(UNROH)&& $(SUDC)blau=$(blau) reset=$(reset) bash tmp_$(UNROH) <<-EOF $'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n'$'\n' EOF;: # uninstallinv von hinten nach vorne abarbeiten
-	-@[ "$(DISTR)" = "1" ]&&{ $(SUDC)apt-get -f install<<EOF $'\n'$'\n' EOF;};:;
+	-@[ "$(OSNR)" -le 3 ]&&{ $(SUDC)apt-get -f install<<EOF $'\n'$'\n' EOF;};:;
 	-@printf "Fertig mit uninstall!\n"
 
 #//rufe:
@@ -539,7 +542,7 @@ version: dovers
 dovers: README.md
 	@printf " Copying all files from/ Kopiere alle Dateien von: %b%s%b (Version %b%s%b) -> git (%b%s%b)\n" $(blau) "$(DPROG)" \
 	$(reset) $(blau) $$(cat versdt) $(reset) $(blau) \
-	"$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;}||cat .git/./config|sed -n '/url =/p')" $(reset) >$(BA) 
+	"$$(F1=.git/FETCH_HEAD;test -f $$F1&&{ cut -f2-< $$F1|sed 's/^\s*//';:;}||cat .git/./config|sed -n '/url =/p')" $(reset) $(BA) 
 	-@cp -au Makefile Makefile.roh
 	$(call setz_gitv,".")
 	@git config --global push.default simple
@@ -565,16 +568,18 @@ tumitzieh:
 		Fg="$$Fg\b: ";printf "$$Fg";[ "$$0" = "dash" ]&&read TZL||read -e -i "$$TZL" TZL;:;\
 	done;\
 	printf "adapt/ mitziehen von %b$$TZL%b\n" $(blau) $(reset);\
-	printf "cp -a $$blau.exrc Makefile install.sh man_?? versdt viall configure $$reset\"$$TZL\";\n";\
-	cp -a .exrc Makefile install.sh man_?? versdt viall configure "$$TZL";\
-	printf "for A in $${blau}kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h$$reset;do [ -f \"$$TZL/\\$A\" -a -f \"\\$A\" ]&&cp -a \"\\$A\" \"$$TZL\";done;\n";\
-	for A in kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h;do [ -f "$$TZL/$$A" -a -f "$$A" ]&&cp -a "$$A" "$$TZL";done;:
+	printf "cp -au $$blau.exrc Makefile install.sh man_?? viall configure $$reset\"$$TZL\";\n";\
+	cp -au .exrc Makefile install.sh man_?? viall configure "$$TZL";\
+	printf "for A in $${blau}kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h$$reset;do [ -f \"$$TZL/\\$A\" -a -f \"\\$A\" ]&&cp -au \"\\$A\" \"$$TZL\";done;\n";\
+	cd "$$TZL" $(DN);test -d ".git"&&git commit -m"vor mitzieh" $(KR);cd - $(DN);\
+	for A in kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h;do [ -f "$$TZL/$$A" -a -f "$$A" ]&&cp -au "$$A" "$$TZL";done;\
+	cd "$$TZL" $(DN); sh configure; cd - $(DN);
 
 
 .PHONY: verschieb vsneu
 verschieb:
 	Z=../$(DPROG)rein;[ "$(LOESCH)" = "1" ]&&rm -rf $$Z;make all install&&\
-		{ make transfer $$Z;{ cd $$Z;[ -d .git ]||make git;./configure;make version; cd - >$(KR);};}
+		{ make transfer $$Z;{ cd $$Z $(DN);[ -d .git ]||make git;./configure;make version; cd - $(DN);};}
 
 # geht nur, wenn das github-Repository vorher gelöscht ist
 vsneu: LOESCH::=1
@@ -638,7 +643,7 @@ dotrans:
 	 printf "Insgesamt $$blau$$DAT$$reset Dateien kopiert\n";\
 	fi;
 	@$(call setz_gitv,$$TZL)
-	@sh -c "cd $$TZL;./configure; " && printf "%b./configure%b in %b$$TZL%b aufgerufen\n" $(blau) $(reset) $(blau) $(reset);\
+	@sh -c "cd $$TZL $(DN);./configure; " && printf "%b./configure%b in %b$$TZL%b aufgerufen\n" $(blau) $(reset) $(blau) $(reset);\
 
 nFERTIG=$(error newproj finished/ Fertig mit neuproj!)
 nZiel::=$(filter-out neuproj,$(MAKECMDGOALS))
@@ -663,13 +668,13 @@ tuneuproj:
 	[ -f $$M ]&&sed -n "1,/^\.SH $$K/p;/^\.SH $$K/,/^\.SH $$D/{/^\.SH $$K/d;/^\.SH /p};/^\.SH $$D/,\$${/^\.SH $$D/d;p}" $$M >../"$$TZL"/$$M;\
 	M=man_en;K=SHORT;D=UNINST;\
 	[ -f $$M ]&&sed -n "1,/^\.SH $$K/p;/^\.SH $$K/,/^\.SH $$D/{/^\.SH $$K/d;/^\.SH /p};/^\.SH $$D/,\$${/^\.SH $$D/d;p}" $$M >../"$$TZL"/$$M;\
-	cd ../"$$TZL";\
+	cd ../"$$TZL" $(DN);\
 	echo 0.1 >versdt; touch entwickeln; echo $$TZL >pname;\
 	L="\"/var/log/\" DPROG \"vorgabe.log\"";\
 	sh configure;\
 	sed -i '/\$DTN [^'\'']/s/ +.* -pNu/ -pNu/' viall;\
 	sed -i.bak '/\$DTN [^'\'']/s/\$DTN /\$DTN +'\''tabfirst|tab sview ..\/$(DPROG)\/$(DPROG).cpp|tabnext|tab sview ..\/$(DPROG)\/$(DPROG).h|tabfirst'\'' /' viall;\
 	sh viall;\
-	echo Weiter mit/Go on with: \"cd ../"$$TZL"\";
+	echo Weiter mit/Go on with: \"cd ../"$$TZL"\" $(DN);
 
 -include $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS)))
