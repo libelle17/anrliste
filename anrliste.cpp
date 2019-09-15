@@ -356,8 +356,8 @@ int hhcl::holanr() // fetchcall()
 
   //std::cout<<buffer<<std::endl;
 	// bei falschem Passwort hier noch Fehler 401 abfangen
-  holraus(buffer,"NewCallListURL",&nurl,0,obverb);
-  holurl(nurl,&buffer,obverb);
+  holraus(buffer,"NewCallListURL",&nurl,0);
+  holurl(nurl,&buffer);
 	// caus<<buffer<<endl;
   size_t pos=0,enr=0;
 	RS rins(My,tabname); 
