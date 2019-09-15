@@ -2,18 +2,7 @@
 #include <vector>
 using namespace std;
 #include "tr64.h"
-#include "kons.h"
 
-const char *tr_T[T_trMAX+1][SprachZahl]=
-{
-	// holurl
-	{"holurl()","fetchurl()"},
-	// holraus
-	{"holraus()","fetchout()"},
-	{"",""}
-}; // const char *Txkonscl::TextC[T_konsMAX+1][SprachZahl]=
-
-class TxB Txt((const char* const* const* const*)tr_T);
 
 static int writer(char *data, size_t size, size_t nmemb, std::string *writerData)
 {
@@ -25,10 +14,9 @@ static int writer(char *data, size_t size, size_t nmemb, std::string *writerData
   return size * nmemb;
 }
 
-int holurl(const std::string url, std::string* bufp,int obverb/*=0*/)
+int holurl(const std::string url, std::string* bufp)
 {
   //std::cout<<"url: "<<url<<std::endl;
-	fLog(violetts+Txt[T_holurl]+schwarz+": '"+blau+url+"'"+schwarz,obverb);
   CURL *hnd = NULL;
   CURLcode code;
   static char errorBuffer[CURL_ERROR_SIZE];
@@ -53,9 +41,8 @@ int holurl(const std::string url, std::string* bufp,int obverb/*=0*/)
 } // int holurl(const std::string url, std::string* bufp)
 
 // XML-Inhalt ermitteln
-size_t holraus(const std::string xml,std::string item,std::string *ergp,size_t anf/*=0*/,int obverb/*=0*/)
+size_t holraus(const std::string xml,std::string item,std::string *ergp,size_t anf/*=0*/)
 {
-	fLog(violetts+Txt[T_holraus]+schwarz+": '"+blau+xml+"'"+schwarz,obverb);
   const std::string von="<"+item+">", bis="</"+item+">";
   if (ergp) {
     ergp->clear();
@@ -65,7 +52,6 @@ size_t holraus(const std::string xml,std::string item,std::string *ergp,size_t a
       size_t p2=xml.find(bis,p1);
       if (p2!=std::string::npos) {
         *ergp=xml.substr(p1,p2-p1);
-				fLog(blaus+" -> '"+schwarz+*ergp+blau+"'"+schwarz,obverb);
         return p2+bis.length();
       }
     }

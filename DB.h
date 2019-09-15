@@ -329,8 +329,9 @@ class DB
     // muss außerhalb der Klasse und einer Funktion noch mal definiert werden
     static uchar oisok; // 1=Installation von MariaDB wurde ueberprueft
     string db_systemctl_name; // mysql, mariadb je nach System
-    servc *dbsv=0;
-    MYSQL **conn;
+		servc *dbsv{0};
+		// 1= mariadb=geprueft
+		MYSQL **conn;
 		static const string defmyengine;
 		static const string defmycharset;
 		static const string defmycollat;
@@ -345,8 +346,9 @@ class DB
     char dve; // delimiter value end
     ////	char* ConStr;
     ////  const char* db;
-    const string mysqlbef="mysql", mysqlben="mysql"; // mysql-Befehl, mysql-Benutzer
-    ////  const char* host;
+    const string mysqlbef{"mysql"}, 
+					mysqlben{"mysql"}; // mysql-Befehl, mysql-Benutzer
+		////  const char* host;
     const string host;
     ////  const char* user;
 		const string charset;
@@ -363,7 +365,7 @@ class DB
     vector<string> myr;
     string cmd;
     string datadir;
-		uchar lassoffen=0;
+		uchar lassoffen{0};
 	private:
 		void instmaria(int obverb, int oblog);
 	public:
@@ -414,8 +416,8 @@ struct Tabelle
 	const string tbname;
 	string comment; // wird geaendert
 	const string dbname;
-	uchar spaltfehler=0;
-	unsigned long long  spzahl=0; // spalt->num_rows
+	uchar spaltfehler{0};
+	unsigned long long  spzahl{0}; // spalt->num_rows
 //	const char **spnamen=nullptr, **splenge=nullptr, **sptyp=nullptr;
 	svec spnamen,splenge,sptyp;
 	Feld *felder;
@@ -428,7 +430,7 @@ struct Tabelle
 	const string charset;
 	const string collate;
 	const string rowformat;
-	uchar tbneu=0; // Tabelle wurde auf der Datenbank neu erstellt
+	uchar tbneu{0}; // Tabelle wurde auf der Datenbank neu erstellt
 	Tabelle(const DB* dbp,const string& tbname, Feld *felder, const int feldzahl, Index *const indices=0, const unsigned vindexzahl=0, 
 			Constraint *const constraints=0, const unsigned constrzahl=0,
 			const string comment=string(), const string& engine=DB::defmyengine, const string& charset=DB::defmycharset, const string& collate=DB::defmycollat, 
@@ -462,9 +464,9 @@ class RS
     uchar obqueryfehler; // -1=initial, 1= mysql_send_query oder mysql_real_query ergab Fehler, 0=keinen
     string fehler;
 		string autofeld;
-		char **betroffen=0; // fuer Abfrage in postgres
+		char **betroffen{0}; // fuer Abfrage in postgres
     unsigned int fnr;
-    MYSQL_RES *result=0; // fuer RS::~RS am 4.9.18 noetig
+    MYSQL_RES *result{0}; // fuer RS::~RS am 4.9.18 noetig
 		uchar resultused{0};
 #ifdef mitpostgres 
 		PGresult *pres;
@@ -513,7 +515,7 @@ struct insv
 {
 	vector<instyp> ivec; // fuer alle Datenbankeinfuegungen
 	RS *rsp;
-	DB* My=0;
+	DB* My{0};
 	const string* const itabp;
 	const size_t aktc;
 	const uchar eindeutig;
