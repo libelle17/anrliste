@@ -9,8 +9,14 @@
 //#include <typeinfo>
 #include <acl/libacl.h> // fuer acl_t, acl_entry_t, acl_get_... in pruefberech()
 // #include <sys/acl.h>
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <term.h>
+#include <mntent.h>
+
+
 #define caus cout // nur zum Debuggen
-extern const string& pwk; // fuer Antlitzaenderung
+const string& pwk{"4893019320jfdksalö590ßs89d0qÃ9m0943Ã09Ãax"}; // fuer Antlitzaenderung
 
 
 #ifdef _WIN32
@@ -18,7 +24,7 @@ const char *const dir = "dir ";
 #elif linux
 const char *const dir = "ls -l ";
 #endif
-const char *const tmmoegl[]={
+const char *const tmmoegl[]{
 	"%d.%m.%y %H.%M.%S","%d.%m.%Y %H.%M.%S","%d.%m.%y %H:%M:%S","%d.%m.%Y %H:%M:%S",
 	"%d.%m.%y %H.%M","%d.%m.%Y %H.%M","%d.%m.%y %H:%M","%d.%m.%Y %H:%M",
 	"%d.%m.%y","%d.%m.%Y","%d.%m.%y","%d.%m.%Y",
@@ -61,7 +67,7 @@ printf(drot, unter windows escape-Sequenzen rausfieselen und durch SetConsoleTex
 ////har logdatei[PATH_MAX+1]="v:\\log_termine.txt";
 #endif // linux elif defined _WIN32
 const boost::locale::generator gen;
-const std::locale loc = gen("en_US.UTF-8");
+const std::locale loc{gen("en_US.UTF-8")};
 
 // z.B. "/root/autofax"
 const string& instvz{
@@ -185,8 +191,6 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
    "Neither zypper nor apt-get nor dnf nor yum found as installation programme!"},
   // T_Logdateidpp
   {"Logdatei:","Log file:"},
-  // T_Lese_Konfiguration_aus
-  {"Lese Konfiguration aus '","Reading configuration from '"},
   // T_j_k,
   {"j","y"},
   // T_Fehler_bei_auswert
@@ -389,6 +393,10 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"w","v"},
 	// T_verbose_l,
 	{"wortreich","verbose"},
+	// T_stu_k,
+	{"stu","mu"},
+	// T_stumm_l
+	{"stumm","mute"},
 	// T_lvz_k
 	{"lvz","ldr"},
 	// T_logvz_l
@@ -411,6 +419,8 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"konfdatei","conffile"},
 	// T_Bildschirmausgabe_gespraechiger
 	{"Bildschirmausgabe gespraechiger","screen output more verbose"},
+  // T_Bildschirmausgabe_ganz_stumm
+  {"Bildschirmausgabe ganz stumm","screen output completely mute"},
 	// T_waehlt_als_Logverzeichnis_pfad_derzeit
 	{"waehlt als Logverzeichnis <pfad>, derzeit","choses <path> as log directory, currently"},
 	// T_logdatei_string_im_Pfad
@@ -461,10 +471,10 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"Fertig mit ","Ready with "},
 	// T_eigene
 	{"eigene","own"},
-	// T_entfernen
-	{"entfernen","remove"},
-	// T_belassen
-	{"belassen","keep"},
+	// T_nicht_mehr_da
+	{"nicht mehr da","gone"},
+	// T_laeuft_noch
+	{"laeuft noch","still running"},
 	// T_warte
 	{"warte","waiting"},
 	// T_wird_aktualisiert_bitte_ggf_neu_starten
@@ -565,6 +575,20 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"Konfigurationsdatei ","edit/view configuration file "},
 	// T_Logdatei_usw_bearbeiten_sehen
 	{", Logdatei usw. bearbeiten/sehen (beenden mit ':qa')",", log file etc. (finish with ':qa')"},
+  // T_kf_k,
+  {"zkf","scf"},
+  // T_konfzeiglang_l,
+  {"konfzeig","showconf"},
+  // T_Konfigurationsdateinamen,
+  {"Konfigurationsdateinamen","show the name of the configuration file"},
+  // T_anzeigen,
+  {"anzeigen",""},
+	// T_Konfigurationsdatei_schreiben,
+	{"Konfigurationsdatei schreiben","write configuration file"},
+	// T_ks_k,
+	{"kschrb","writec"},
+	//	T_kschreib_l,
+  {"kschreib","writeconf"},
 	// T_vs_k
 	{"vs","vs"},
 	// T_vs_l
@@ -799,7 +823,7 @@ void perfcl::ausgeb(const string& stelle,uchar obdauer)
   cout<<Txk[T_Dauer]<<setprecision(7)<<setw(9)<<(long)(zp1-zp0)<<" clocks = "
     <<fixed<<(t1-t0)<<setprecision(0)<<" s, "
     "delta= "<<setprecision(7)<<setw(9)<<(long)(zp1-zp1alt)<<" clocks"<<fixed<<schwarz<<(obdauer?"\n":"\r");cout.flush();
-} // void perfcl::ausgeb(const string& stelle)
+} // void perfcl::ausgeb
 
 
 void perfcl::ausgab1000(const string& stelle)
@@ -1126,10 +1150,24 @@ int getcols()
 #elif linux
 int getcols() 
 {
-  winsize w{0};
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-  return w.ws_col;
-} // int getcols() 
+	static int breite{0};
+	struct winsize w{0};
+	if (!breite) {
+		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+		if (w.ws_col) {
+			breite=w.ws_col;
+		} else {
+			char *termtype = getenv ("TERM");
+			if (termtype) {
+				static char term_buffer[2048];
+				if (tgetent(term_buffer, termtype)) {
+					breite=tgetnum("co");
+				}
+			}
+		}
+	}
+	return breite;
+} // int getcols
 #endif
 
 // Achtung: Wegen der Notwendigkeit der Existenz der Datei zum Aufruf von setfacl kann die Datei erstellt werden!
@@ -1153,7 +1191,9 @@ mdatei::mdatei(const string& name, ios_base::openmode modus/*=ios_base::in|ios_b
 			} // if (!systemrueck(sudc+"test -f '"+name+"' || "+sudc+"touch '"+name+"'",obverb,oblog)) 
 		} // 		if (mehralslesen)
 	} // for(int iru=0;iru<3;iru++) 
-	if (obverb||oblog) fLog(violetts+Txk[T_Ende]+"mdatei("+blau+name+schwarz+","+blau+ltoan(modus)+schwarz+","+blau+(faclbak?"1":"0")+schwarz+")",oblog,obverb);
+	if (obverb||oblog) {
+    fLog(violetts+Txk[T_Ende]+"mdatei("+blau+name+schwarz+","+blau+ltoan(modus)+schwarz+","+blau+(faclbak?"1":"0")+schwarz+")",oblog,obverb);
+  }
 } // mdatei::mdatei (const string& name, ios_base::openmode modus)
 
 #ifdef oeffalsch
@@ -1220,7 +1260,7 @@ int kuerzelogdatei(const char* logdatei,int obverb)
 	}
 	////  fLog(string("kuerzelogdatei: ") + drot + logdatei + schwarz,obverb,0);
 	//// ersetze(logdatei,"\\","\\\\")
-	struct stat stat={0};
+	struct stat stat{0};
 	if (lstat(logdatei,&stat)){
 		if (obverb>1) {
 			cout<<Txk[T_Logdatei]<<drot<<logdatei<<schwarz<<Txk[T_gibt_es_noch_nicht_Kuerze_sie_daher_nicht]<<endl;
@@ -1284,8 +1324,8 @@ int kuerzelogdatei(const char* logdatei,int obverb)
 				////          	  char tbuf[20];
 				////              strftime(tbuf, 18,"%d.%m.%y %X",localtime(&gesz));
 				////              <<"Datum: "<<tbuf<<endl;
-				time_t jetzt{time(0)};
-				long sekunden{(long)(jetzt-gesz)};
+				const time_t jetzt{time(0)};
+				const long sekunden{(long)(jetzt-gesz)};
 				if (sekunden<1209600) {// juenger als zwei Wochen => behalten
 					abhier=1;
 				}
@@ -1394,13 +1434,13 @@ int fLog(const string& text, const short screen/*=1*/, const short file/*=1*/, c
 			if (!logdt || !*logdt|| !strcmp(logdt,"/")) {
 				cerr<<rot<<Txk[T_Variable_logdatei_leer]<<schwarz<<endl;
 			}
-			struct stat logst={0};
+			struct stat logst{0};
 			if (!lstat(logdt,&logst) && S_ISDIR(logst.st_mode)) {
 				cerr<<rot<<Txk[T_Variable_logdatei_Verzeichnis]<<schwarz<<endl;
 			} else {
 				static bool erstaufruf=1;
 				//// char tbuf[20];
-				time_t jetzt=time(0);
+				const time_t jetzt{time(0)};
 				stringstream strs;
 				strs<<ztacl(jetzt,"%d.%m.%y %X: ")<<text;
 				//// pthread_mutex_lock(&timemutex);
@@ -1548,7 +1588,7 @@ string ltoan(long value, int base/*=10*/, uchar obtz/*=0*/, uchar minstel/*=0*/)
 		} //   while(ptr1 < ptr)
 	} //   if (base < 2 || base > 36)
   return string(result);
-} // ltoan(long value, char* result, int base)
+} // ltoan
 
 char* ltoa_(long value, char* result, int base/*=10*/) 
 {
@@ -1644,7 +1684,7 @@ void kopierm(const string *quelle, const string *ziel)
 // von http://chris-sharpe.blogspot.de/2013/05/better-than-systemtouch.html
 int touch(const string& pfad,int obverb/*=0*/,int oblog/*=0*/)
 {
-	struct stat tstat={0};
+	struct stat tstat{0};
   int fehler{lstat(pfad.c_str(),&tstat)};
 	if (fehler) {
 		const int fd{open(pfad.c_str(), O_WRONLY|O_CREAT|O_NOCTTY|O_NONBLOCK, 0666)};
@@ -1841,13 +1881,13 @@ betrsys pruefos()
 */
 
 // erg=1: gibt es fuer den aktuellen Benutzer; erg=2: gibt es fuer root; erg=0: nicht gefunden
-int obprogda(const string& prog, int obverb/*=0*/, int oblog/*=0*/, string *pfad/*=0*/)
+int obprogda(const string& prog, int obverb/*=0*/, int oblog/*=0*/, string *pfad/*=0*/,const int keinsu/*=0*/)
 {
   if (prog.empty())
 	  return 0;
 	const int maxz{8};
   for(int iru=0;iru<maxz;iru++) {
-    struct stat fstat={0};
+    struct stat fstat{0};
     string verz;
 		if (prog[0]=='/') iru=maxz; // z.B. <instvz>/ocrv/bin/ocrmypdf
     switch (iru) {
@@ -1868,16 +1908,18 @@ int obprogda(const string& prog, int obverb/*=0*/, int oblog/*=0*/, string *pfad
     }
   } // for(int iru=0;iru<3;iru++) 
   svec rueck;
-  if (!systemrueck("which "+prog+" 2>/dev/null",obverb,oblog,&rueck,/*obsudc=*/0)) {
+  if (!systemrueck("which "+prog+" 2>/dev/null",obverb,oblog,&rueck)) {
     if (pfad) *pfad=rueck[0];
     return 2;
   } // if (!systemrueck("which "+prog+" 2>/dev/null",obverb,oblog,&rueck))
 	// wenn nicht root
-  if (cus.cuid) {
-    if (!systemrueck("which \""+prog+"\" 2>/dev/null ||env \"PATH=$PATH\" which \""+prog+"\" 2>/dev/null",obverb,oblog,&rueck,/*obsudc=*/1)) {
-      if (pfad) *pfad=rueck[0];
-      return 3;
-    }
+	if (cus.cuid && !keinsu) { // 
+		if (!systemrueck("which \""+prog+"\" 2>/dev/null",obverb,oblog,&rueck,/*obsudc=*/1)) {
+			if (!systemrueck("env \"PATH=$PATH\" which \""+prog+"\" 2>/dev/null",obverb,oblog,&rueck,/*obsudc=*/1)) {
+				if (pfad) *pfad=rueck[0];
+				return 3;
+			}
+		}
 	} // if (!cus.cuid)
   if (pfad) pfad->clear();
   return 0; 
@@ -1916,8 +1958,8 @@ linst_cl::linst_cl(int obverb,int oblog)
 			};
 			*/
 			vector<aScl> vecta{
-					{feld[i],&osname},
-					};
+				{feld[i],&osname},
+			};
 			schAcl<WPcl> osvCp("osvC", &vecta);
 			confdcl osvd(osvdt[i],obverb);
 			osvd.kauswert(&osvCp);
@@ -1960,7 +2002,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 					"ping -qc 1 www.debian.org >/dev/null 2>&1 && sed -i.bak '/'$F'/{H;d};${p;x}' $S;:",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 			// hier werden die Dateien vorgabemaessig behalten
 			ipr=apt;
-			schau="dpkg -s";
+			psuch="dpkg -s";
 			instp=sudc+"apt-get install "; 
 			instyp=sudc+"apt-get -y --force-yes --reinstall install "; 
 			upr="apt-get -f install; apt-get --auto-remove purge ";
@@ -1972,7 +2014,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 			break;
 		case Suse: case Fedora: case Fedoraalt: case Mageia:
 			dev="devel";
-			schau="rpm -q";
+			psuch="rpm -q";
 			udpr=sudc+"rpm -e --nodeps ";
 			switch (distro) {
 				case Suse:
@@ -2019,7 +2061,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 			break;
 		case Manjaro:
 			ipr=pac;
-			schau="pacman -Qi";
+			psuch="pacman -Qi";
 			instp=sudc+"pacman -S ";
 			instyp=sudc+"pacman -S --noconfirm ";
 			upr="pacman -R -s ";
@@ -2032,7 +2074,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 	svec qrueck;
 	// in findfile wird ueber setfacl evtl. Installation aufgerufen, was (aus Kontruktor) zum Absturz fuehrt
 //	if (findv==1) {
-		systemrueck("find /usr -maxdepth 1 -type d -name 'lib*'",obverb,oblog,&qrueck,/*obsudc=*/0);
+		systemrueck("find /usr -maxdepth 1 -type d -name 'lib*'",obverb,oblog,&qrueck);
 //	} else findfile(&qrueck,findv,obverb,oblog,0,"/usr",/*muster=*/"lib[^/]*$",1,34,1);
 	for(size_t iru=0;iru<qrueck.size();iru++) libs+=qrueck[iru]+" ";
 	obprogda("sh",obverb,oblog,&shpf);// Pfad zu sh
@@ -2125,24 +2167,23 @@ template <typename SCL> void confdcl::kauswert(schAcl<SCL> *sA, int obverb,const
 			while(ii--) {
 				sA->schl[ii]->ausgewertet=0;
 			}
+			if (obverb) cout<<"sA->name: "<<sA->name<<", paare.size(): "<<paare.size()<<", sA->schl.size(): "<<sA->schl.size()<<endl;
 			for(size_t nr=0;nr<paare.size();nr++) {
-						size_t ii=sA->schl.size();
+						size_t ii{sA->schl.size()};
 						//// <<"auswert() "<<pname<<" vor while, wert: "<<wert<<endl;
-////						if (obverb) caus<<"Stell 9, sA->name: "<<sA->name<<endl;
 						while(ii--) {
 							if (sA->schl[ii]) if (!sA->schl[ii]->ausgewertet) { 
 								// conf[ii]->pname muss am Zeilenanfang anfangen, sonst Fehler z.B.: number, faxnumber
 								if (paare[nr].name==sA->schl[ii]->pname) {
-									//// if (obverb) caus<<"werte aus ..."<<endl;
 									sA->schl[ii]->ausgewertet=1;
-									//// <<"sA->schl[ii]->pname: "<<sA->schl[ii]->pname<<endl;
-									//// <<blau<<"setze!"<<schwarz<<endl;
-									// if (obverb) caus<<"Stell 11, sA->schl["<<ii<<"]->pname: "<<sA->schl[ii]->pname<<", wert: "; sA->schl[ii]->virtoausgeb(); caus<<endl;
-									const int wiefalsch{sA->schl[ii]->setzstr(paare[nr].wert.c_str(),&obzuschreib,/*ausDatei=*/1)};
-									if (!wiefalsch) {
+									if (obverb){cout<<"setze: sA->schl["<<ii<<"]->pname: "<<sA->schl[ii]->pname<<":   "; sA->schl[ii]->virtoausgeb();}
+									const int kafnr __attribute__((unused)) {sA->schl[ii]->setzstr(paare[nr].wert.c_str(),&obzuschreib,/*ausDatei=*/1)};
+									// 19.6.19: Bedingung auskommentiert, da sonst bei nicht-existentem Verzeichnis die Konfiguration immer neu geschrieben wird
+//									if (!kafnr) {
 										sA->setzbemerkwoher(sA->schl[ii].get(),/*bemerk=*/paare[nr].bemerk,/*woher*/2);
 										++richtige;
-									}
+//									}
+									if (obverb){cout<<"gesetzt:    "; sA->schl[ii]->virtoausgeb();}
 									break;
 								} // if( !strcmp(sA[i]->pname.c_str(),zeile->c_str()) ) 
 							} // 	if (sA->schl[ii]) if (!sA->schl[ii]->ausgewertet)
@@ -2173,35 +2214,35 @@ void wpgcl::virtfrisch()
 
 void WPcl::virtfrisch()
 {
-////	caus<<violett<<"WPcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
+////	<<violett<<"WPcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
 	wpgcl::virtfrisch();
 	gelesen=0;
 	wert.clear();
-////	caus<<violett<<"Ende WPcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
+////	<<violett<<"Ende WPcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
 }
 
 optcl::~optcl()
 {
-////	caus<<"Loesche optcl, pname: "<<blau<<pname<<schwarz<<endl;
+////	<<"Loesche optcl, pname: "<<blau<<pname<<schwarz<<endl;
 }
 
 void optcl::virtfrisch()
 {
-////	caus<<violett<<"optcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
+////	<<violett<<"optcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
 	wpgcl::virtfrisch();
 	woher=0;
 	gegenteil=0;
   nichtspeichern=0;	
-////	caus<<violett<<"Ende optcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
+////	<<violett<<"Ende optcl::virtfrisch "<<blau<<pname<<schwarz<<endl;
 } // void optcl::virtfrisch()
 
 template<typename SCL> void schAcl<SCL>::frisch()
 {
-	////	caus<<violett<<"frisch schAcl: "<<blau<<name<<schwarz<<endl;
+	////	<<violett<<"frisch schAcl: "<<blau<<name<<schwarz<<endl;
 	for(size_t i=0;i<schl.size();i++) {
 		schl[i]->virtfrisch();
   }
-////	caus<<violett<<"Ende frisch schAcl: "<<blau<<name<<schwarz<<endl;
+////	<<violett<<"Ende frisch schAcl: "<<blau<<name<<schwarz<<endl;
 } // void schAcl::frisch()
 
 
@@ -2212,16 +2253,16 @@ template<typename SCL> schAcl<SCL>::schAcl(const string& name):name(name)
 
 template<typename SCL> schAcl<SCL>::~schAcl()
 {
-//// caus<<violett<<"Loesche schAcl: "<<blau<<name<<schwarz<<" size(): "<<size()<<endl;
+//// <<violett<<"Loesche schAcl: "<<blau<<name<<schwarz<<" size(): "<<size()<<endl;
 	for(size_t i=0;i<schl.size();i++) {
 		//delete schl[i];
-////		caus<<"i: "<<i<<", schl[i]: "<<schl[i]<<", pname: ";
-////		caus<<blau<<schl[i]->pname<<schwarz<<endl;
+////		<<"i: "<<i<<", schl[i]: "<<schl[i]<<", pname: ";
+////		<<blau<<schl[i]->pname<<schwarz<<endl;
 		schl[i].reset();
 ////		schl[i]=0; // falls selbes Element in mehreren Vektoren
 	}
 	////schl.clear();
-//// caus<<violett<<"Ende loesche schAcl: "<<blau<<name<<schwarz<<endl;
+//// <<violett<<"Ende loesche schAcl: "<<blau<<name<<schwarz<<endl;
 	////schl.clear();
 }// template<typename SCL> schAcl<SCL>::~schAcl()
 
@@ -2490,9 +2531,9 @@ string dir_name(const string& path)
 //  nur den Pfad /usr/bin:/bin (fedora und ubuntu) bzw. /usr/bin:/usr/sbin:/sbin:/bin:/usr/lib/news/bin:/root/bin (opensuse) erwarten
 int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<string> *rueck/*=0*/, const uchar obsudc/*=0*/,
     const int verbergen/*=0*/, int obergebnisanzeig/*wahr*/, const string& ueberschr/*=string()*/,vector<errmsgcl> *errm/*=0*/,uchar obincron/*=0*/,
-		stringstream *ausgp/*=0*/,uchar obdirekt/*=0*/)
+		stringstream *ausgp/*=0*/,uchar obdirekt/*=0*/,uchar ohnewisch/*=0*/)
 {
-////	caus<<rot<<"cmd: "<<violett<<cmd<<schwarz<<endl;
+////	<<rot<<"cmd: "<<violett<<cmd<<schwarz<<endl;
 // verbergen: 0 = nichts, 1= '2>/dev/null' anhaengen + true zurueckliefern, 2='>/dev/null 2>&1' anhaengen + Ergebnis zurueckliefern
 	// die 'if (obverb||oblog)' sind zur Vermeidung von Rekursionen mit Endlosschleifen
   binaer ob0heissterfolg{wahr};
@@ -2556,7 +2597,7 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 	perfcl prf("systemrueck");
 #endif // systemrueckprofiler
 	// obsudc==0 nichts, obsudc==1: "sudo ", obsudc==2: "sudo -H "
-////	caus<<violett<<"bef: "<<blau<<bef<<schwarz<<endl;
+////	<<violett<<"bef: "<<blau<<bef<<schwarz<<endl;
 	if (rueck) {
 		//// <<gruen<<bef<<schwarz<<endl;
     if (FILE* pipe{popen(bef.c_str(),"r")}) {
@@ -2601,7 +2642,7 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
         for(unsigned i=0;i<rueck->size();i++) {
 #ifdef systemrueckprofiler
 #endif
-          smeld=smeld+"\n"+tuerkis+rueck->at(i)+schwarz;
+          smeld=smeld+"\n"+ltoan(i)+": "+tuerkis+rueck->at(i)+schwarz;
         } //         for(unsigned i=0;i<rueck->size();i++)
       } //       if (obverb>1 || oblog || obergebnisanzeig) if (rueck->size())
 #ifdef systemrueckprofiler
@@ -2627,7 +2668,10 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 	// temporäre Datei loeschen, falls leer
 	struct stat tmpdst{0};
 	if (!lstat(tmpd,&tmpdst)) if (!tmpdst.st_size) tuloeschen(tmpd,string(),0,0);
-  int erg2 __attribute__((unused)){system(string("printf ' %.0s' {1.."+ltoan(getcols()-2)+"};printf '\r';").c_str())};
+	//int erg2 __attribute__((unused)){system(string("printf ' %.0s' {1.."+ltoan(getcols()-2)+"};printf '\r';").c_str())};
+	if (!ohnewisch) {
+		int erg2 __attribute__((unused)){system(string("awk 'BEGIN{printf \"\r\";for(c=0;c<"+ltoan(getcols()-2)+";c++)printf \" \";printf \"\r\"}'").c_str())};
+	}
 #ifdef systemrueckprofiler
   prf.ausgab1000("vor weiter");
 #endif
@@ -2648,11 +2692,11 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 			} else {
 				if (ob0heissterfolg) {
 					if (erg) {
-						if (cmd.substr(0,6)=="rpm -q" || cmd.substr(0,7)=="dpkg -s" || 
-						    cmd.substr(0,5)=="which" || cmd.substr(0,11)=="iptables -L" ||
-								(cmd.find("grep")!=string::npos && cmd.find(" -q <("+sudc+"crontab -l")!=string::npos) ||
-							  cmd.substr(0,7)=="test -f" ||
-								cmd.substr(0,20)=="systemctl list-units" || cmd.substr(0,10)=="pdbedit -L" ||
+						if (cmd.substr(0,6)=="rpm -q"||cmd.substr(0,7)=="dpkg -s"||cmd.substr(0,7)=="dpkg -l"||
+							  cmd.substr(0,5)=="which"||cmd.substr(0,11)=="iptables -L"||
+		           (cmd.find("grep")!=string::npos && cmd.find(" -q <("+sudc+"crontab -l")!=string::npos)||
+  							cmd.substr(0,7)=="test -f"||
+								cmd.substr(0,20)=="systemctl list-units"||cmd.substr(0,10)=="pdbedit -L"||
                 cmd.find("faxstat|grep")!=string::npos
 								) {
 							ergebnis=gruens+Txk[T_nicht_gefunden];
@@ -2706,7 +2750,7 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 		if (neurueck) {delete rueck;rueck=0;}
 	} // 	if (rueck)
 	return erg; 
-} // int systemrueck(const string& cmd, char obverb, int oblog, vector<string> *rueck, binaer ...
+} // int systemrueck
 
 // ob das aktuelle Programm mehrfach laeuft; bei obstumm Exit-Code 0
 void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
@@ -2717,7 +2761,8 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 	const string iwen{wen.empty()?base_name(meinpfad()):wen};
 	// bei valgrind steht z.B. 'memecheck-amd64-' am Anfang
 	// gdb macht einen zusaetzlichen Prozess
-	systemrueck("ps -eo comm,args,etimes,pid|grep -P 'valgrind.*"+iwen+"|^"+iwen+"'| grep -P '"+iwen+"([[:space:]]|\\z)'",obverb,0,&rueck,/*obsudc=*/0);
+	const string bef{"ps -eo comm,args,etimes,pid|grep -P 'valgrind.*"+iwen+"|^"+iwen+"'|grep -P '"+iwen+"([[:space:]]|\\z)'|grep -v '[[:space:]]grep -P'"};
+	systemrueck(bef,obverb,0,&rueck,/*obsudc=*/0);
 	long sek{0};
 	for(int aru=0;aru<3;aru++) {
 		if (rueck.size()==1) // ich
@@ -2742,6 +2787,10 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 		} else {
 			if (obstumm)
 				exit(schluss(0));
+			cout<<blau<<bef<<schwarz<<endl;
+			for(unsigned iru=0;iru<rueck.size();iru++) {
+				cout<<blau<<iru<<schwarz<<": "<<rueck[iru]<<endl;
+			}
 			exit(schluss(98,Txk[T_Program]+blaus+wen+schwarz+Txk[T_laeuft_schon_einmal_seit]+blau+ltoan(sek)+" "+schwarz+Txk[T_sec_Breche_ab],/*oblog*/0));
 		} // if (aru<2) else
 	} // 	for(int aru=0;aru<3;aru++) 
@@ -3046,7 +3095,7 @@ int pruefberecht(const string& datei,const string& benutzer,const mode_t mod/*=0
 // falls Benutzer root
 // wenn !besitzer.empty(), dann wird das letzte und alle neu zu erstellenden Verzeichnisse diesem zugeordnet 
 int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfacl/*=0*/,uchar obmitcon/*=0*/, 
-		const string& besitzer/*=string()*/, const string& benutzer/*=string()*/,const uchar obmachen/*=1*/,const uchar obprot/*=1*/)
+		const string& besitzer/*=string()*/, const string& benutzer/*=string()*/,const uchar obmachen/*=1*/,const uchar obprot/*=1*/,const int keinsu/*=0*/)
 {
 	if (obverb||oblog) fLog(violetts+"pruefverz("+blau+verz+schwarz+")",obverb,oblog);
 	static int obselinux{-1}; // -1=ununtersucht, 0=kein Selinux da, 1=Selinux da
@@ -3070,7 +3119,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 		} while (!aktv.empty());
 		for(int i=stack.size()-1;i>=0;i--) {
 			fehlt=1;
-			struct stat sverz={0};
+			struct stat sverz{0};
 			if (!lstat(stack[i].c_str(),&sverz)) {
 				if(S_ISDIR(sverz.st_mode)) {
 					fehlt=0;
@@ -3101,12 +3150,15 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 						if (unindt.find(stack[i])) { // wenn der Anfang nicht identisch ist, also nicht das Verzeichnis von unindt geprueft werden soll
 							anfgg(unindt,sudc+"rmdir '"+stack[i]+"'",bef,obverb,oblog);
 						}
-					}
+					} // if (!fehlt)
 				} // 					if (fehlt)
 				// folgendes mindestens notwendig fuer sverz.st_mode
 				fehlt=lstat(stack[i].c_str(),&sverz);
 				// wenn notwendige Rechte fehlen ...
-				if (int prueferg{pruefberecht(/*datei=*/stack[i],aktben,/*mod=*/i?1:7,obverb)}) {
+				for(int runde=0;runde<2;runde++) {
+					const int prueferg{pruefberecht(/*datei=*/stack[i],aktben,/*mod=*/i?1:7,obverb)};
+					if (!prueferg) break;
+					if (runde) obmitfacl=0; // wenn z.B. bei fuseblk es nicht mit facl geht
 					// .. und korrigiert werden sollen
 					if (obmitfacl) {
 						setfaclggf(stack[i],obverb>1?obverb-1:0,oblog, /*obunter=*/wahr, /*mod=*/i?1:7, /*obimmer=*/1,/*faclbak=*/1,/*user=*/aktben,/*fake*/0,/*ausgp*/0,obprot);
@@ -3131,14 +3183,14 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 						}
 						if (obverb||oblog) fLog(Txk[T_datei]+blaus+stack[i].c_str()+schwarz+", mode: "+blau+altmod+schwarz+" -> "+blau+
 								ltoan(sverz.st_mode,8)+schwarz,obverb,oblog);
-						if (chmod(stack[i].c_str(),sverz.st_mode)) {
-							//             if (1) 
-							string bef{"chmod "+modstr+" '"+stack[i]+"'"};
-							fehlt=systemrueck(bef,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
-						}
+						//						if (chmod(stack[i].c_str(),sverz.st_mode)) {
+						//             if (1) 
+						string bef{"chmod "+modstr+" '"+stack[i]+"'"};
+						fehlt=systemrueck(bef,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+						//						}
 					}
 					if (obverb) systemrueck("ls -ld \""+stack[i]+"\"",2,0,/*rueck=*/0,/*obsudc=*/1);
-				} // 					if (int prueferg=pruefberecht(/*datei=*/stack[i],aktben,/*mod=*/i?1:7))
+				}
 			} // 				if (obmachen)
 			if (fehlt) {
 				// sonst Ende
@@ -3150,7 +3202,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 		}
 		if (obmitcon) {
 			if (obselinux==-1) 
-				obselinux=obprogda("sestatus",obverb,oblog);
+				obselinux=obprogda("sestatus",obverb,oblog,/*pfad*/0,keinsu);
 			if (obselinux) {
 				systemrueck("chcon -R -t samba_share_t '"+verz+"'",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 			}
@@ -3158,7 +3210,7 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 	} // 	if (!verz.empty())
 	if (obverb||oblog) fLog(violetts+Txk[T_Ende]+"pruefverz("+blau+verz+schwarz+")",obverb,oblog);
 	return fehlt;
-} // void pruefverz(const string& verz,int obverb,int oblog)
+} // void pruefverz
 
 
 // verwendet in: virtlieskonfein
@@ -3350,7 +3402,7 @@ string Tippverz(const char *const frage,const string *const vorgabe)
 		if (cin.fail()) { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); }
 		if (input.empty() && vorgabe) {input=*vorgabe;}
 		pthread_mutex_unlock(&getmutex);
-		struct stat st={0};
+		struct stat st{0};
 		////    <<"input: '"<<rot<<input<<schwarz<<"'"<<endl;
 		pthread_mutex_lock(&getmutex);
 		while (1) {
@@ -3487,16 +3539,15 @@ const string linst_cl::ersetzeprog(const string& prog) const
 	switch(ipr) {
 		case apt:
 			if (prog=="mariadb") return "mariadb-server";
-			else if (prog=="hylafax") return "hylafax-server";
-			else if (prog=="hylafax+") return "hylafax+-server";
-			else if (prog=="hylafax hylafax-client") return "hylafax-server hylafax-client";
-			else if (prog=="hylafax+ hylafax+-client") return "hylafax+-server hylafax+-client";
 			else if (prog=="kernel-source") return "linux-source-$(uname -r|cut -d. -f1,2)";
+			else if (prog=="boost-devel") return "libboost-dev libboost-system-dev libboost-filesystem-dev";
 			else if (prog=="tiff") return "libtiff-tools";
-			else if (prog=="libxslt-tools") return "xsltproc";
-			else if (prog=="imagemagick") return "imagemagick imagemagick-doc";
-			else if (prog=="libreoffice-base") return "libreoffice-common libreoffice-base";
+			//			else if (prog=="libffi-devel") return "libffi-dev";
+			//      else if (prog=="libtiff-devel") return "libtiff-dev";
 			else if (prog=="libcapi20-2") return "libcapi20-dev";
+			else if (prog=="imagemagick") return "imagemagick imagemagick-doc";
+			else if (prog=="libxslt-tools") return "xsltproc";
+			else if (prog=="libreoffice-base") return "libreoffice-common libreoffice-base";
 			//      else if (prog=="python-devel") return "python-dev";
 			//      else if (prog=="python3-devel") return "python3-dev";
 			else if (prog=="tesseract-ocr-traineddata-english") return "tesseract-ocr-eng";
@@ -3504,15 +3555,18 @@ const string linst_cl::ersetzeprog(const string& prog) const
 			else if (prog=="tesseract-ocr-traineddata-orientation_and_script_detection") return "tesseract-ocr-osd";
 			//      else if (prog=="libavformat-devel") return "libavformat-dev";
 			else if (prog=="poppler-tools") return "poppler-utils";
-			//			else if (prog=="libffi-devel") return "libffi-dev";
-			else if (prog=="boost-devel") return "libboost-dev libboost-system-dev libboost-filesystem-dev";
-			//      else if (prog=="libtiff-devel") return "libtiff-dev";
+			else if (prog=="hylafax") return "hylafax-server";
+			else if (prog=="hylafax+") return "hylafax+-server";
+			else if (prog=="hylafax hylafax-client") return "hylafax-server hylafax-client";
+			else if (prog=="hylafax+ hylafax+-client") return "hylafax+-server hylafax+-client";
 			else if (prog.find("-devel")!=string::npos) return nersetze(prog,"-devel","-dev");
 			break;
 		case dnf: case yum:
 			if (prog=="mariadb") return "mariadb-server";
 			else if (prog=="kernel-source") return "kernel-devel-$(uname -r)";
+			else if (prog=="libwbclient0") return "libwbclient";
 			else if (prog=="tiff") return "libtiff-tools";
+			else if (prog=="libtiff5") return "libtiff";
 			else if (prog=="libcapi20-2") return "isdn4k-utils";
 			else if (prog=="libcapi20-3") return {};
 			////      else if (prog=="python-devel") return "python3-devel"; // bei capisuite_copy falsch; dann bei ocrmypdf fuer apt noch zu pruefen
@@ -3525,13 +3579,11 @@ const string linst_cl::ersetzeprog(const string& prog) const
 			else if (prog=="tesseract-ocr-traineddata-german") return "tesseract-langpack-deu tesseract-langpack-deu_frak";
 			else if (prog=="tesseract-ocr-traineddata-orientation_and_script_detection") return "tesseract-osd";
 			else if (prog=="poppler-tools") return "poppler-utils";
-			else if (prog=="libwbclient0") return "libwbclient";
-			else if (prog=="libtiff5") return "libtiff";
 			break;
 		case zypper:
 			if (prog=="redhat-rpm-config") return {};
-			else if (prog=="libffi-devel") return "libffi$(gcc --version|head -n1|sed \"s/.*) \\(.\\).\\(.\\).*/\\1\\2/\")-devel";
 			else if (prog=="kernel-source") return "kernel-devel";
+			else if (prog=="libffi-devel") return "libffi$(gcc --version|head -n1|sed \"s/.*) \\(.\\).\\(.\\).*/\\1\\2/\")-devel";
 			break;
 		case pac:
 			if (prog=="libwbclient0") return "libwbclient";
@@ -3571,6 +3623,7 @@ std::string string_to_hex(const std::string& input)
 	linst.ziehraus(inh,&ustring);
 //<<blau<<"ustring: "<<gruen<<ustring<<schwarz<<endl;
  */
+// zieht aus der Rueckmeldung die zusaetzlich installierten Pakete heraus, fuer das Protokoll zur Deinstallation
 void linst_cl::ziehraus(svec srueck, string *ustringp)
 {
 	uchar obanf{0};
@@ -3684,8 +3737,8 @@ int linst_cl::doinst(const string& prog,int obverb/*=0*/,int oblog/*=0*/,const s
 		} // switch (linst.pruefipr()) 
 		const uchar obyes{1};
 		svec srueck;
-		const string bef{(obyes?instyp:instp)+eprog};
-		if (!(ret=systemrueck(bef,obverb+1,oblog,&srueck,/*obsudc=*/0))) {
+		const string befehl{(obyes?instyp:instp)+eprog};
+		if (!(ret=systemrueck(befehl,obverb+1,oblog,&srueck,/*obsudc=*/0))) {
 			/*//svec*/ string ustring; 
 			ziehraus(srueck,&ustring);
 
@@ -3693,7 +3746,7 @@ int linst_cl::doinst(const string& prog,int obverb/*=0*/,int oblog/*=0*/,const s
 			if (!pruefverz(instvz,obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0)) {
 				mdatei uniff(instvz+"/inst.log",ios::app,0);
 				if (uniff.is_open()) {
-					uniff<<endl<<"Rueckmeldung zu: '"<<bef<<"':"<<endl;
+					uniff<<endl<<"Rueckmeldung zu: '"<<befehl<<"':"<<endl;
 					for(unsigned i=0;i<srueck.size();i++) {
 						uniff<<srueck[i]<<endl;
 					}
@@ -3714,7 +3767,7 @@ int linst_cl::doinst(const string& prog,int obverb/*=0*/,int oblog/*=0*/,const s
 			//// <<violett<<"ustring nach Pruefung: "<<rot<<ustring<<schwarz<<endl;
 			if (!ustring.empty()) {
 				fLog(Txk[T_Ins_Deinstallationsprogramm_wird_eingetragen]+violetts+udpr+ustring+schwarz,obverb,oblog);
-				anfgw(unindt,udpr,ustring,bef,obverb,oblog);
+				anfgw(unindt,udpr,ustring,befehl,obverb,oblog);
 			} // 			if (!ustring.empty())
 
 			/*//
@@ -3980,9 +4033,9 @@ void servc::semodpruef(int obverb/*=0*/,int oblog/*=0*/)
 			const string mod{instvz+vtz+selocal+".pp"};
 			if (!lstat(mod.c_str(),&sstat)) {
 				if (linstp) linstp->doinst("policycoreutils",obverb+1,oblog,"semodule");
-				const string bef{"semodule -i \""+mod+"\""};
-				systemrueck(bef,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
-				anfgg(unindt,sudc+"semodule -r \""+mod+"\"",bef,obverb,oblog);
+				const string befehl{"semodule -i \""+mod+"\""};
+				systemrueck(befehl,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+				anfgg(unindt,sudc+"semodule -r \""+mod+"\"",befehl,obverb,oblog);
 			} // 					if (!lstat((instvz+vtz+selocal+".pp").c_str(),&sstat)
 		}  // if (obse)
 	} // 			if (obprogda("sestatus",obverb,oblog,&sepfad))
@@ -3994,9 +4047,9 @@ void servc::semanpruef(int obverb/*=0*/,int oblog/*=0*/,const string& mod/*="get
 	string sepfad;
 	if (ename.find("faxgetty")!=string::npos) {
 		if (obprogda("sestatus",obverb,oblog,&sepfad)) {
-			const string bef{"semodule -l|grep permissive_"+mod+" >/dev/null|| semanage permissive -a "+mod};
-			systemrueck(bef,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
-			anfgg(unindt,sudc+"semanage permissive -d "+mod,bef,obverb,oblog);
+			const string befehl{"semodule -l|grep permissive_"+mod+" >/dev/null|| semanage permissive -a "+mod};
+			systemrueck(befehl,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+			anfgg(unindt,sudc+"semanage permissive -d "+mod,befehl,obverb,oblog);
 		} // 	if (obprogda("sestatus",obverb,oblog,&sepfad))
 	} // 		if (ename.find("faxgetty")!=string::npos)
 } // int servc::semanpruef(const string& mod/*="getty_t*/, int obverb/*=0*/,int oblog/*=0*/)
@@ -4032,7 +4085,7 @@ int servc::machfit(int obverb/*=0*/,int oblog/*=0*/, binaer nureinmal/*=falsch*/
 		enableggf(obverb,oblog);
 	fLog(violetts+"Ende "+Txk[T_machfit]+schwarz+" sname: "+violett+sname+schwarz+" svfeh: "+blau+ltoan(svfeh)+schwarz, obverb,oblog);
 	return !svfeh;
-} // int servc::machfit(int obverb,int oblog)
+} // int servc::machfit
 
 // wird aufgerufen in: hservice_faxq_hfaxd, hservice_faxgetty, cservice
 uchar servc::spruef(const string& sbez, uchar obfork, const string& parent, const string& sexec, const string& CondPath, const string& After, 
@@ -4063,7 +4116,7 @@ uchar servc::spruef(const string& sbez, uchar obfork, const string& parent, cons
 			mdatei syst(systemd,ios::out);
 			if (syst.is_open()) {
 				syst<<"[Unit]"<<endl;
-				time_t jetzt = time(0);
+				const time_t jetzt{time(0)};
 				syst<<"Description="<<sbez<<Txk[T_als_Dienst_eingerichtet_von]<<parent<<Txk[T_am]<<ztacl(jetzt,"%d.%m.%y %H:%M:%S")<<endl;
 				//// char buf[80];
 				//// pthread_mutex_lock(&timemutex);
@@ -4104,7 +4157,7 @@ uchar servc::spruef(const string& sbez, uchar obfork, const string& parent, cons
 		enableggf(obverb,oblog);
 	} // 	if (!svfeh&&!obenabled)
 	return !svfeh;
-} // void servc::spruef() 
+} // void servc::spruef
 
 int servc::startbar()
 {
@@ -4143,7 +4196,7 @@ int servc::obsvfeh(int obverb/*=0*/,int oblog/*=0*/) // ob service einrichtungs 
 					if (systemd.empty()) systemd=sdatei;
 				}
 				if (sp->find("disabled")!=string::npos) {
-					//// svfeh=2; // stoert bei if (!svfeh) enableggf(
+					//// svfeh=2; // stoert bei if (!svfeh) enableggf
 					obenabled=0;
 				} else if (sp->find("not-found")!=string::npos) {
 					svfeh=1;
@@ -4184,7 +4237,7 @@ int servc::obsvfeh(int obverb/*=0*/,int oblog/*=0*/) // ob service einrichtungs 
 			svfeh=3; // Dienstdatei nicht ermittelbar
 		} else {
 			// Dienst existent, Dienstdatei bekannt
-			struct stat svst={0};
+			struct stat svst{0};
 			if ((svfeh=lstat(systemd.c_str(),&svst))) { 
 				svfeh=4; // Dienst laeuft evtl. noch, aber Dienstdatei inexistent
 			} else {
@@ -4209,7 +4262,7 @@ int servc::obsvfeh(int obverb/*=0*/,int oblog/*=0*/) // ob service einrichtungs 
 					} // 					if (srueExe.size()) else
 				} else {
 					// Dienst existent, Dienstdatei bekannt und existent
-					systemrueck("cat '"+systemd+"'|grep ExecStart=|cut -d= -f2|cut -d' ' -f1",obverb,oblog,&srueExe,/*obsudc=*/1);
+					systemrueck("cat '"+systemd+"'|grep ExecStart=|cut -d= -f2|sed 's/^[[:space:]]*//'|cut -d' ' -f1",obverb,oblog,&srueExe,/*obsudc=*/1);
 					if (srueExe.size()) {
 						execf=srueExe[0];
 					} // 			if (!srueExe.size()) else
@@ -4219,7 +4272,7 @@ int servc::obsvfeh(int obverb/*=0*/,int oblog/*=0*/) // ob service einrichtungs 
 				} else {
 					if (ename.empty()) ename=base_name(execf); // stimmt z.B. nicht bei /usr/lib/mysql/mysql-systemd-helper
 					// Dienst existent, Dienstdatei bekannt und existent, Exe-Datei bekannt
-					struct stat lst={0};
+					struct stat lst{0};
 					if (lstat(execf.c_str(),&lst)) {
 						svfeh=6; // Exec-Datei fehlt, hier auch: activating
 					} else {// 				if (lstat(srueExe.c_str(),&lst))
@@ -4293,7 +4346,7 @@ int servc::obsvfeh(int obverb/*=0*/,int oblog/*=0*/) // ob service einrichtungs 
 	//	fLog(violetts+"Ende "+Txk[T_obsfveh]+schwarz+" sname: "+violett+sname+schwarz,obverb,oblog);
 	if (svf0==-1) svf0=svfeh; // Einstellung nach der ersten Untersuchung
 	return svfeh;
-} // int servc::obsvfeh(int obverb,int oblog)
+} // int servc::obsvfeh
 
 void servc::pkill(int obverb/*=0*/,int oblog/*=0*/)
 {
@@ -4341,7 +4394,7 @@ int servc::startundenable(int obverb/*=0*/,int oblog/*=0*/)
 	enableggf(obverb,oblog);
 	//// <<violett<<"startundeable, sname: "<<schwarz<<sname<<endl;
 	return !obsvfeh(obverb,oblog);
-} // int servc::start(int obverb,int oblog)
+} // int servc::start
 
 void servc::stop(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill/*=0*/)
 {
@@ -4349,7 +4402,7 @@ void servc::stop(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill/*=0*/)
 	if (mitpkill) {
 		pkill(obverb,oblog);
 	} //   if (mitpkill)
-} // int servc::stop(int obverb,int oblog)
+} // int servc::stop
 
 void servc::stopggf(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill/*=0*/)
 {
@@ -4357,7 +4410,7 @@ void servc::stopggf(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill/*=0*/)
 	if (!svfeh||svfeh==7) {
 		stop(obverb,oblog,mitpkill);
 	} //  if (!svfeh||svfeh==7)
-} // void servc::stopggf(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill/*=0*/)
+} // void servc::stopggf
 
 void servc::stopdis(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill)
 {
@@ -4367,8 +4420,9 @@ void servc::stopdis(int obverb/*=0*/,int oblog/*=0*/,uchar mitpkill)
 	} // 	if (!obsvfeh(obverb,oblog))
 	if (svfeh!=1&&obenabled)
 		systemrueck("systemctl disable '"+sname+"'",obverb,oblog,0,/*obsudc=*/1,2);
-} // int servc::stop(int obverb,int oblog)
+} // int servc::stop
 
+// aufgerufen ind spruef, startundenable, machfit,
 int servc::enableggf(int obverb/*=0*/,int oblog/*=0*/)
 {
 	fLog(violetts+Txk[T_enableggf]+schwarzs+": "+sname,obverb,oblog);
@@ -4380,7 +4434,7 @@ int servc::enableggf(int obverb/*=0*/,int oblog/*=0*/)
 	errv.push_back(errmsgcl(1,f1));
 	errv.push_back(errmsgcl(6,f1));
 	return systemrueck("systemctl is-enabled '"+sname+"' >/dev/null 2>&1 ||systemctl enable '"+sname+"'",obverb,oblog,0,/*obsudc=*/1,2,wahr,"",&errv);
-} // int servc::enableggf(int obverb,int oblog)
+} // int servc::enableggf
 
 
 void servc::daemon_reload(int obverb/*=0*/, int oblog/*=0*/)
@@ -4394,7 +4448,7 @@ int tuloeschen(const string& zuloe,const string& cuser/*=string()*/, int obverb/
 {
 	////  fLog(violetts+Txk[T_tuloeschen]+schwarz,obverb,oblog);
 	string meld;
-	struct stat entryzuloe={0};
+	struct stat entryzuloe{0};
 	if (!lstat(zuloe.c_str(),&entryzuloe)) {
 		meld=Txk[T_Loesche_Ausrufezeichen]+gruens+zuloe+schwarz;
 		if (ausgp&&obverb) *ausgp<<meld<<endl; else fLog(meld,obverb,oblog);
@@ -4423,17 +4477,18 @@ int tuloeschen(const string& zuloe,const string& cuser/*=string()*/, int obverb/
 } // int tuloeschen(string zuloe,int obverb, int oblog)
 
 // gleicht das Datum von <zu> an <gemaess> an, aehnlich touch
+// rueckgabe: 0 = alles in Ordnung, 1=Zeiten stimmen am Schluss nicht, 2=Zieldatei fehlt, 3=Quelldatei fehlt
 int attrangleich(const string& zu, const string& gemaess,const string* const zeitvondtp/*=0*/, int obverb/*=0*/, int oblog/*=0*/)
 {
-	struct stat statgm={0};
+	struct stat statgm{0};
 	if (lstat(gemaess.c_str(),&statgm)) {
 		fLog(rots+Txk[T_Fehler_bei_lstat]+schwarz+gemaess,obverb,oblog);
-		return 1;
+		return 3;
 	} //   if (lstat(gemaess.c_str(),&statgm))
-	struct stat statzu={0};
+	struct stat statzu{0};
 	if (lstat(zu.c_str(),&statzu)) {
 		fLog(rots+Txk[T_Fehler_bei_lstat]+schwarz+zu,obverb,oblog);
-		return 1;
+		return 2;
 	} //   if (lstat(zu.c_str(),&statzu))
 	if (chmod(zu.c_str(),statgm.st_mode)) {
 		systemrueck("chmod --reference=\""+gemaess+"\" \""+zu+"\"",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
@@ -4455,6 +4510,7 @@ int attrangleich(const string& zu, const string& gemaess,const string* const zei
 	lstat(zu.c_str(),&statzu);
 	if (memcmp(&stzvd.st_mtime, &statzu.st_mtime,sizeof statzu.st_mtime)) {
 		fLog(rots+Txk[T_Datum_nicht_gesetzt_bei]+schwarz+zu+rot+"'"+schwarz,1,1);
+		return 1;
 		////          exit(0);
 	} //   if (memcmp(&statgm.st_mtime, &statzu.st_mtime,sizeof statzu.st_mtime))
 	return 0;
@@ -4469,7 +4525,7 @@ int kopier(const string& quel, const string& ziel, int obverb, int oblog)
 	if (source==-1) {
 		////    fLog(Txk[T_Konnte_Datei]+rots+quel+schwarz+Txk[T_nicht_zum_Lesen_oeffnen],obverb,oblog);
 	} else {
-		struct stat statq={0};
+		struct stat statq{0};
 		if (!fstat(source,&statq)) {
 			int dest{open(ziel.c_str(),O_WRONLY|O_CREAT,statq.st_mode)};
 			if (dest==-1) {
@@ -4765,7 +4821,7 @@ int find3cl::verarbeit(const char *fpath, const struct stat *sb, int tflag, stru
 		string pfad;
 		char buff[FILENAME_MAX];
 		buff[0]=0;
-		struct stat lst={0};
+		struct stat lst{0};
 		if (tflag==FTW_SL) {
 			ssize_t len = readlink(fpath, buff, sizeof(buff)-1);
 			if (len==-1) {
@@ -4826,7 +4882,7 @@ int find3cl::dofind()
 		for(it=wurz.begin();it!=wurz.end();it++) {
 			if (fertige.find(*it)!=fertige.end()) continue;
 			if (it->pfad.empty()) continue;
-			struct stat st={0};
+			struct stat st{0};
 			if (lstat(it->pfad.c_str(),&st)) continue;
 			gearbeitet=1;
 			if (obverb>2||oblog>1) fLog("Iterator: "+blaus+it->pfad+schwarz+Txk[T_Tiefe]+blau+ltoan(it->maxd)+schwarz,obverb,oblog);
@@ -5018,7 +5074,7 @@ const string& defvors{"https://github.com/"+gitv+"/"};
 const string& defnachs{"/archive/master.tar.gz"};
 
 // wird aufgerufen in main
-hcl::hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron):DPROG(DPROG),mitcron(mitcron)
+hcl::hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron,const uchar parstreng/*=1*/):DPROG(DPROG),mitcron(mitcron),parstreng(parstreng)
 {
 	tstart=clock();
 	_DPROG=DPROG;
@@ -5055,7 +5111,6 @@ int schluss(const int fnr,const string text,int oblog)
 // zum Aufruf virtueller Funktionen aus dem Konstruktur verschoben
 void hcl::lauf()
 {
-	virtzeigueberschrift();
 	virtVorgbAllg();
 	pvirtVorgbSpeziell(); // die Vorgaben, die in einer zusaetzlichen Datei mit einer weiteren Funktion "void hhcl::pvirtVorgbSpeziell()" ueberladbar sind
 	virtinitopt();
@@ -5063,21 +5118,28 @@ void hcl::lauf()
 	if (obhilfe==3) { // Standardausgabe gewaehrleisten
 		virtMusterVorgb();
 	} else {
-		virtlieskonfein();
-		verarbeitkonf();
+    virtlieskonfein();
+    if (kfzg) {
+      cout<<akonfdt<<endl;
+      exit(0);
+    }
+    verarbeitkonf();
 //		opn.gibomapaus();
 //		if (obverb) opn.oausgeb(gruen);
 	} // if (obhilfe==3)
 //	opn.omapzuw();
+	virtzeigueberschrift();
 	pvirtmacherkl();
 	if (zeighilfe(&erkl)) {
 		virttesterg();
-		exit(schluss(1));
+		exit(schluss(1)); 
 	}
+	// ab hier nur obhilfe 0
 	pvirtvorzaehler();
 	lieszaehlerein();
-	if (obvi) dovi(); 
-	else if (obvs) {
+  if (obvi) {
+		dovi(); 
+	} else if (obvs) {
 		svec rueck;
 		systemrueck("cd \""+instvz+"\";ls -l $(grep 'DTN' vars|sed 's/DTN::=//g')",-1,oblog,&rueck);
 		exit(schluss(systemrueck("cd \""+instvz+"\"; sh viall"+devtty,/*obverb=*/0,/*oblog=*/0,/*rueck=*/0,/*obsudc=*/1),
@@ -5090,11 +5152,13 @@ void hcl::lauf()
 	else if (!keineverarbeitung) {
 		pvirtvorrueckfragen();
 		virtrueckfragen();
-		pvirtvorpruefggfmehrfach();
-		pruefggfmehrfach();
-		if (logdateineu) tuloeschen(logdt,string(),obverb,oblog);
-		hLog(Txk[T_Logpfad]+drots+loggespfad+schwarz+Txk[T_oblog]+drot+ltoan((int)oblog)+schwarz+")");
-		virtpruefweiteres();
+		pvirtvorpruefggfmehrfach(); // kann noch keineverarbeitung setzen
+    if (!keineverarbeitung) {
+      pruefggfmehrfach();
+      if (logdateineu) tuloeschen(logdt,string(),obverb,oblog);
+      hLog(Txk[T_Logpfad]+drots+loggespfad+schwarz+Txk[T_oblog]+drot+ltoan((int)oblog)+schwarz+")");
+      virtpruefweiteres();
+    }
 	} // 	if (!keineverarbeitung)
 	if (mitcron) pruefcron(string()); // soll vor Log(Txk[T_Verwende ... stehen
 	if (!keineverarbeitung) {
@@ -5110,7 +5174,7 @@ void hcl::lauf()
 	} // 	if (obsetz)
 	virtschlussanzeige();
 	hLog(violetts+Txk[T_Ende]+schwarz);
-} // hcl::lauf()
+} // hcl::lauf
 
 // wird aufgerufen in: hcl::hcl
 void hcl::holbefz0(const int argc, const char *const *const argv)
@@ -5119,36 +5183,39 @@ void hcl::holbefz0(const int argc, const char *const *const argv)
 	for(int i=1;i<argc;i++)
 		if (argv[i][0]) {
 			if (!obverb && argv[i][1]) {
-				Sprache altSpr=Txk.lgn;
-				for(int akts=0;akts<SprachZahl;akts++) {
-					Txk.lgn=(Sprache)akts;
-					if ((strchr("-/",argv[i][0])&&!strcmp(argv[i]+1,Txk[T_v_k])) || 
-							(!strncmp(argv[i],"--",2)&&!strcmp(argv[i]+2,Txk[T_verbose_l]))) { // -v, -w, -verbose, -wortreich
-						cout<<violett<<Txk[T_hcl_hcl]<<schwarz<<endl;
-						obverb=1;
-					} // if ((strchr...
-				} //         for(int akts=0;akts<SprachZahl;akts++)
-				Txk.lgn=altSpr;
-			} // 			if (!obverb && argv[i][1])
-			argcmv.push_back(argcl(i,argv)); 
-			cl+=" ";
-			cl+=argv[i];
-		} //     if (argv[i][0])
+        Sprache altSpr=Txk.lgn;
+        for(int akts=0;akts<SprachZahl;akts++) {
+          Txk.lgn=(Sprache)akts;
+          if (strchr("-/",argv[i][0])) {
+            if (!strcmp(argv[i]+1,Txk[T_v_k]) || (!strncmp(argv[i],"--",2)&&!strcmp(argv[i]+2,Txk[T_verbose_l]))) { // -v, -w, -verbose, -wortreich
+              cout<<violett<<Txk[T_hcl_hcl]<<schwarz<<endl;
+              obverb=1;
+            } else if (!strcmp(argv[i]+1,Txk[T_stu_k])||(!strncmp(argv[i],"--",2)&&!strcmp(argv[i]+2,Txk[T_stumm_l]))) {
+              stumm=1;
+            }
+          } // if ((strchr...
+        } //         for(int akts=0;akts<SprachZahl;akts++)
+        Txk.lgn=altSpr;
+      } // 			if (!obverb && argv[i][1])
+      argcmv.push_back(argcl(i,argv)); 
+      cl+=" ";
+      cl+=argv[i];
+    } //     if (argv[i][0])
 } // void hcl::holbefz0
 
 // wird aufgerufen in: hcl::hcl
 string holsystemsprache(int obverb/*=0*/)
 {
-	if (obverb)
-		cout<<violett<<Txk[T_holsystemsprache]<<schwarz<<endl;
-	schAcl<WPcl> cglangA("cglangA"); // Systemsprach-Konfiguration
-	string ret;
-	// OpenSuse, Fedora, Debian
-	const char* const langdt[]{"/etc/sysconfig/language","/etc/locale.conf","/etc/default/locale","/etc/sysconfig/i18n"};
-	const char* const langvr[]{"RC_LANG","LANG","LANG","LANG"};
-	for (size_t lind=0;lind<elemzahl(langdt);lind++) {
-		struct stat langstat{0};
-		if (!lstat(langdt[lind],&langstat)) {
+  if (obverb)
+    cout<<violett<<Txk[T_holsystemsprache]<<schwarz<<endl;
+  schAcl<WPcl> cglangA("cglangA"); // Systemsprach-Konfiguration
+  string ret;
+  // OpenSuse, Fedora, Debian
+  const char* const langdt[]{"/etc/sysconfig/language","/etc/locale.conf","/etc/default/locale","/etc/sysconfig/i18n"};
+  const char* const langvr[]{"RC_LANG","LANG","LANG","LANG"};
+  for (size_t lind=0;lind<elemzahl(langdt);lind++) {
+    struct stat langstat{0};
+    if (!lstat(langdt[lind],&langstat)) {
 			cglangA.sinit(1, langvr[lind]);
 			confdcl langcd(langdt[lind],obverb);
 			langcd.kauswert(&cglangA,obverb);
@@ -5169,8 +5236,7 @@ string holsystemsprache(int obverb/*=0*/)
 // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
 void hcl::virtlgnzuw()
 {
-	//// int altobverb=obverb;
-	//// obverb=1;
+	//// int altobverb=obverb; obverb=1;
 	fLog(violetts+Txk[T_virtlgnzuw_langu]+schwarzs+": "+langu,obverb,oblog);
 	//// obverb=altobverb;
 	if (langu=="d" || langu=="D" || langu=="deutsch" || langu=="Deutsch") {
@@ -5237,6 +5303,7 @@ void hcl::virtinitopt()
 	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lg_k,T_language_l,/*TxBp*/&Txk,/*Txi*/T_sprachstr,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,T_Sprachen);
 	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lang_k,T_lingue_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,-1);
 	opn<<new optcl(/*pptr*/&obverb,/*art*/puchar,T_v_k,T_verbose_l,/*TxBp*/&Txk,/*Txi*/T_Bildschirmausgabe_gespraechiger,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&stumm,/*art*/puchar,T_stu_k,T_stumm_l,/*TxBp*/&Txk,/*Txi*/T_Bildschirmausgabe_ganz_stumm,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pname*/"logvz",/*pptr*/&logvz,/*art*/pverz,T_lvz_k,T_logvz_l,/*TxBp*/&Txk,/*Txi*/T_waehlt_als_Logverzeichnis_pfad_derzeit,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!logvz.empty(),T_Logverzeichnis);
 	opn<<new optcl(/*pname*/"logdname",/*pptr*/&logdname,/*art*/pstri,T_ld_k,T_logdname_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_string_im_Pfad,/*wi*/0,/*Txi2*/T_wird_verwendet_anstatt,/*rottxt*/logvz,/*wert*/-1,/*woher*/!logdname.empty(),T_Logdateiname);
 	opn<<new optcl(/*pname*/"oblog",/*pptr*/&oblog,/*art*/pint,T_l_k,T_log_l,/*TxBp*/&Txk,/*Txi*/T_protokolliert_ausfuehrlich_in_Datei,/*wi*/1,/*Txi2*/T_sonst_knapper,/*rottxt*/loggespfad,/*wert*/1,/*woher*/1,T_Oblog_ausf_Protok);
@@ -5249,8 +5316,10 @@ void hcl::virtinitopt()
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_libtest,T_libtest,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/4,/*woher*/1);
 	opn<<new optcl(/*pname*/"cronminut",/*pptr*/&cronminut,/*art*/pdez,T_cm_k,T_cronminuten_l,/*TxBp*/&Txk,/*Txi*/T_Alle_wieviel_Minuten_soll,/*wi*/1,/*Txi2*/T_aufgerufen_werden_0_ist_gar_nicht,/*rottxt*/meinname,/*wert*/-1,/*woher*/1,T_Intervall_Minuten);
 	opn<<new optcl(/*pptr*/&obvi,/*art*/puchar,T_vi_k,T_vi_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei,/*wi*/0,/*Txi2*/T_Logdatei_usw_bearbeiten_sehen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&kfzg,/*art*/puchar,T_kf_k,T_konfzeiglang_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdateinamen,/*wi*/0,/*Txi2*/T_anzeigen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&kschreib,/*art*/puchar,T_ks_k,T_kschreib_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei_schreiben,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obvs,/*art*/puchar,T_vs_k,T_vs_l,/*TxBp*/&Txk,/*Txi*/T_Quelldateien_in,/*wi*/0,/*Txi2*/T_bearbeiten_sehen,/*rottxt*/instvz,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pptr*/&autoupd,/*art*/pint,T_autoupd_k,T_autoupd_l,/*TxBp*/&Txk,/*Txi*/T_Programm_automatisch_aktualisieren,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"autoupd",/*pptr*/&autoupd,/*art*/pint,T_autoupd_k,T_autoupd_l,/*TxBp*/&Txk,/*Txi*/T_Programm_automatisch_aktualisieren,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,T_Programm_automatisch_aktualisieren);
 	opn<<new optcl(/*pptr*/&rzf,/*art*/puchar,T_rf_k,T_rueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&nrzf,/*art*/puchar,T_krf_k,T_keinerueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_keine_Rueckfragen_zB_aus_Cron,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&zeigvers,/*art*/puchar,T_info_k,T_version_l,/*TxBp*/&Txk,/*Txi*/T_Zeigt_die_Programmversion_an,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -5268,9 +5337,9 @@ void hcl::parsecl()
 	vector<argcl>::iterator ap,apn;
 	for(ap=argcmv.begin();ap!=argcmv.end();ap++) {
 		uchar nichtspeichern{0}, gegenteil{0}, kurzp{0}, langp{0};
-		const char *acstr=ap->argcs;
+		const char *acstr{ap->argcs};
 		//// <<rot<<"acstr: "<<schwarz<<acstr<<endl;
-		unsigned aclen=strlen(acstr);
+		unsigned long aclen{strlen(acstr)};
 		if (aclen>1) {
 			if (aclen>2 && acstr[0]=='-'&&acstr[1]=='-') {
 				langp=1;
@@ -5297,7 +5366,7 @@ void hcl::parsecl()
 				if (langp) omp=&opn.olmap;
 				else if (kurzp) omp=&opn.okmap;
 				if (omp) {
-////					caus<<"acstr: '"<<acstr<<"', omp->size(): "<<omp->size()<<endl;
+					//// <<"acstr: '"<<acstr<<"', omp->size(): "<<omp->size()<<endl;
 					for(omit=omp->begin();omit!=omp->end();omit++) {
 						//// <<"omit: "<<omit->second->pname<<", "<<omit->first<<endl;
 						// omit ist also jetzt iterator fuer die relevante map auf die aktuelle Option (kurz oder lang)
@@ -5306,18 +5375,18 @@ void hcl::parsecl()
 							hLog(Txk[T_Parameter]+blaus+acstr+schwarz+Txk[T_gefunden]+(omit->second->pptr?"1":"0"));
 							if (omit->second->pptr) {
 								hLog("pptr gefunden");
-								// pzuweis liefert -1, wenn der naechste Parameter als Inhalt verwendet wurde, sonst wiefalsch
+								// pzuweis liefert -1, wenn der naechste Parameter als Inhalt verwendet wurde, sonst pcfnr
 								apn=ap; apn++;
 								const char *nacstr=apn==argcmv.end()?"":apn->argcs;
 								optcl* trick=(optcl*)omit->second;
-								int wiefalsch{trick->pzuweis(nacstr,gegenteil,nichtspeichern)};
-								//int wiefalsch=omit->second->pzuweis(nacstr,gegenteil,nichtspeichern);
-								if (wiefalsch==-1) { // String-Parameter erfolgreich zugewiesen
+								int pcfnr{trick->pzuweis(nacstr,gegenteil,nichtspeichern)};
+								//int pcfnr=omit->second->pzuweis(nacstr,gegenteil,nichtspeichern);
+								if (pcfnr==-1) { // String-Parameter erfolgreich zugewiesen
 									ap++;
 									ap->agef++; // Zusatzparameter gefunden
 									if (ap==argcmv.end()) break;
 								}
-								if (wiefalsch<=0) { // erfolgreich zugewiesen
+								if (pcfnr<=0) { // erfolgreich zugewiesen
 									if (omit->second->pptr==&langu) {
 										virtlgnzuw();
 									} else if (omit->second->pptr==&logvz || omit->second->pptr==&logdname) {
@@ -5330,7 +5399,7 @@ void hcl::parsecl()
 									//opn.setzbemerkwoher(omit->second,/*ibemerk=*/string(),/*vwoher=*/3);
 								} else {
 									if (!obhilfe) obhilfe=1;
-								} // 								if (wiefalsch<=0) else
+								} // 								if (pcfnr<=0) else
 							} // 								if (omit->second->pptr)
 							break; // Parameter schon gefunden, die anderen nicht mehr suchen
 						} // 							if (!omit->first.find(acstr))
@@ -5341,15 +5410,16 @@ void hcl::parsecl()
 		} // if (aclen>1)
 	} // 	for(ap=argcmv.begin();ap!=argcmv.end();ap++)
 //	if (obverb) opn.oausgeb(gelb);
-	for(size_t i=0;i<argcmv.size();i++) {
-		if (!argcmv[i].agef) {
-			exit(schluss(17,rots+"Parameter: "+gruen+argcmv[i].argcs+rot+Txk[T_nicht_erkannt]+schwarz));
-			if (!obhilfe) obhilfe=1;
-		} //     if (!argcmv[i].agef)
-	} //   for(size_t i=0;i<argcmv.size();i++)
+	if (parstreng)
+		for(size_t i=0;i<argcmv.size();i++) {
+			if (!argcmv[i].agef) {
+				exit(schluss(17,rots+"Parameter: "+gruen+argcmv[i].argcs+rot+Txk[T_nicht_erkannt]+schwarz));
+				if (!obhilfe) obhilfe=1;
+			} //     if (!argcmv[i].agef)
+		} //   for(size_t i=0;i<argcmv.size();i++)
 	hLog(violetts+Txk[T_Ende]+Txk[T_parsecl]+schwarz);
 	return;
-} // void hcl::parsecl()
+} // void hcl::parsecl
 
 // wird aufgerufen in lauf
 void hcl::virtMusterVorgb()
@@ -5364,9 +5434,12 @@ void hcl::virtlieskonfein()
 	if (akonfdt.empty()) {
 		svec rue;
 		// aus Datenschutzgruenden sollte das Home-Verzeichnis zuverlaessig ermittelt werden
-		systemrueck("getent passwd $(logname)|cut -d: -f6",0,0,&rue);
+	  systemrueck("getent passwd $(logname 2>/dev/null||loginctl user-status|sed -n '1s/\\(.*\\) .*/\\1/p'||whoami)|cut -d: -f6",0,0,&rue);
 		if (rue.size()) {
-			akonfdt=rue[0]+vtz+"."+DPROG+".conf";
+			//  $XDG_CONFIG_HOME in XDG Base Directory Specification
+			string confverz{rue[0]+vtz+".config"};
+			pruefverz(confverz,/*obverb=*/0,/*oblog=*/0,/*obmitfacl=*/1,/*obmitcon=*/1,/*besitzer*/string(),/*benutzer*/string(),/*obmachen*/1,/*obprot*/1,/*keinsu*/1);
+			akonfdt=confverz+"/"+DPROG+".conf";
 		}
 	} // 	if (akonfdt.empty()) 
 	// agcnfA.init muss spaetetens am Anfang von getcommandl0 kommen
@@ -5380,6 +5453,7 @@ void hcl::virtlieskonfein()
 	if (!hccd.obzuschreib) {
 		for (map<string,optcl*>::iterator omit=opn.omap.begin();omit!=opn.omap.end();omit++) {
 			if (omit->second->woher<2) {
+				caus<<"setze obzuschreib, da woher<2 in "<<omit->first<<endl;
 				hccd.obzuschreib=1;
 				break;
 			} // 			if (omit->second->woher<2)
@@ -5477,7 +5551,7 @@ void hcl::dovi()
 // wird aufgerufen in lauf
 void hcl::virtzeigversion(const string& ltiffv/*=string()*/)
 {
-	struct tm tm={0};
+	struct tm tm{0};
 	//// char buf[100];
 	cout<<endl<<Txk[T_Programm]<<violett<<mpfad<<schwarz<<endl;
 	cout<<"Copyright: "<<blau<<Txk[T_Freie_Software]<<schwarz<<Txk[T_Verfasser]<<blau<<"Gerald Schade"<<schwarz<<endl;
@@ -5510,7 +5584,8 @@ void hcl::virtrueckfragen()
 		vector<string> sprachen={"e","d"/*,"f","i"*/};
 		langu=Tippstrs(sprachstr.c_str()/*"Language/Sprache/Lingue/Lingua"*/,&sprachen,&langu);
 		virtlgnzuw();
-		cronminut=Tippzahl(Txk[T_Alle_wieviel_Minuten_soll]+meinname+Txk[T_aufgerufen_werden_0_ist_gar_nicht],&cronminut);
+		if (mitcron)
+			cronminut=Tippzahl(Txk[T_Alle_wieviel_Minuten_soll]+meinname+Txk[T_aufgerufen_werden_0_ist_gar_nicht],&cronminut);
 		autoupd=Tippob(Txk[T_Sollen_neue_Programmversionen_von]+meinname+Txk[T_automatisch_installiert_werden],autoupd?Txk[T_j_af]:"n");
 		logvz=Tippverz(Txk[T_Logverzeichnis],&logvz);
 		logdname=Tippstr(Txk[T_Logdateiname],&logdname);
@@ -5523,7 +5598,7 @@ void hcl::virtrueckfragen()
 // wird aufgerufen in lauf
 void hcl::pruefggfmehrfach()
 {
-	if (!obhilfe &&!obvi &&!obvs &&!zeigvers &&!rzf) {
+	if (!obhilfe &&!obvi && !kfzg &&!obvs &&!zeigvers &&!rzf) {
 		pruefmehrfach(meinname,obverb,nrzf);
 	}
 } // void hhcl::pruefggfmehrfach
@@ -5575,8 +5650,8 @@ uchar hcl::pruefcron(const string& cm)
 			if (vorcm.empty() && !cronzuplanen) {
 				if (obverb||cmeingegeben) 
 					fLog(Txk[T_Kein_cron_gesetzt_nicht_zu_setzen],1,oblog);
-			} else {
-				if (cmhier==vorcm) {
+      } else {
+        if (cmhier==vorcm) {
 					if (cmeingegeben) fLog(blaus+"'"+zsaufr+"'"+schwarz+Txk[T_wird]+Txk[T_unveraendert]+
 							+blau+(vorcm.empty()?Txk[T_gar_nicht]:Txk[T_alle]+vorcm+Txk[T_Minuten])+schwarz+Txk[T_aufgerufen],1,oblog);
 				} else {
@@ -5590,31 +5665,29 @@ uchar hcl::pruefcron(const string& cm)
 #ifdef anders
 #define uebersichtlich
 #ifdef uebersichtlich
-			string befehl;
+			string befehl{"T="+tmpcron+";"};
 			if (!cronzuplanen) {
 				if (nochkeincron) {
 				} else {
-					befehl="bash -c 'grep \""+saufr[0]+"\" -q <(crontab -l)&&{ crontab -l|sed \"/"+zsaufr[0]+"/d\">"+tmpcron+";"
-						"crontab "+tmpcron+";}||:'";
+					befehl+="bash -c 'grep \""+saufr[0]+"\" -q <(crontab -l)&&{ crontab -l|sed \"/"+zsaufr[0]+"/d\" >$T;crontab $T;}||:'";
 				}
 			} else {
 				if (nochkeincron) {
-					befehl="rm -f "+tmpcron+";";
+					befehl+="rm -f $T;";
 				} else {
-					befehl="bash -c 'grep \"\\*/"+cmhier+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l|sed \"/"+zsaufr[0]+"/d\">"+tmpcron+";";
+					befehl+="bash -c 'grep \"\\*/"+cmhier+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l|sed \"/"+zsaufr[0]+"/d\" >$T;";
 				}
-				befehl+="echo \""+cbef+"\">>"+tmpcron+"; crontab "+tmpcron+"";
+				befehl+="echo \""+cbef+"\" >>$T; crontab $T";
 				if (!nochkeincron)
 					befehl+=";}'";
 			} // 			if (!cronzuplanen)
 #else // uebersichtlich
-			const string befehl{cronzuplanen?
-				(nochkeincron?"rm -f "+tmpcron+";":
-				 "bash -c 'grep \"\\*/"+cmhier+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l | sed \"/"+zsaufr[0]+"/d\">"+tmpcron+"; ")+
-					"echo \""+cbef+"\">>"+tmpcron+"; crontab "+tmpcron+(nochkeincron?"":";}'")
+			const string befehl{"T="+tmpcron+";"+cronzuplanen?
+				(nochkeincron?"rm -f $T;":
+				 "bash -c 'grep \"\\*/"+cmhier+czt+cabfr+"\" -q <(crontab -l)||{ crontab -l | sed \"/"+zsaufr[0]+"/d\" >$T; ")+
+					"echo \""+cbef+"\" >>$T; crontab $T"+(nochkeincron?"":";}'")
 					:
-					(nochkeincron?"":"bash -c 'grep \""+saufr[0]+"\" -q <(crontab -l)&&{ crontab -l | sed \"/"+zsaufr[0]+"/d\">"+tmpcron+";"
-					 +"crontab "+tmpcron+";}||:'")
+					(nochkeincron?"":"bash -c 'grep \""+saufr[0]+"\" -q <(crontab -l)&&{ crontab -l | sed \"/"+zsaufr[0]+"/d\" >$T;crontab $T;}||:'")
 			};
 #endif   // uebersichtlich else
 			systemrueck(befehl,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
@@ -5642,7 +5715,7 @@ void hcl::virtzeigueberschrift()
 				+(vorcm!=cronminut&&!(vorcm.empty()&&cronminut=="0")?((vorcm.empty()?Txk[T_gar_nicht]:vorcm)+" -> "):string())
 				+(cronminut=="0"?Txk[T_kein_Aufruf]+schwarzs:cronminut+schwarz+(cronminut=="1"?Txk[T_Minute]:Txk[T_Minuten])):
 				string());
-	fLog(uebers.str(),1,oblog);
+	if (!stumm) fLog(uebers.str(),1,oblog);
 } // void hcl::virtzeigueberschrift
 
 
@@ -5650,7 +5723,10 @@ void hcl::virtzeigueberschrift()
 void hcl::virtautokonfschreib()
 {
 	hLog(violetts+Txk[T_autokonfschreib]+schwarz+", "+Txk[T_rueckzufragen]+blau+(rzf?Txk[T_ja]:Txk[T_nein])+schwarz+", "+Txk[T_zu_schreiben]+blau+(hccd.obzuschreib?Txk[T_ja]:Txk[T_nein])+schwarz);
-	if (rzf||hccd.obzuschreib) {
+	caus<<"rzf: "<<(int)rzf<<endl;
+	caus<<"obzuschreib: "<<(int)hccd.obzuschreib<<endl;
+	caus<<"kschreib: "<<(int)kschreib<<endl;
+	if (rzf||hccd.obzuschreib||kschreib) {
 		hLog(gruens+Txk[T_schreibe_Konfiguration]+schwarz);
 		opn.confschreib(akonfdt,ios::out,mpfad,0,obverb,oblog);
 	} // if (rzf||obzuschreib)
@@ -5674,7 +5750,7 @@ void hcl::gitpull(const string& DPROG)
 
 				fLog(violetts+DPROG+blau+Txk[T_muss_nicht_aktualisiert_werden]+schwarz,1,oblog);
 			} else {
-				////  struct stat entwst={0};
+				////  struct stat entwst{0};
 				//// entwickeln muss genauso definiert sein wie in Makefile
 				////  const string ziel=instvz+(lstat((instvz+"/entwickeln").c_str(),&entwst)?string():"/nvers");
 				const string ziel{instvz};
@@ -5702,49 +5778,71 @@ void hcl::gitpull(const string& DPROG)
 } // void hcl::gitpull
 
 // wird aufgerufen in lauf
-int wartaufpids(pidvec *pidv,const ulong runden/*=0*/,const int obverb/*=0*/,const int oblog/*=0*/,const string& wo/*=string()*/)
+int wartaufpids(pidvec *pidtb,const ulong runden/*=0*/,const int obverb/*=0*/,const int oblog/*=0*/,const string& wo/*=string()*/,const time_t maxsec/*0*/)
 {
-	////	int* ovp=(int*)&obverb; *ovp=0;
-	ulong aktru=0; 
-	yLog(obverb>1,oblog>1,0,0,"%s%s()%s, %s, %s%s pid: %s%lu%s, pidv->size(): %s%zu%s",
-			violett,__FUNCTION__,blau,wo.c_str(),schwarz,Txk[T_eigene],blau,getpid(),schwarz,blau,pidv->size(),schwarz);
-	for(size_t i=0;i<pidv->size();i++) {
+////	int altobverb=obverb, *ovp=(int*)&obverb; *ovp=2;
+	time_t t0, t1;
+	int ret{0};
+  uchar killen{0};
+	ulong aktru{0}; 
+	yLog(obverb>1,oblog>1,0,0,"%s%s()%s, %s, %s%s pid: %s%lu%s, pidtb->size(): %s%zu%s",
+			violett,__FUNCTION__,blau,wo.c_str(),schwarz,Txk[T_eigene],blau,getpid(),schwarz,blau,pidtb->size(),schwarz);
+	for(size_t i=0;i<pidtb->size();i++) {
 		yLog(obverb>1,oblog>1,0,0," i: %s%zu%s, pid: %s%lu%s, name: %s%s%s",
-				blau,i,schwarz,blau,pidv->at(i).pid,schwarz,blau,pidv->at(i).name.c_str(),schwarz);
-	} // 	for(size_t i=0;i<pidv->size();i++)
+				blau,i,schwarz,blau,pidtb->at(i).pid,schwarz,blau,pidtb->at(i).name.c_str(),schwarz);
+	} // 	for(size_t i=0;i<pidtb->size();i++)
+	if (maxsec) t0=time(0);
 	while (1) {
-		yLog(obverb>1,0,0,0," %s%s%s, while (1), pidv->size(): %s%zu%s",blau,wo.c_str(),schwarz,blau,pidv->size(),schwarz);
-		for(size_t i=pidv->size();i;) {
+		yLog(obverb>1,0,0,0," %s%s%s, while (1), pidtb->size(): %s%zu%s",blau,wo.c_str(),schwarz,blau,pidtb->size(),schwarz);
+		if (maxsec) {
+			t1=time(0);
+			if (t1-t0>maxsec) killen=1; 
+		}
+		for(size_t i=pidtb->size();i;) {
 			i--;
-			const int res{kill(pidv->at(i).pid,0)};
+			const int obgueltig{kill(pidtb->at(i).pid,0)};
 			uchar zuloeschen{0};
-			if (res==-1 && errno==ESRCH) zuloeschen=1;
+			if (obgueltig==-1 && errno==ESRCH) zuloeschen=1; // not successful && error search -> Prozess nicht (mehr) da
 			else {
 				int status; 
-				pid_t erg=waitpid(pidv->at(i).pid,&status,WNOHANG); 
+				if (killen) {
+					kill(pidtb->at(i).pid,SIGTERM);
+					pid_t __attribute__((unused)) erg{waitpid(pidtb->at(i).pid,&status,0)};
+					ret=124;
+					if (!WIFSIGNALED(status)) {
+						kill(pidtb->at(i).pid,SIGKILL);
+						pid_t __attribute__((unused)) erg{waitpid(pidtb->at(i).pid,&status,WNOHANG)};
+						ret=137;
+					}
+				} // 				if (killen)
+				pid_t erg{waitpid(pidtb->at(i).pid,&status,WNOHANG)};
+				if (WIFEXITED(status)) {
+					ret=WEXITSTATUS(status);
+				}
 				if (erg>0) zuloeschen=1;
-			} // 			if (res==-1 && errno==ESRCH)
-			yLog(obverb>1,0,0,0," %s%s%s, i: %s%zu%s, pidv->at(i).pid: %s%lu%s, name: %s%s%s, %s%s%s",blau,wo.c_str(),schwarz,blau,i,schwarz,blau,
-					pidv->at(i).pid,schwarz,blau,pidv->at(i).name.c_str(),schwarz,(zuloeschen?blau:""),(zuloeschen?Txk[T_entfernen]:Txk[T_belassen]),schwarz);
+			} // 			if (obgueltig==-1 && errno==ESRCH)
+			yLog(obverb>1,0,0,0," %s%s%s, i: %s%zu%s, pidtb->at(i).pid: %s%lu%s, name: %s%s%s, %s%s%s",blau,wo.c_str(),schwarz,blau,i,schwarz,blau,
+					pidtb->at(i).pid,schwarz,blau,pidtb->at(i).name.c_str(),schwarz,(zuloeschen?blau:""),(zuloeschen?Txk[T_nicht_mehr_da]:Txk[T_laeuft_noch]),schwarz);
 			if (zuloeschen) {
-				//      if (getpgid(pidv->at(i).pid)<0)
-				pidv->erase(pidv->begin()+i);
+				//      if (getpgid(pidtb->at(i).pid)<0)
+				pidtb->erase(pidtb->begin()+i);
 			}
-		} // 		for(size_t i=0;i<pidv->size();i++)
-		if (!pidv->size()) {
-			fLog(violetts+__FUNCTION__+", "+blau+wo+", return 0 (1)",obverb>1,0);
-			return 0;
-		} // 		if (!pidv->size())
+		} // 		for(size_t i=0;i<pidtb->size();i++)
+		if (!pidtb->size()) {
+			fLog(violetts+Txk[T_Ende]+" 1 "+__FUNCTION__+", "+blau+wo+", return 0 (1)",obverb>1,0);
+			return ret;
+		} // 		if (!pidtb->size())
 		const int wz3{50};
 		this_thread::sleep_for(chrono::milliseconds(wz3));
 		yLog(obverb>1,0,0,0,"in %s(): %s%s: %s%d%s ms",__FUNCTION__,rot,Txk[T_warte],blau,wz3,schwarz);
 		if (++aktru==runden) {
-			fLog(violetts+__FUNCTION__+", "+blau+wo+", return 1",obverb>1,0);
-			return 1;
+			fLog(violetts+__FUNCTION__+", "+blau+wo+", return -1",obverb>1,0);
+			return -1;
 		} // 		if (++aktru==runden)
 	} // 	while (1)
-	fLog(violetts+__FUNCTION__+", "+blau+wo+", return 0 (2)",obverb>1,0);
-	return 0;
+	fLog(violetts+Txk[T_Ende]+" 2 "+__FUNCTION__+", "+blau+wo+", return 0 (2)",obverb>1,0);
+////  *ovp=altobverb; 
+	return ret;
 } // void wartaufpids
 
 // wird aufgerufen in lauf
@@ -5753,9 +5851,9 @@ void hcl::setzzaehler()
 	aufrufe++;
 	//// <<"aufrufe: "<<aufrufe<<endl;
 	// zcnfA[0].setze(&aufrufe);
-	time_t jetzt=time(0);
+	const time_t jetzt{time(0)};
 	pthread_mutex_lock(&timemutex);
-	struct tm heute=*localtime(&jetzt);
+	const struct tm heute=*localtime(&jetzt);
 	if (heute.tm_year!=laufrtag.tm_year || heute.tm_yday!=laufrtag.tm_yday) {
 		tagesaufr=0;
 	}
@@ -5812,7 +5910,7 @@ int hcl::holvomnetz(const string& datei,const string& vors/*=defvors*/,const str
 		} //     if (!qrueck.size())
 	} // if (!pruefinstv())
 	return erg;
-} // int hcl::holvomnetz(const string& datei,const string& vors/*=defvors*/,const string& nachs/*=defnachs*/)
+} // int hcl::holvomnetz
 
 // wird aufgerufen in hcl::kompiliere
 int hcl::kompilbase(const string& was, const string& endg)
@@ -5882,7 +5980,7 @@ void hcl::prueftif(string aktvers)
 {
 	hLog(violetts+Txk[T_prueftif]+schwarz+" "+aktvers);
 	//	const string vstr="4.0.8"; //// "4.08001";
-const int altobverb{obverb};
+	////const int altobverb{obverb};
 	size_t p1;
 	if ((p1=aktvers.find('\n'))!=string::npos) aktvers.erase(p1);
 	if ((p1=aktvers.rfind(' '))!=string::npos) aktvers.erase(0,p1+1);
@@ -5895,7 +5993,7 @@ const int altobverb{obverb};
 	const uchar incfehlt{!systemrueck("find /usr/include /usr/local/include -name tiff.h -print -quit 2>/dev/null",obverb,oblog,0,1)};
 	if (obsotiff) {
 		// Die Datei /usr/local/sclibtiff wird als Nachweis verwendet, dass die Installationskorrektur durchgefuert wurde
-		struct stat lnw={0};
+		struct stat lnw{0};
 		if ((/*(tv==4.07||tv==4.08)&&*/lstat(tiffmark.c_str(),&lnw))||incfehlt) {
 			obverb=1;
 			////		linstp->doggfinst("cmake",obverb,oblog); 
@@ -5908,7 +6006,7 @@ const int altobverb{obverb};
 					anfgg(unindt,sudc+"rm -f \""+tiffmark+"\"","",obverb,oblog);
 				}
 			} // if (!kompiliere(
-			obverb=altobverb;
+////			obverb=altobverb;
 		} // 	if (dcmv<3.62)
 	} else {
 		if (incfehlt|| !systemrueck("find /usr/lib64 /usr/lib -maxdepth 2 -type l -xtype f -name libtiff.so -print -quit 2>/dev/null",obverb,oblog)) {
@@ -5947,10 +6045,10 @@ int hcl::kompiliere(const string& was,const string& endg, const string& vorcfg/*
 	return 1;
 } // int hcl::kompiliere(const string was,const string endg,const string nachtar, const string vorcfg,const string cfgbismake)
 
-// aufgerufen in: main
+// aufgerufen: nirgends
 void hcl::zeigkonf()
 {
-	struct stat kstat={0};
+	struct stat kstat{0};
 	cout<<Txk[T_aktuelle_Einstellungen_aus]<<blau<<akonfdt<<schwarz<<"' (";
 	//// char buf[100]={0};
 	if (!lstat(akonfdt.c_str(),&kstat)) {
@@ -5969,8 +6067,7 @@ void hcl::zeigkonf()
 		cout<<Txk[T_mit_w_werden_die_Einstellungen_noch_ausfuehrlicher_angezeigt]<<endl;
 		opn.zeigschoen();
 	}
-} // void hcl::zeigkonf()
-// augerufen in: anhalten(), zeigkonf()
+} // void hcl::zeigkonf
 
 wpgcl::wpgcl(const string& pname,const void* pptr,par_t part):pname(pname),pptr(pptr),part(part),eingetragen(0)
 {
@@ -6074,11 +6171,13 @@ int optcl::setzstr(const char* const neuw,uchar *const obzuschreib/*=0*/,const u
 {
 	uchar tuschreib{0};
 	// nicht mit Vorgaben (woher 2) Befehlszeilenoption (woher 3) ueberschreiben
-	int wiefalsch{wpgcl::tusetzstr(neuw,/*obzuschreib*/&tuschreib,ausDatei,/*keineprio*/woher>2)};
+	const int sstfnr{wpgcl::tusetzstr(neuw,/*obzuschreib*/&tuschreib,ausDatei,/*keineprio*/woher>2)};
+////	<<blau<<"setzstr("<<gruen<<neuw<<","<<obzuschreib<<(obzuschreib?(int)*obzuschreib:-1)<<","<<(int)ausDatei<<blau<<"), tuschreib: "<<(int)tuschreib<<endl;
 	if (tuschreib) if (obzuschreib) if (!*obzuschreib) if (!nichtspeichern) {
+		caus<<"setze obzuschreib in setzstr "<<neuw<<" ausDatei: "<<(int)ausDatei<<endl;
 		*obzuschreib=1;
 	}
-	return wiefalsch;
+	return sstfnr;
 } // setzstr
 
 int WPcl::setzstr(const char* const neuw,uchar *const obzuschreib/*=0*/,const uchar ausDatei/*=0*/)
@@ -6096,7 +6195,7 @@ int WPcl::setzstr(const string& neus,uchar *const obzuschreib/*=0*/,const uchar 
 //  aufgerufen in: pzuweis (Befehlszeile) und auswert (Datei)
 int wpgcl::tusetzstr(const char* const neuw,uchar *const tuschreibp,const uchar ausDatei/*=0*/,const uchar keineprio/*=0*/)
 {
-	int wiefalsch{0};
+	int tsfnr{0};
 	struct tm tmp{0},tmmax{0},neu{0};
 	char *emax{0},*eakt;
 	if (pptr) {
@@ -6119,7 +6218,7 @@ int wpgcl::tusetzstr(const char* const neuw,uchar *const tuschreibp,const uchar 
 					} else {
 						//// <<blau<<"vor weise zu 2 "<<schwarz<<endl;
 						if (part==pdez && !isnumeric(neuw)) {
-							wiefalsch=1;
+							tsfnr=1;
 						} else {
 							//// <<blau<<"weise zu"<<schwarz<<endl;
 							*(string*)pptr=neuw;
@@ -6147,8 +6246,8 @@ int wpgcl::tusetzstr(const char* const neuw,uchar *const tuschreibp,const uchar 
 			case pverz: case pfile:
 				// ... die also nicht mit '-' anfaengt
 				// ... und sie bestimmte existentielle Bedingungen erfuellt ...
-				if (stat(neuw,&entryarg)) wiefalsch=1;  // wenn inexistent
-				else if ((part==pverz)^(S_ISDIR(entryarg.st_mode))) wiefalsch=2; // Datei fuer Verzeichnis o.u.
+				if (stat(neuw,&entryarg)) tsfnr=1;  // wenn inexistent
+				else if ((part==pverz)^(S_ISDIR(entryarg.st_mode))) tsfnr=2; // Datei fuer Verzeichnis o.u.
 				// ... dann zuweisen
 				else {
 					if (*(string*)pptr!=neuw) {
@@ -6173,7 +6272,7 @@ int wpgcl::tusetzstr(const char* const neuw,uchar *const tuschreibp,const uchar 
 				// oder wenn es eine Zahl sein soll ...
 			case puchar: case pint: case plong:
 				// und tatsaechlich numerisch ist ...
-				if (!isnumeric(neuw)) wiefalsch=1;
+				if (!isnumeric(neuw)) tsfnr=1;
 				// dann zuweisen
 				else {
 					switch (part) {
@@ -6232,14 +6331,14 @@ int wpgcl::tusetzstr(const char* const neuw,uchar *const tuschreibp,const uchar 
 				break;
 		} // switch (part) 
 	} // 	if (pptr)
-	return wiefalsch;
+	return tsfnr;
 } // void optcl::setzstr
 
 // Rueckgabe: -1: String-Parameter erfolgreich zugewiesen, 0: Zahl erfolgreich zugewiesen
 // Parameter ueber Befehlszeile zuweisen
 int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const uchar vnichtspeichern/*=0*/)
 {
-	int wiefalsch{0};
+	int pzfnr{0};
 	gegenteil=vgegenteil;
 	nichtspeichern=vnichtspeichern;
   if (iwert!=-1) {
@@ -6248,11 +6347,11 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 		//// <<rot<<"nacstr: "<<nacstr<<schwarz<<endl;
 		// er also nicht mit '-' anfaengt ...
 		if (*nacstr && *nacstr!='-') {
-			wiefalsch=setzstr(nacstr);
+			pzfnr=setzstr(nacstr);
 		} else {
-			wiefalsch=3; // kein geeigneter Parameter gefunden
+			pzfnr=3; // kein geeigneter Parameter gefunden
 		}
-		if (wiefalsch) {
+		if (pzfnr) {
 			// wenn kein Zusatzparameter erkennbar, dann melden
 			switch (part) {
 				case pdat:
@@ -6266,27 +6365,27 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 				case pverz:
 				case pfile:
 					fLog(drots+Txk[T_Fehler_Parameter]+(kurzi<0?ltoan(kurzi):(*TxBp)[kurzi])+Txk[T_oder]+(langi<0?ltoan(langi):(*TxBp)[langi])+" "+
-							(wiefalsch==1?Txk[T_ohne_gueltigen]:wiefalsch==2?Txk[T_mit_Datei_als]:Txk[T_mit_falschem])+Txk[T_Pfad_angegeben]+schwarz,1,1);
+							(pzfnr==1?Txk[T_ohne_gueltigen]:pzfnr==2?Txk[T_mit_Datei_als]:Txk[T_mit_falschem])+Txk[T_Pfad_angegeben]+schwarz,1,1);
 					break;
 				case puchar: case pint: case plong: case pbin:
-					fLog(drots+(wiefalsch==1?Txk[T_Nicht_numerischer]:Txk[T_Fehlender])+Txk[T_Parameter_nr_zu]
+					fLog(drots+(pzfnr==1?Txk[T_Nicht_numerischer]:Txk[T_Fehlender])+Txk[T_Parameter_nr_zu]
 							+(kurzi<0?ltoan(kurzi):(*TxBp)[kurzi])+Txk[T_oder]+(langi<0?ltoan(langi):(*TxBp)[langi])+"!"+schwarz,1,1);
 					break;
 			} // switch (part)
-		} // 										if (wiefalsch)
-		if (!wiefalsch) {
+		} // 										if (pzfnr)
+		if (!pzfnr) {
 			return -1;
 		}
 	} // 									if (wert) else
-	return wiefalsch;
+	return pzfnr;
 } // int optcl::pzuweis
 
 optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const long Txrf,const uchar obno/*=0*/):wpgcl(pname,pptr,part),
+		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const long Txrf/*=-1*/,const uchar obno/*=0*/):wpgcl(pname,pptr,part),
 	kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),Txi2(Txi2),rottxt(rottxt),iwert(iwert),
-	woher(woher),Txrf(Txrf),obno(obno)/*=0*///,eingetragen(0)
+	woher(woher),Txrf(Txrf==-1?Txi:Txrf),obno(obno)/*=0*///,eingetragen(0)
 {
-////	caus<<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
+////	<<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
 }
 
 optcl::optcl(const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi,
@@ -6294,7 +6393,7 @@ optcl::optcl(const void* pptr,const par_t part, const int kurzi, const int langi
 	kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),Txi2(Txi2),rottxt(rottxt),iwert(iwert),
 	woher(woher),obno(obno)/*=0*///,eingetragen(0)
 {
-////	caus<<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
+////	<<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
 }
 
 int hcl::hLog(const string& text,const bool oberr/*=0*/,const short klobverb/*=0*/) const
@@ -6334,7 +6433,7 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 			} // if (!nrzf) 
 		} // 	if (obsfehlt)
 		for(uchar iru=0;iru<2;iru++) {
-			struct stat sstat={0};
+			struct stat sstat{0};
 			if (!(conffehlt=lstat(smbdt,&sstat))) break;
 			if (iru) break;
 			pruefverz("/etc/samba",obverb,oblog,/*obmitfacl=*/1,/*obmitcon=*/0,/*besitzer=*/string(),/*benutzer=*/string(),/*obmachen=*/0);
@@ -6377,11 +6476,12 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 		} // for(int aru=0;aru<2;aru++) 
 		////    if (gestartet==2) smbrestart=0;
 	} // if (dienstzahl<2 || conffehlt) 
-	struct stat sstat={0};
+	struct stat sstat{0};
 	if (!(conffehlt=lstat(smbdt,&sstat))) {
 		confdcl smbcd(smbdt,obverb);
 //		smbcd.Abschn_auswert(obverb);
 		uchar gef[vzn.size()]; memset(gef,0,vzn.size()*sizeof(uchar));
+		// gef als Array gefundener Pfade aus/zu vzn erstellen
 		for(size_t i=0;i<smbcd.abschv.size();i++) {
 			if (smbcd.abschv[i].aname!="global") {
 				const string pfad{*smbcd.abschv[i].suche("path")};
@@ -6537,20 +6637,21 @@ void hcl::setztmpcron()
 // wird aufgerufen in pruefcron (2x)
 void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const string& cbef)
 {
-	string unicmd{"rm -f "+tmpcron+";"};
+	string unicmd{"T="+tmpcron+";rm -f $T;"};
 	string cmd{unicmd};
-	string dazu{"crontab -l|sed '/"+zsauf+"/d'>"+tmpcron+";"};
+	string dazu{"crontab -l|sed '/"+zsauf+"/d' >$T;"};
 	unicmd+=dazu;	
 	if (!nochkeincron) {
 		// cmd=dazu; // 26.2.17: Debian: nach Deinstallation rootscrontab mit root-Berechtigungen, die Programm hier aufhielten
 		cmd=unicmd;
 	}
 	if (cronzuplanen) {
-		cmd+=" echo \""+cbef+"\">>"+tmpcron+";";
+		cmd+=" echo \""+cbef+"\" >>$T;";
 	}
-	dazu=" crontab "+tmpcron+";";
+	dazu=" crontab $T;";
 	unicmd+=dazu;
 	cmd+=dazu;
+  //// caus<<gruen<<cmd<<schwarz<<endl;
 	systemrueck(cmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 	//// ersetzAlle(unicmd,"'\\''","'");
 	const string bef{sudc+"sh -c '"+cmd+"'"};
@@ -6668,7 +6769,7 @@ void optcl::virtweisomapzu(void *schlp)
 	// interne Berechnungen durchfuehren
 	// Bemerkung erst beim Schreiben setzen
 	// Indices (maps) belegen
-	//// caus<<"weise omap zu, pname: "<<blau<<pname<<schwarz<<endl;
+	//// <<"weise omap zu, pname: "<<blau<<pname<<schwarz<<endl;
 //	((schAcl<optcl>*)schlp)->gibomapaus();
 	if (!pname.empty()) {
 		((schAcl<optcl>*)schlp)->omap[pname]=this;
@@ -6686,7 +6787,7 @@ void optcl::virtweisomapzu(void *schlp)
 void optcl::virtloeschomaps(schAcl<optcl> *schlp)
 {
 	// Indices (maps) loeschen
-	//// caus<<"loesche omap, pname: "<<blau<<pname<<schwarz<<endl;
+	//// <<"loesche omap, pname: "<<blau<<pname<<schwarz<<endl;
 //	((schAcl<optcl>*)schlp)->gibomapaus();
 	if (!pname.empty()) {
 		((schAcl<optcl>*)schlp)->omap.erase(pname);
@@ -6781,9 +6882,19 @@ int confdcl::lies(const string& vfname, int obverb, const char tz/*='='*/)
 							rtrim(&pname);
 //							shared_ptr<string> wertp{new string(zeile.substr(pos+1))};
 //							shared_ptr<string> wertp=make_shared<string>(zeile.substr(pos+1));
-							string *const wertp{new string(zeile.substr(pos+1))};
+							string *wertp{new string(zeile.substr(pos+1))};
+							string altwp{*wertp};
 							gtrim(wertp);
+							bool obunabg{0};
+							while ((*wertp)[0]=='\"' && (*wertp)[wertp->size()-1]!=(*wertp)[0]) {
+								delete wertp;
+								obunabg=1;
+								wertp=new string(altwp);
+			          if (getline(f,zeile)) {*wertp+="\n"; *wertp+=zeile;} else break;
+							}
+							if (obunabg) gtrim(wertp);
 							anfzweg(wertp);
+							// <<"xor: "<<XOR(*wertp,pwk)<<endl;
 							paare.push_back(paarcl(pname,wertp,ibemerk));
 							ibemerk.clear();
 							if (mitabsch) 
@@ -6839,7 +6950,7 @@ const uchar optcl::virteinzutragen(/*schAcl<optcl>**/void* schlp,int obverb)
 	////	obverb=1;
 	// fLog(violetts+Txk[T_einzutragen]+blaus+pname+schwarz+"'",obverb,0);
 	map<string,optcl*>::iterator omit{((schAcl<optcl>*)schlp)->omap.find(pname)};
-	////	caus<<violett<<">)"; caus<<omit->first<<endl;caus<<omit->second->pname<<endl;omit->second->virtoausgeb(); caus<<schwarz;
+	////	<<violett<<">)"; caus<<omit->first<<endl;caus<<omit->second->pname<<endl;omit->second->virtoausgeb(); caus<<schwarz;
 	if (omit!=((schAcl<optcl>*)schlp)->omap.end()) {
 		if (omit->second->eingetragen) {
 			fLog(ltoan(nr)+" "+violetts+Txk[T_einzutragen]+Txk[T_schon_eingetragen]+blaus+omit->first+schwarz+"' = '"+omit->second->virtholstr()+schwarz+"'",obverb,0);
@@ -6862,19 +6973,22 @@ const uchar optcl::virteinzutragen(/*schAcl<optcl>**/void* schlp,int obverb)
 template<typename SCL> void schAcl<SCL>::schAschreib(mdatei *const f,int obverb)
 {
 	//	eintrinit();
-	////	caus<<"schl.size(): "<<schl.size()<<", omap.size(): "<<omap.size()<<endl;
+	if (obverb>1) {
+		const string schlsz{ltoan(schl.size())};
+		fLog("schl.size(): "+blaus+schlsz+schwarz+", omap.size(): "+blau+ltoan(omap.size())+schwarz,obverb,0);
+	}
 	for (size_t i=0;i<schl.size();i++) {
-		//// <<"i: "<<blau<<i<<schwarz<<", pname: "<<blau<<schl[i]->pname<<schwarz<<", pptr: "<<blau<<schl[i]->virtholstr()<<schwarz<<endl;
 		if (!schl[i]->pname.empty()) {
-			//		schl[i]->virtoausgeb();
+//		fLog("i: "+blaus+ltoan(i)+schwarz+", pname: "+blau+schl[i]->pname+schwarz+", pptr: "+blau+schl[i]->virtholstr()+schwarz,obverb,0);
+//		schl[i]->virtoausgeb();
 			const uchar einzt{/*1;*/schl[i]->virteinzutragen(this,obverb)};
 			//		schl[i]->virtoausgeb();
 			if (einzt) {
 				schl[i]->virtmachbemerk(Txk.lgn);
 				if (!schl[i]->bemerk.empty()) *f<<(schl[i]->bemerk[0]=='#'?"":"# ")<<*loeschefarbenaus(&schl[i]->bemerk)<<endl;
 				*f<<schl[i]->pname<<" = \""<<schl[i]->virtholstr()<<"\""<<endl;
-			} // 		if (!schl[i]->pname.empty() && schl[i]->virteinzutragen(this))
-		}
+			} // 		if einzt
+		} // 		if (!schl[i]->pname.empty())
 	} //   for (size_t i=0;i<zahl;i++)
 } // void schAcl::schAschreib
 
@@ -6925,7 +7039,7 @@ template<typename SCL> int schAcl<SCL>::confschreib(const string& fname,ios_base
 {
   mdatei f(fname,modus);
   if (f.is_open()) {
-		time_t jetzt=time(0);
+		const time_t jetzt{time(0)};
 		f<<Txk[T_Konfiguration_fuer]<<mpfad<<Txk[T_erstellt_automatisch_durch_dieses_am]<<ztacl(jetzt,"%d.%m.%Y %H.%M.%S")<<endl;
     schAschreib(&f,obverb);
     return 0;
@@ -6940,7 +7054,7 @@ template<typename SCL> int multischlschreib(const string& fname, schAcl<SCL> *co
   if (f.is_open()) {
     if (!mpfad.empty()) {
       //// char buf[30];
-      time_t jetzt=time(0);
+			const time_t jetzt{time(0)};
 			f<<Txk[T_Konfiguration_fuer]<<mpfad<<Txk[T_erstellt_automatisch_durch_dieses_am]<<ztacl(jetzt,"%d.%m.%Y %H.%M.%S")<<endl;
 			//// pthread_mutex_lock(&timemutex);
 			//// tm *ltm = localtime(&jetzt);
@@ -6972,9 +7086,9 @@ template<typename SCL> schAcl<SCL>& schAcl<SCL>::operator<<(shared_ptr<SCL> schp
 {
 ////	shared_ptr<SCL> kopie{schp};
 ////	schl.push_back(kopie); 
-////	caus<<rot<<"Uebertrage nach "<<blau<<name<<rot<<" smart_ptr "<<blau<<schp->pname<<schwarz;
+////	<<rot<<"Uebertrage nach "<<blau<<name<<rot<<" smart_ptr "<<blau<<schp->pname<<schwarz;
 	schl.push_back(schp);
-////	caus<<", Adresse: "<<blau<<schl[schl.size()-1]<<schwarz<<endl;
+////	<<", Adresse: "<<blau<<schl[schl.size()-1]<<schwarz<<endl;
 	schl[schl.size()-1]->virtweisomapzu(this); 
 	return *this; 
 }
@@ -6983,7 +7097,7 @@ template<typename SCL> schAcl<SCL>& schAcl<SCL>::operator<<(SCL *schp)
 // template<typename SCL> schAcl<SCL>& schAcl<SCL>::operator<<(shared_ptr<SCL> schp) 
 { 
 	/*//
-	caus<<"neuer Ueberladeoperator, pname: "<<schp->pname<<endl;
+	<<"neuer Ueberladeoperator, pname: "<<schp->pname<<endl;
 	SCL *sch= (SCL*)::operator new(sizeof *schp);
 	memcpy(sch,schp,sizeof *sch);
 	schl.push_back(*schp); 
@@ -6991,14 +7105,14 @@ template<typename SCL> schAcl<SCL>& schAcl<SCL>::operator<<(SCL *schp)
 	return *this; 
 	*/
 	//return operator<<(*schp); 
-////	caus<<rot<<name<<rot<<"<<"<<violett<<schp->pname<<endl;
-////	caus<<rot<<"Uebertrage nach "<<blau<<name<<rot<<" Zeiger "<<blau<<schp->pname<<schwarz;
+////	<<rot<<name<<rot<<"<<"<<violett<<schp->pname<<endl;
+////	<<rot<<"Uebertrage nach "<<blau<<name<<rot<<" Zeiger "<<blau<<schp->pname<<schwarz;
 	
 	shared_ptr<SCL> kopie{schp};
 //	shared_ptr<SCL> *kopie = new shared_ptr<SCL>(schp);
 	schl.push_back(kopie); 
 
-////	caus<<", Adresse: "<<blau<<schl[schl.size()-1]<<schwarz<<endl;
+////	<<", Adresse: "<<blau<<schl[schl.size()-1]<<schwarz<<endl;
 
 	schl[schl.size()-1]->virtweisomapzu(this); 
 	return *this; 
@@ -7008,7 +7122,21 @@ hcl::~hcl()
 {
 	delete linstp;
 	linstp=0;
-	////	caus<<"hcl-Destruktor"<<endl;
+	////	<<"hcl-Destruktor"<<endl;
+}
+
+int mntpunkt(const char* mntpfad) {
+	int ismounted{0};
+	if (FILE* mtab{setmntent("/etc/mtab", "r")}) {
+		while (const mntent* mtp{getmntent(mtab)}) {
+			if (mtp->mnt_dir && !strcmp(mtp->mnt_dir, mntpfad)) {
+				ismounted = 1;
+				break;
+			}
+		}
+		endmntent(mtab);
+	}
+	return ismounted;
 }
 
 // damit nicht Template-Klassen-Funktionen in Header-Dateien geschrieben werden muessen

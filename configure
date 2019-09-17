@@ -58,9 +58,9 @@ getIPR() {
 			REPOS="${SUDC}$Z lr|grep 'g++\|devel_gcc' \>$KR||${SUDC}$Z ar http://download.opensuse.org/repositories/devel:/gcc/\`cat /etc/*-release|grep ^NAME= |cut -d'\"' -f2|sed 's/ /_/'\`_\`cat /etc/*-release|grep ^VERSION_ID= |cut -d'\"' -f2\`/devel:gcc.repo;";
 			UREPO="${SUDC}$Z lr|grep \\\\\"g++\\\\\|devel_gcc\\\\\" \>$KR && ${SUDC}$Z rr devel_gcc;";
 			COMP="gcc gcc-c++"; # \$(CCInst)";
-			LBOOST=$(grep LBOOST vars|cut -d= -f2);
-			LBIO=$(grep LBIO vars|cut -d= -f2);
-			LBLO=$(grep LBLO vars|cut -d= -f2);
+			test -f vars && LBOOST=$(grep LBOOST vars|cut -d= -f2) ||LBOOST=;
+			test -f vars && LBIO=$(grep LBIO vars|cut -d= -f2) ||LBIO=;
+			test -f vars && LBLO=$(grep LBLO vars|cut -d= -f2) ||LBLO=;
 			# der Aufruf `zypper se ...boost...` dauert so lang und sollte bei `make mitzieh` meist nicht noetig sein
 			if test "$ICH" != viall -a -z "$ohneboost"; then
 			 if test -z "$PAR1" -o -z "$LBOOST" -o -z "$LBIO" -o -z "$LBLO"; then

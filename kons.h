@@ -36,6 +36,7 @@
 #include <memory> // fuer shared_ptr
 
 using namespace std;
+int mntpunkt(const char* mntpfad);
 extern const string& instvz; // in kons.cpp, z.B. /root/autofax
 extern const string& unindt; // instvz+"uninstallinv"
 extern const int sfeh[]; // T_Dienst_laeuft, T_Dienst_inexistent, ...
@@ -218,7 +219,6 @@ enum Tkons_
   T_Erfolg,
   T_Weder_zypper_noch_apt_get_noch_dnf_noch_yum_als_Installationspgrogramm_gefunden,
   T_Logdateidpp,
-  T_Lese_Konfiguration_aus,
   T_j_k,
   T_Fehler_bei_auswert,
   T_nicht_gefunden,
@@ -320,6 +320,8 @@ enum Tkons_
 	T_sprachstr,
 	T_v_k,
 	T_verbose_l,
+	T_stu_k,
+	T_stumm_l,
 	T_lvz_k,
 	T_logvz_l,
 	T_ld_k,
@@ -331,6 +333,7 @@ enum Tkons_
 	T_kd_k,
 	T_konfdatei_l,
 	T_Bildschirmausgabe_gespraechiger,
+  T_Bildschirmausgabe_ganz_stumm,
 	T_waehlt_als_Logverzeichnis_pfad_derzeit,
 	T_logdatei_string_im_Pfad,
 	T_sonst_knapper,
@@ -356,8 +359,8 @@ enum Tkons_
 	T_Zeit_Doppelpunkt,
 	T_Fertig_mit,
 	T_eigene,
-	T_entfernen,
-	T_belassen,
+	T_nicht_mehr_da,
+	T_laeuft_noch,
 	T_warte,
 	T_wird_aktualisiert_bitte_ggf_neu_starten,
 	T_muss_nicht_aktualisiert_werden,
@@ -407,6 +410,13 @@ enum Tkons_
 	T_vi_l,
 	T_Konfigurationsdatei,
 	T_Logdatei_usw_bearbeiten_sehen,
+  T_kf_k,
+  T_konfzeiglang_l,
+  T_Konfigurationsdateinamen,
+  T_anzeigen,
+	T_Konfigurationsdatei_schreiben,
+	T_ks_k,
+	T_kschreib_l,
 	T_vs_k,
 	T_vs_l,
 	T_Quelldateien_in,
@@ -465,6 +475,7 @@ enum Tkons_
 	T_Intervall_Minuten,
 	T_konsMAX
 }; // Tkons_
+// Konsistenz in gdb pruefen, z.B.:  p (const char* const)reinterpret_cast<TCtp*>(Txk.TCp)[T_unbek][Txk.lgn]
 
 extern const string sprachstr;
 /*
@@ -629,18 +640,18 @@ char ers(const char roh);
 
 // Gesamt-Trim
 inline std::string *gtrim(std::string *str) {
-  str->erase(0, str->find_first_not_of("\t "));       //prefixing spaces
-  str->erase(str->find_last_not_of("\t ")+1);         //surfixing spaces
+  str->erase(0, str->find_first_not_of("\t\r "));       //prefixing spaces etc.
+  str->erase(str->find_last_not_of("\t\r ")+1);         //surfixing spaces etc.
   return str;
 } // inline std::string *gtrim(std::string *str)
 
 inline std::string *ltrim(std::string *str) {
-  str->erase(0, str->find_first_not_of("\t "));       //prefixing spaces
+  str->erase(0, str->find_first_not_of("\t\r "));       //prefixing spaces etc.
   return str;
 } // inline std::string *ltrim(std::string *str)
 
 inline std::string *rtrim(std::string *str) {
-  str->erase(str->find_last_not_of("\t ")+1);         //surfixing spaces
+  str->erase(str->find_last_not_of("\t\r ")+1);         //surfixing spaces etc.
   return str;
 } // inline std::string *ltrim(std::string *str)
 
@@ -799,7 +810,7 @@ struct optcl:wpgcl
     int iwert; // Wert, der pptr zugewiesen wird, falls dieser Parameter gewaehlt wird; -1= Wert steht im nächsten Parameter, 1=pro Nennung in der Kommandozeile wert um 1 erhöhen
 //    string *zptr=0; // Zeiger auf Zusatzparameter, der hier eingegeben werden kann (z.B. Zahl der Zeilen nach -n (Zeilenzahl)
 //    schAcl<WPcl> *cpA=0; // Konfigurationsarray, das ggf. geschrieben werden muss
-//    uchar ogefunden=0; // braucht man nicht, ist in argcl
+//    uchar obgefunden=0; // braucht man nicht, ist in argcl
 		// ermittelte Optionen:
 		uchar woher{0}; // 1= ueber Vorgaben, 2= ueber Konfigurationsdatei, 3= ueber Befehlszeile gesetzt
 		const long Txrf{-1};
@@ -811,7 +822,7 @@ struct optcl:wpgcl
 //		void virtloeschomaps(/*schAcl<optcl>**/void *schlp);
 		void virtloeschomaps(schAcl<optcl> *schlp);
 		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-				const uchar wi, const long Txi2, const string rottxt, const int iwert, const uchar woher, const long Txrf, const uchar obno=0);
+				const uchar wi, const long Txi2, const string rottxt, const int iwert, const uchar woher, const long Txrf=-1, const uchar obno=0);
 		optcl(const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
 				const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const uchar obno=0);
 		void setzwert();
@@ -907,7 +918,7 @@ class lsyscl
 
 // enum betrsys {keins,suse,ubuntu,fedora};
 // betrsys pruefos();
-int obprogda(const string& prog, int obverb=0, int oblog=0, string *pfad=0);
+int obprogda(const string& prog, int obverb=0, int oblog=0, string *pfad=0,const int keinsu=0);
 enum instprog {keinp,zypper,apt,dnf,yum,urp,pac};
 string gethome();
 
@@ -1009,13 +1020,13 @@ std::string base_name(const std::string& path); // Dateiname ohne Pfad
 std::string dir_name(const std::string& path);  // Pfadname einer Datei
 int systemrueck(const string& cmd, int obverb=0, int oblog=0, vector<string> *rueck=0, const uchar obsudc=0,
                 const int verbergen=0, int obergebnisanzeig=wahr, const string& ueberschr=nix,vector<errmsgcl> *errm=0,uchar obincron=0,
-								stringstream *ausgp=0,uchar obdirekt=0);
+								stringstream *ausgp=0,uchar obdirekt=0,uchar ohnewisch=0);
 void pruefplatte();
 void pruefmehrfach(const string& wen=nix,int obverb=0,uchar obstumm=0);
 int setfaclggf(const string& datei,int obverb=0,int oblog=0,const binaer obunter=falsch,int mod=4,uchar obimmer=0,
                 uchar faclbak=0,const string& user={},uchar fake=0,stringstream *ausgp=0,const uchar obprot=1);
 int pruefverz(const string& verz,int obverb=0,int oblog=0, uchar obmitfacl=0, uchar obmitcon=0,
-              const string& besitzer={}, const string& benutzer={}, const uchar obmachen=1,const uchar obprot=1);
+              const string& besitzer={}, const string& benutzer={}, const uchar obmachen=1,const uchar obprot=1,const int keinsu=0);
 string aktprogverz();
 char Tippbuchst(const string& frage, const string& moegl,const char *berkl[], const char* erlaubt=0, const char *vorgabe=0);
 // vorgabe fur vorgabe = T_j_k; alternativ='n'
@@ -1050,7 +1061,7 @@ enum distroenum{unbek=-1,Mint,Ubuntu,Debian,Suse,Fedora,Fedoraalt,Mageia,Manjaro
 struct linst_cl
 {
  instprog ipr=keinp; // installiertes Program
- string schau; // Befehl zum Pruefen auf Vorhandensein ueber das Installationssystem
+ string psuch; // Befehl zum Pruefen auf Vorhandensein ueber das Installationssystem
  string instp; // Befehl zum Installieren ueber das Installationnssystem
  string instyp; // Befehl zum Installieren ueber das Installationnssystem mit automatischem yes auf Rueckfragen
  string upr;   // Befehl zum Deinstallieren ueber das Installationssystem
@@ -1231,7 +1242,7 @@ struct pidvec: public vector<pidcl>
  } //  inline pidvec& operator<<(const pidcl& pd)
 }; // pidvec
 
-int wartaufpids(pidvec *pidv,const ulong runden=0,const int obverb=0,const int oblog=0,const string& wo=nix);
+int wartaufpids(pidvec *pidv,const ulong runden=0,const int obverb=0,const int oblog=0,const string& wo=nix,const time_t maxsec=0);
 
 extern const string s_true; // ="true";
 extern const string s_dampand; // =" && ";
@@ -1248,13 +1259,17 @@ class hcl
 {
 	private:
 		uchar obsetz=1; // setzzaehler
-		uchar mitpids=0; // mehrere pids
+		const char* const DPROG;
+		const uchar mitcron; // ob Programm auch in Cron eingetragen werden kann; kann im Konstruktor angegeben werden
+		const uchar parstreng; // breche Programm ab, wenn Parameter nicht gefunden
 	protected:
 		pidvec pidv;
-		const char* const DPROG;
     double tstart, tende;
     size_t optslsz=0; // last opts.size()
+		uchar mitpids=0; // mehrere pids
+	public:
 		confdcl hccd;
+	protected:
 		string tmpcron; // fuer crontab
     string cronminut; // Minuten fuer crontab; 0 = kein Crontab-Eintrag
 		uchar nochkeincron;
@@ -1270,7 +1285,6 @@ class hcl
 		string muser; // Benutzer fuer Mysql/MariaDB
 		string mpwd;  // Passwort fuer Mysql/MariaDB //ω
 		stringstream uebers; // Ueberschrift fuer Verarbeitungslauf
-		const uchar mitcron; // ob Programm auch in Cron eingetragen werden kann; kann im Konstruktor angegeben werden
 		unsigned tmmoelen;
 #ifdef _WIN32
     char cpt[255];
@@ -1282,9 +1296,12 @@ class hcl
 	public:
 		int retu{0}; // Return-Value
 		int obverb=0; // verbose
+		int stumm=0; // gar keine Bildschirmausgabe
 		int oblog=0;  // mehr Protokollieren
     uchar rzf=0; // rueckzufragen
 		uchar obvi=0; // ob Konfigurationsdatei editiert werden soll
+    uchar kfzg=0; // Konfigurationsdatei-Namen ausgeben
+		uchar kschreib=0; // Konfigurationsdatei schreiben
 		uchar obvs=0;   // ob Quelldateien bearbeitet werden sollen
 		uchar keineverarbeitung=0; // wenn cronminuten geaendert werden sollen, vorher abkuerzen
     string langu; // Sprache (Anfangsbuchstabe)
@@ -1366,7 +1383,7 @@ class hcl
 		virtual void virtschlussanzeige();
 	public:
 		void pruefcl(); // commandline mit omap und mit argcmv parsen
-		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron);
+		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron,const uchar parstreng=1);
 		~hcl();
 		void lauf();
 		int hLog(const string& text,const bool oberr=0,const short klobverb=0) const; 

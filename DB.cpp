@@ -172,7 +172,6 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 // class Txdbcl Txd;
 // class TxB Txd(DB_T);
 class TxB Txd((const char* const* const* const*)DB_T);
-const string& pwk = "4893019320jfdksalö590ßs89d0qÃ9m0943Ã09Ãax"; // fuer Antlitzaenderung
 
 #ifdef mitpostgres 
 const DBSTyp myDBS=Postgres;
@@ -267,7 +266,7 @@ Feld::Feld(const string& name, string typ/*=string()*/, const string& lenge/*=st
 	}
 } // Feld(const string& name, const string& typ, const string& lenge, const string& prec, string comment, bool vind, bool vobauto, bool vnnull, string vdefa):
 
-// Feld::Feld(Feld const& copy) { }
+// Feld::Feld
 
 
 Index::Index(const string& name, Feld *const vfelder, const unsigned feldzahl, const uchar unique/*=0*/):
@@ -346,7 +345,7 @@ const string DB::defmycollat{"utf8_unicode_ci"};
 const string DB::defmyrowform{"DYNAMIC"};
 
 // statische Variable, 1= mariadb=geprueft
-uchar DB::oisok=0;
+uchar DB::oisok{0};
 
 // /*1*/DB::DB() { }
 
@@ -396,9 +395,9 @@ void DB::init(
 {
 	fehnr=0;
 	fLog(violetts+Txd[T_DB_wird_initialisiert]+schwarz,obverb>0?obverb-1:0,oblog);
-	uchar installiert=0;
-	uchar datadirda=0;
-	const string mysqld="mysqld";
+	uchar installiert{0};
+	uchar datadirda{0};
+	const string mysqld{"mysqld"};
 	switch (DBS) {
 		case MySQL:
 #ifdef linux
@@ -411,66 +410,67 @@ void DB::init(
 					break;
 				default: break;
 			} //       switch (ipr)
-			if (!dbsv) dbsv=new servc(db_systemctl_name,mysqld,obverb,oblog);
+			// schauen, ob die Exe-Datei da ist 
+			for (int iru=0;iru<2;iru++) {
+				if (!dbsv) dbsv=new servc(db_systemctl_name,mysqld,obverb,oblog);
+				installiert=1;
+				// wenn nicht gefunden ...
+				if (!obprogda(mysqld,obverb,oblog)) {
+					svec frueck;
+					// .. und auch hier nicht gefunden ...
+					systemrueck("find /usr/sbin /usr/bin /usr/libexec -executable -size +1M -name "+mysqld,obverb,oblog, &frueck,/*obsudc=*/0);
+					if (!frueck.size()) 
+						// .. dann wohl nicht installiert
+						installiert=0;
+				} //           if (!obprogda("mysqld",obverb,oblog))
+				if (installiert) {
+					if (!obprogda(mysqlbef,obverb,oblog))
+						installiert=0;
+					else if (systemrueck("grep \"^"+mysqlben+":\" /etc/passwd",obverb,oblog,/*rueck=*/0,/*obsudc=*/0))
+						installiert=0;
+					else if (systemrueck(mysqlbef+" -V",obverb,oblog,/*rueck=*/0,/*obsudc=*/0))
+						installiert=0;
+				} //           if (installiert)
+				if (installiert) break;
+				////        systemrueck("which zypper && zypper -n in mariadb || KLA which apt-get && apt-get -y install mariadb-server; KLZ",1,1);
+				instmaria(obverb, oblog);
+			} //         for (int iru=0;iru<2;iru++)
 			if (!oisok) {
-				// schauen, ob die Exe-Datei da ist 
-				for (int iru=0;iru<2;iru++) {
-					installiert=1;
-					// wenn nicht gefunden ...
-					if (!obprogda(mysqld,obverb,oblog)) {
-						svec frueck;
-						// .. und auch hier nicht gefunden ...
-						systemrueck("find /usr/sbin /usr/bin /usr/libexec -executable -size +1M -name "+mysqld,obverb,oblog, &frueck,/*obsudc=*/0);
-						if (!frueck.size()) 
-							// .. dann wohl nicht installiert
-							installiert=0;
-					} //           if (!obprogda("mysqld",obverb,oblog))
-					if (installiert) {
-						if (!obprogda(mysqlbef,obverb,oblog))
-							installiert=0;
-						else if (systemrueck("grep \"^"+mysqlben+":\" /etc/passwd",obverb,oblog,/*rueck=*/0,/*obsudc=*/0))
-							installiert=0;
-						else if (systemrueck(mysqlbef+" -V",obverb,oblog,/*rueck=*/0,/*obsudc=*/0))
-							installiert=0;
-					} //           if (installiert)
-					if (installiert) break;
-					////        systemrueck("which zypper && zypper -n in mariadb || KLA which apt-get && apt-get -y install mariadb-server; KLZ",1,1);
-					instmaria(obverb, oblog);
-				} //         for (int iru=0;iru<2;iru++)
 				// Datenverzeichnis suchen und pruefen
 				if (installiert) {
 					svec zrueck;
-					if (!systemrueck("sed 's/#.*$//g' `"+mysqlbef+" --help | sed -n '/Default options/{n;p}'` 2>/dev/null "
-								"| grep datadir | cut -d'=' -f2",obverb,oblog,&zrueck,/*obsudc=*/0)) {
+					if (!systemrueck("sed 's/#.*$//g' `"+mysqlbef+" --help | sed -n '/Default options/{n;p}'` 2>/dev/null"
+								"|grep datadir|cut -d= -f2|sed 's/^[[:space:]]*//'",obverb,oblog,&zrueck,/*obsudc=*/0)) {
 						if (zrueck.size()) {
 							datadir=zrueck[zrueck.size()-1];  
 						} else {
-							svec zzruck, zincldir;
-							systemrueck("find /etc /etc/mysql ${MYSQL_HOME} -name my.cnf -printf '%p\\n' -quit", obverb,oblog,&zzruck,/*obsudc=*/0);
-							if (!zzruck.size())
-								systemrueck("find "+gethome()+" -name .my.cnf -printf '%p\\n' -quit",obverb,oblog,&zzruck,/*obsudc=*/0);
-							if (zzruck.size()) {
-								systemrueck("cat "+zzruck[0]+" | sed 's/#.*$//g' | grep '!includedir' | sed 's/^[ \t]//g' | cut -d' ' -f2-", 
+							svec myconfpfad, zincldir;
+							systemrueck("find /etc /etc/mysql $MYSQL_HOME -name my.cnf -printf '%p\\n' -quit", obverb,oblog,&myconfpfad,/*obsudc=*/0);
+							if (!myconfpfad.size())
+								systemrueck("find "+gethome()+" -name .my.cnf -printf '%p\\n' -quit",obverb,oblog,&myconfpfad,/*obsudc=*/0);
+							if (myconfpfad.size()) {
+								systemrueck("sed 's/#.*$//g' "+myconfpfad[0]+"|grep '!includedir'|sed 's/^[ \t]//g'|cut -d' ' -f2-", 
 										obverb,oblog,&zincldir,/*obsudc=*/1); 
 								for(auto const& aktdir:zincldir) {
 									svec zzruck2;
-									systemrueck("find "+aktdir+" -not -type d",obverb,oblog,&zzruck2,/*obsudc=*/1); // auch links
+									systemrueck("find "+aktdir+" -not -type d -name '*.cnf'",obverb,oblog,&zzruck2,/*obsudc=*/1); // auch links
 									for(auto const& aktzz2:zzruck2) {
-										zzruck<<aktzz2;
+										myconfpfad<<aktzz2;
 									}
 								} //                 for(size_t i=0;i<zincldir.size();i++)
-							} //               if (zzruck.size())
-							if(zzruck.size()) {
-								for(auto const& aktzz:zzruck) {
-									svec zrueck;
-									if (!systemrueck(("sed 's/#.*$//g' '")+aktzz+"' | grep datadir | cut -d'=' -f2",obverb,oblog,&zrueck,/*obsudc=*/1)) {
-										if (zrueck.size()) {
-											datadir=zrueck[zrueck.size()-1];  
+							} //               if (myconfpfad.size())
+							if(myconfpfad.size()) {
+								for(auto const& aktzz:myconfpfad) {
+									svec drueck;
+									if (!systemrueck(("sed 's/#.*$//g' '")+aktzz+"'|grep datadir|cut -d= -f2|sed 's/^[[:space:]]*//'"
+												,obverb,oblog,&drueck,/*obsudc=*/1)) {
+										if (drueck.size()) {
+											datadir=drueck[drueck.size()-1];  
 											break;
-										} // if (zrueck.size()) 
-									} // if (!systemrueck(("cat ")+zzruck[i]+" | sed 's/#.*$//g' | grep datadir | cut -d'=' -f2",obverb>0?obverb-1:0,oblog,&zrueck)) 
-								} // for(size_t i=0;i<zzruck.size();i++) 
-							} // if(zzruck.size()) 
+										} // if (drueck.size()) 
+									} // if (!systemrueck(("cat ")+myconfpfad[i]+"|sed 's/#.*$//g'|grep datadir|cut -d= -f2",obverb>0?obverb-1:0,oblog,&drueck)) 
+								} // for(size_t i=0;i<myconfpfad.size();i++) 
+							} // if(myconfpfad.size()) 
 						} // if (zrueck.size()) else
 					} // if (!systemrueck("sed 's/#.*$//g' `"+mysqlbef+"--help | sed -n '/Default options/KLAn;pKLZ'` 2>/dev/null " ...
 					gtrim(&datadir);
@@ -479,7 +479,7 @@ void DB::init(
 						datadir="/var/lib/mysql";
 					}
 					if (obverb) fLog("datadir: "+blaus+datadir+schwarz,obverb,oblog);
-					struct stat datadst={0};
+					struct stat datadst{0};
 					if (!lstat(datadir.c_str(), &datadst)) {
 						if(S_ISDIR(datadst.st_mode)) {
 							datadirda=1;
@@ -507,7 +507,7 @@ void DB::init(
 				} else {
 					if (user.empty()) {
 						exit(schluss(13,Txd[T_Datenbankbenutzer_leer]));
-          }
+					}
 					RS *rs;
 					for(unsigned versuch=0;versuch<versuchzahl;versuch++) {
 						////   <<"versuch: "<<versuch<<", conn[aktc]: "<<conn[aktc]<<", host: "<<host<<", user: "<<user<<", passwd "<<passwd<<", uedb: "<<uedb<<", port: "<<port<<", client_flag: "<<client_flag<<", obverb: "<<obverb<<", oblog: "<<(int)oblog<<endl;
@@ -516,7 +516,7 @@ void DB::init(
 							// mysql_set_character_set(conn[aktc],"utf8");
 							cmd="SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'";
 							if (mysql_real_query(conn[aktc],cmd.c_str(),cmd.length())) {
-								if (MYSQL_RES *dbres=mysql_use_result(conn[aktc])) {
+								if (MYSQL_RES *dbres{mysql_use_result(conn[aktc])}) {
 									mysql_free_result(dbres);
 								}
 							}
@@ -569,9 +569,9 @@ void DB::init(
 										fehnr=mysql_errno(conn[aktc]);
 										if (!fehnr) {
 											rs=new RS(this,string("CREATE DATABASE IF NOT EXISTS `")+dbname+"`"+
-											         (charset.empty()?"":" CHARSET '"+charset+"'")+
-															 (collate.empty()?"":" COLLATE '"+collate+"'"),
-											       aktc,obverb);
+													(charset.empty()?"":" CHARSET '"+charset+"'")+
+													(collate.empty()?"":" COLLATE '"+collate+"'"),
+													aktc,obverb);
 											fehnr=mysql_errno(conn[aktc]);
 											if (!fehnr) {
 												////                    rs->Abfrage(string("USE `")+uedb+"`");
@@ -616,10 +616,10 @@ void DB::init(
 			uchar neu=0;
 			if (!dbsv) { 
 				if (!obprogda("postgres",obverb,oblog)) {
-				  caup<<"Programm postgres nicht da"<<endl;
+					caup<<"Programm postgres nicht da"<<endl;
 					systemrueck("V0=/usr/bin/postgres; V1=${V0}_alt; V2=${V0}_uralt; test -d $V0 &&{ test -d $V1 && "
-					            "mv $V1 $V2; mv $V0 $V1;};:",
-					            obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+							"mv $V1 $V2; mv $V0 $V1;};:",
+							obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 					linstp->doinst("postgresql-server",obverb,oblog);// postgresql-contrib
 					neu=1;
 				} // 				if (!obprogda("postgres",obverb,oblog))
@@ -632,7 +632,7 @@ void DB::init(
 					}
 				}
 				if (!dbsv->obslaeuft(obverb,oblog)) {
-				  systemrueck("journalctl -xe --no-pager -n 9",2,2,/*rueck=*/0,/*obsudc=*/0);
+					systemrueck("journalctl -xe --no-pager -n 9",2,2,/*rueck=*/0,/*obsudc=*/0);
 					//// (sudo) systemctl start postgresql
 					//// oisok=1;
 					fLog(Txd[T_Ende_Gelaende],obverb,oblog);
@@ -658,13 +658,13 @@ void DB::init(
 						break;
 					}
 					caup<<"jetzt Benutzererstellung"<<endl<<endl;
-		      PGconn *zwi=pconn;
+					PGconn *zwi=pconn;
 					pconn=pmconn;
-			    RS p1(this,"CREATE USER "+puser+" CREATEDB CREATEUSER INHERIT REPLICATION PASSWORD '"+ppasswd+"'",obverb);
-////					PQexec(pmconn, ("CREATE USER "+puser+" CREATEDB CREATEUSER INHERIT REPLICATION PASSWORD '"+ppasswd+"'").c_str());
-			    RS p2(this,string("CREATE DATABASE \"")+uedb+"\" ENCODING 'LATIN1' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'",obverb);
-////					PQexec(pmconn, (string("CREATE DATABASE \"")+uedb+"\" ENCODING 'LATIN1' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'").c_str());
-          pconn=zwi;
+					RS p1(this,"CREATE USER "+puser+" CREATEDB CREATEUSER INHERIT REPLICATION PASSWORD '"+ppasswd+"'",obverb);
+					////					PQexec(pmconn, ("CREATE USER "+puser+" CREATEDB CREATEUSER INHERIT REPLICATION PASSWORD '"+ppasswd+"'").c_str());
+					RS p2(this,string("CREATE DATABASE \"")+uedb+"\" ENCODING 'LATIN1' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'",obverb);
+					////					PQexec(pmconn, (string("CREATE DATABASE \"")+uedb+"\" ENCODING 'LATIN1' TEMPLATE template0 LC_CTYPE 'de_DE.ISO88591' LC_COLLATE 'de_DE.ISO88591'").c_str());
+					pconn=zwi;
 				} else {
 					fLog(Txd[T_Verbindung_zu]+blaus+uedb+schwarz+Txd[T_gelungen]+blau+user+schwarz+"', host: '"+blau+ip_a+schwarz+"', port: '"+blau+ltoan(port)+schwarz+"'",obverb,oblog);
 					caup<<"is gangen"<<endl;
@@ -735,10 +735,10 @@ void DB::setzrpw(int obverb/*=0*/,int oblog/*=0*/) // Setze root-password
 						if (rootpw2==rootpwd) break;
 					} //         while (1)
 					// 7.7.17: neuer Fehler "ERROR 1819 (HY000) at line 1: Your password does not satisfy the current policy requirements" auf fedora
-					const string verbot="/etc/my.cnf.d/cracklib_password_check.cnf",
-					             plugin="plugin-load-add=cracklib_password_check.so";
-					struct stat st={0};
-					uchar gef=0;
+					const string verbot{"/etc/my.cnf.d/cracklib_password_check.cnf"},
+					             plugin{"plugin-load-add=cracklib_password_check.so"};
+					struct stat st{0};
+					uchar gef{0};
 					if (!lstat(verbot.c_str(),&st)) {
 						mdatei f(verbot,ios::in,0);
 						if (f.is_open()) {
@@ -755,12 +755,12 @@ void DB::setzrpw(int obverb/*=0*/,int oblog/*=0*/) // Setze root-password
 						 cmd="sed -i 's/^\\("+plugin+"\\)/;\\1/g' "+verbot+";";
 						 systemrueck(cmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 						 dbsv->restart(obverb,oblog);
-						 const string rcmd=sudc+"sed -i 's/^;\\("+plugin+"\\)/\\1/g' "+verbot+";";
+						 const string rcmd{sudc+"sed -i 's/^;\\("+plugin+"\\)/\\1/g' "+verbot+";"};
 						 anfgg(unindt,rcmd,cmd,obverb,oblog);
 						} // 						if (gef)
 					} // 					if (!lstat(verbot.c_str(),&st))
-					const string cmd=sudc+mysqlbef+" -uroot -h'"+host+"' -e \"GRANT ALL ON *.* TO 'root'@'"+myloghost+
-						"' IDENTIFIED BY '"+ersetzAllezu(rootpwd,"\"","\\\"")+"' WITH GRANT OPTION\"";
+					const string cmd{sudc+mysqlbef+" -uroot -h'"+host+"' -e \"GRANT ALL ON *.* TO 'root'@'"+myloghost+
+						"' IDENTIFIED BY '"+ersetzAllezu(rootpwd,"\"","\\\"")+"' WITH GRANT OPTION\""};
 					fLog(Txd[T_Fuehre_aus_db]+blaus+cmd+schwarz,1,1);
 					int erg __attribute__((unused))=system(cmd.c_str());
 				} // if (Tippob(Txd[T_Das_MySQL_Passwort_fuer_Benutzer_root_ist_leer_Wollen_Sie_eines_festlegen])) 
@@ -1793,10 +1793,9 @@ void RS::setzzruck()
 // fuer obverb gibt es die Stufen: -2 (zeige auch bei Fehlern nichts an), -1 (zeige SQL an), 0, 1
 int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/)
 {
-	int altobverb=obverb;
+////	int altobverb=obverb; obverb=1;
 	const unsigned vlz=10; // Verlängerungszahl
 	const unsigned maxversuche=3;
-//	obverb=1;
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
 	int obfalsch{0};
@@ -1967,7 +1966,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 #endif // mitpostgres
 			break;
 	} // 	switch (db->DBS)
-	obverb=altobverb;
+////	obverb=altobverb;
 	return (int)obqueryfehler;
 } // RS::doAbfrage
 
@@ -2458,7 +2457,7 @@ void dhcl::virtinitopt()
 	opn<<new optcl(/*pname*/"mpwd",/*pptr*/&mpwd,/*part*/ppwd,T_mpwd_k,T_mpwd_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mpwd.empty(),T_Passwort_fuer_MySQL_MariaDB);
 	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty(),T_Datenbankname_fuer_MySQL_MariaDB_auf);
 //	opn<<optcl(/*pname*/"tabl",/*pptr*/&tabl,/*art*/pstri,T_tb_k,T_tabelle_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1);
-	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
 	hcl::virtinitopt();
 } // void hhcl::virtinitopt
 
@@ -2628,3 +2627,19 @@ void insv::zeig(const char* const wo) {
 		fLog(violetts+"i: "+gruen+ltoan(i)+": "+schwarz+ivec[i].feld+": '"+blau+ivec[i].wert+"'"+schwarz,1,0);
 	}
 }
+
+Feld& Feld::operator=(const Feld* fur) {
+	if (fur!=this) {
+		string *np=(string*)&name; *np=fur->name;
+		np=(string*)&typ;*np=fur->typ;
+		lenge=fur->lenge;
+		np=(string*)&prec;*np=fur->prec;
+		comment=fur->comment;
+		obind=fur->obind;
+		obauto=fur->obauto;
+		nnull=fur->nnull;
+		defa=fur->defa;
+		unsig=fur->unsig;
+	}
+	return *this;
+} // Feld& Feld::operator=
