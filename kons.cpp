@@ -3510,6 +3510,7 @@ void optcl::virtoausgeb() const
 	cout<<",fnnachhz:"<<blau<<fnnachhz<<schwarz;
 	cout<<",fnvorhz:"<<blau<<fnvorhz<<schwarz;
 	cout<<",sonderrf:"<<blau<<(int)sonderrf<<schwarz;
+	cout<<",fngueltigz:"<<blau<<fngueltigz<<schwarz;
 	cout<<endl<<endl;
 } // void optcl::virtoausgeb()
 
@@ -5605,6 +5606,7 @@ void hcl::turueckfrage(shared_ptr<optcl>& omit)
 			if (!omit->pptr)
 				perror((Txk[T_pptr_darf_nicht_null_sein_bei]+omit->pname+")").c_str());
 			if (obverb) fLog(Txk[T_Frage_ab]+blaus+omit->pname+schwarz+":",obverb,oblog);
+			do {
 			string pwd2;
 			switch (omit->part) {
 				case pint:
@@ -5637,6 +5639,7 @@ void hcl::turueckfrage(shared_ptr<optcl>& omit)
 				case pbin:
 					break;
 			} // 		switch (omit->part)
+			} while (omit->fngueltigz && !(this->*omit->fngueltigz)());
 			if (omit->fnnachhz) {
 				(this->*omit->fnnachhz)();
 			}
@@ -6459,11 +6462,10 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 void hcl::fuv0(){}; void hcl::fuv1(){}; void hcl::fuv2(){}; void hcl::fuv3(){}; void hcl::fuv4(){}; void hcl::fuv5(){}; void hcl::fuv6(){}; void hcl::fuv7(){}; void hcl::fuv8(){}; void hcl::fuv9(){}; void hcl::fuv10(){};
 int hcl::fui0(){return 0;}; int hcl::fui1(){return 0;}; int hcl::fui2(){return 0;}; int hcl::fui3(){return 0;}; int hcl::fui4(){return 0;}; int hcl::fui5(){return 0;}; int hcl::fui6(){return 0;}; int hcl::fui7(){return 0;}; int hcl::fui8(){return 0;}; int hcl::fui9(){return 0;}; int hcl::fui10(){return 0;};
 
-optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const string& Txtrf/*={}*/,const uchar obno/*=(uchar)-1*/,const string* refstr/*=0*/,const uchar* obfragz/*=0*/,fnhcliztyp fnobfragz/*=0*/,fnhclztyp fnnachhz/*=0*/,fnhclztyp fnvorhz/*=0*/,uchar sonderrf/*=0*/):
+optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi, const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const string& Txtrf/*={}*/,const uchar obno/*=(uchar)-1*/,const string* refstr/*=0*/,const uchar* obfragz/*=0*/,fnhcliztyp fnobfragz/*=0*/,fnhclztyp fnnachhz/*=0*/,fnhclztyp fnvorhz/*=0*/,uchar sonderrf/*=0*/,fnhcliztyp fngueltigz/*=0*/):
 	wpgcl(pname,pptr,part),
 	kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),Txi2(Txi2),rottxt(rottxt),iwert(iwert),
-	woher(woher),Txtrf(Txtrf.empty()?Txi==-1?string():(*TxBp)[Txi]:Txtrf),obno(obno==(uchar)-1?part==puchar?1:0:obno),refstr(refstr),obfragz(obfragz),fnobfragz(fnobfragz),fnnachhz(fnnachhz),sonderrf(sonderrf)/*=0*///,eingetragen(0)
+	woher(woher),Txtrf(Txtrf.empty()?Txi==-1?string():(*TxBp)[Txi]:Txtrf),obno(obno==(uchar)-1?part==puchar?1:0:obno),refstr(refstr),obfragz(obfragz),fnobfragz(fnobfragz),fnnachhz(fnnachhz),sonderrf(sonderrf),fngueltigz(fngueltigz)/*=0*///,eingetragen(0)
 {
 	//// <<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
 }
@@ -6737,7 +6739,7 @@ void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const strin
 	//// ersetzAlle(unicmd,"'\\''","'");
 	const string bef{sudc+"sh -c '"+cmd+"'"};
 	anfgg(unindt,unicmd,bef,obverb,oblog);
-} // void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const string& cbef)
+} // void hcl::tucronschreib
 
 // wird aufgerufen in dodovi
 void viadd(string* const cmdp,string* const zeigp, const string& datei,const uchar ro/*=0*/,const uchar hinten/*=0*/, const uchar unten/*=0*/)

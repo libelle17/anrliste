@@ -825,15 +825,15 @@ struct optcl:wpgcl
 		const string* refstr{0}; // z.B. der User zu einem Passwort, um bei rueckfragen() bessere Ansagen machen zu koennen
 		const uchar* obfragz; // Zeiger auf Variable, die ggf. mit 1 bezeichnet, dass Option in rueckfragen abgefragt werden soll;
 		fnhcliztyp fnobfragz{0}; // Zeiger auf Funktion, deren Ergebnis sagt, ob die Option bei rueckfragen() abgefragt werden soll
-		fnhclztyp fnnachhz{0}; // Zeiger auf Funktion, die in rueckfragen() vorher aufgerufen wird
-		fnhclztyp fnvorhz{0}; // Zeiger auf Funktion, die in rueckfragen() nach aufgerufen wird
+		fnhclztyp fnnachhz{0}; // Zeiger auf Funktion, die in rueckfragen() danach aufgerufen wird
+		fnhclztyp fnvorhz{0}; // Zeiger auf Funktion, die in rueckfragen() vorher aufgerufen wird
 		uchar sonderrf{0}; // 1 = in rueckfragen individuelle Behandlung
+		fnhcliztyp fngueltigz{0}; // Zeiger auf Funktion, deren Ergebnis sagt, ob die Eingabe gueltig war
 		const uchar virteinzutragen(/*schAcl<optcl>**/void *schlp,int obverb);
 		void virtweisomapzu(/*schAcl<optcl>**/void *schlp);
 //		void virtloeschomaps(/*schAcl<optcl>**/void *schlp);
 		void virtloeschomaps(schAcl<optcl> *schlp);
-		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-				const uchar wi, const long Txi2, const string rottxt, const int iwert, const uchar woher, const string& Txtrf=string(), const uchar obno=(uchar)-1/*dann je nach art*/,const string* refstr=0,const uchar* obfragz=0,fnhcliztyp fnobfragz=0, fnhclztyp fnnachhz=0,fnhclztyp fnvorhz=0,uchar sonderrf=0);
+		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi, const uchar wi, const long Txi2, const string rottxt, const int iwert, const uchar woher, const string& Txtrf=string(), const uchar obno=(uchar)-1/*dann je nach art*/,const string* refstr=0,const uchar* obfragz=0,fnhcliztyp fnobfragz=0, fnhclztyp fnnachhz=0,fnhclztyp fnvorhz=0,uchar sonderrf=0,fnhcliztyp fngueltigz=0);
 		optcl(const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
 				const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const uchar obno=0);
 		void setzwert();
