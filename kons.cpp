@@ -699,8 +699,14 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"pruefmehrfach()","checkmultiple()"},
 	// T_Sprachen,
 	{"Sprache/Language/lingue/lingua","Sprache/Language/lingue/lingua"},
-	// T_Intervall_Minuten,
-	{"Intervall in Minuten fuer automatischen Programmaufruf (0=kein Aufruf)", "interval in minutes for automatic program call (0=no call)"},
+	// T_pptr_gefunden,
+	{"pptr gefunden","pptr found"},
+	// T_pptr_darf_nicht_null_sein_bei,
+	{"pptr darf nicht (null) sein (bei ","pptr must not be (null) (at"},
+	// T_rueckfragen
+	{"rueckfragen()","callbacks()"},
+	// T_Frage_ab
+	{"Frage ab: ","Asking for: "},
 	{"",""}
 }; // const char *Txkonscl::TextC[T_konsMAX+1][SprachZahl]=
 
@@ -3450,7 +3456,7 @@ uchar VerzeichnisGibts(const char* vname)
 
 void wpgcl::virtoausgeb() const
 {
-	cout<<"pname:"<<blau<<setw(13)<<pname<<schwarz;
+	cout<<"pname:"<<gruen<<setw(13)<<pname<<schwarz;
 	cout<<",pptr:"<<gruen<<setw(45);
 	if (pptr) {
 		if (part==puchar||part==pbin) {
@@ -3494,10 +3500,17 @@ void optcl::virtoausgeb() const
 	cout<<",obno:"<<blau<<(int)obno<<schwarz;
 	cout<</*endl<<setw(22)<<*/",bemkg:"<<blau<<bemerk<<schwarz;
 	cout<<",woh:"<<blau<<(int)woher<<schwarz;
+	cout<<",Txtrf:"<<blau<<Txtrf<<schwarz;
 	cout<<",geg:"<<blau<<(int)gegenteil<<schwarz;
 	cout<<",nsp:"<<blau<<(int)nichtspeichern<<schwarz;
 	cout<<",eing:"<<blau<<(int)eingetragen<<schwarz;
-	cout<<endl;
+	cout<<",refstr:"<<blau<<refstr<<schwarz;
+	cout<<",obfragz:"<<blau;if(obfragz)cout<<(int)*obfragz;else cout<<"(0)"<<schwarz;
+	cout<<",fnobfragz:"<<blau<<fnobfragz<<schwarz;
+	cout<<",fnnachhz:"<<blau<<fnnachhz<<schwarz;
+	cout<<",fnvorhz:"<<blau<<fnvorhz<<schwarz;
+	cout<<",sonderrf:"<<blau<<(int)sonderrf<<schwarz;
+	cout<<endl<<endl;
 } // void optcl::virtoausgeb()
 
 
@@ -4928,7 +4941,7 @@ int find3cl::ausgeb()
 	} //       for(set<elem3>::iterator jt=erg.begin();jt!=erg.end();jt++)
 	pthread_mutex_unlock(&printf_mutex);
 	return 0;
-} //     int ausgeb()
+} //     int ausgeb
 
 int find3cl::finde(svec *wovp,const string& muster/*=string()*/,long tiefe/*=-1*/,
 		int _typbit/*=B_Alle*/,int _folge/*=Fol_Dat*/,time_t _mab/*=0*/,time_t _mbis/*=0*/,int obicase/*=0*/,int _nurexec/*=0*/,int obnoext/*=0*/)
@@ -5049,7 +5062,7 @@ int dateivgl(const string& d1, const string& d2,uchar obzeit/*=0*/)
 	return erg;
 } // int dateivgl(const string& d1, const string& d2)
 
-// wird aufgerufen in: paramcl::setzhylavz, pruefcvz, virtrueckfragen
+// wird aufgerufen in: paramcl::setzhylavz, pruefcvz, rueckfragen
 void kuerzevtz(string *vzp)
 {
 	if (!vzp->empty()) {
@@ -5151,8 +5164,8 @@ void hcl::lauf()
 	} // if (zeigvers)
 	else if (!keineverarbeitung) {
 		pvirtvorrueckfragen();
-		virtrueckfragen();
-		pvirtvorpruefggfmehrfach(); // kann noch keineverarbeitung setzen
+		rueckfragen();
+		pvirtnachrueckfragen(); // pvirtvorpruefggfmehrfach(); // kann noch keineverarbeitung setzen
     if (!keineverarbeitung) {
       pruefggfmehrfach();
       if (logdateineu) tuloeschen(logdt,string(),obverb,oblog);
@@ -5233,7 +5246,7 @@ string holsystemsprache(int obverb/*=0*/)
 	return ret;
 } // string holsystemsprache
 
-// wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
+// wird aufgerufen in: rueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
 void hcl::virtlgnzuw()
 {
 	//// int altobverb=obverb; obverb=1;
@@ -5300,13 +5313,13 @@ void hcl::virtVorgbAllg()
 // wird aufgerufen in lauf
 void hcl::virtinitopt()
 {
-	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lg_k,T_language_l,/*TxBp*/&Txk,/*Txi*/T_sprachstr,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,T_Sprachen);
-	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lang_k,T_lingue_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,-1);
+	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lg_k,T_language_l,/*TxBp*/&Txk,/*Txi*/T_sprachstr,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,/*Txtrf*/Txk[T_Sprachen]);
+	opn<<new optcl(/*pname*/"language",/*pptr*/&langu,/*art*/pstri,T_lang_k,T_lingue_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obverb,/*art*/puchar,T_v_k,T_verbose_l,/*TxBp*/&Txk,/*Txi*/T_Bildschirmausgabe_gespraechiger,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&stumm,/*art*/puchar,T_stu_k,T_stumm_l,/*TxBp*/&Txk,/*Txi*/T_Bildschirmausgabe_ganz_stumm,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"logvz",/*pptr*/&logvz,/*art*/pverz,T_lvz_k,T_logvz_l,/*TxBp*/&Txk,/*Txi*/T_waehlt_als_Logverzeichnis_pfad_derzeit,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!logvz.empty(),T_Logverzeichnis);
-	opn<<new optcl(/*pname*/"logdname",/*pptr*/&logdname,/*art*/pstri,T_ld_k,T_logdname_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_string_im_Pfad,/*wi*/0,/*Txi2*/T_wird_verwendet_anstatt,/*rottxt*/logvz,/*wert*/-1,/*woher*/!logdname.empty(),T_Logdateiname);
-	opn<<new optcl(/*pname*/"oblog",/*pptr*/&oblog,/*art*/pint,T_l_k,T_log_l,/*TxBp*/&Txk,/*Txi*/T_protokolliert_ausfuehrlich_in_Datei,/*wi*/1,/*Txi2*/T_sonst_knapper,/*rottxt*/loggespfad,/*wert*/1,/*woher*/1,T_Oblog_ausf_Protok);
+	opn<<new optcl(/*pname*/"logvz",/*pptr*/&logvz,/*art*/pverz,T_lvz_k,T_logvz_l,/*TxBp*/&Txk,/*Txi*/T_waehlt_als_Logverzeichnis_pfad_derzeit,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/!logvz.empty(),Txk[T_Logverzeichnis]);
+	opn<<new optcl(/*pname*/"logdname",/*pptr*/&logdname,/*art*/pstri,T_ld_k,T_logdname_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_string_im_Pfad,/*wi*/0,/*Txi2*/T_wird_verwendet_anstatt,/*rottxt*/logvz,/*wert*/-1,/*woher*/!logdname.empty(),Txk[T_Logdateiname],/*obno*/0,/*refstr*/0,/*obfragz*/0,/*fnobfragz*/0,/*fnnachhz*/&hcl::setzlog);
+	opn<<new optcl(/*pname*/"oblog",/*pptr*/&oblog,/*art*/pint,T_l_k,T_log_l,/*TxBp*/&Txk,/*Txi*/T_protokolliert_ausfuehrlich_in_Datei,/*wi*/1,/*Txi2*/T_sonst_knapper,/*rottxt*/loggespfad,/*wert*/1,/*woher*/1,Txk[T_Oblog_ausf_Protok]);
 	opn<<new optcl(/*pptr*/&logdateineu,/*art*/puchar,T_ldn_k,T_logdateineu_l,/*TxBp*/&Txk,/*Txi*/T_logdatei_vorher_loeschen,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&akonfdt,/*art*/pfile,T_kd_k,T_konfdatei_l,/*TxBp*/&Txk,/*Txi*/T_verwendet_Konfigurationsdatei_string_anstatt,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_h_k,T_hilfe_l,/*TxBp*/&Txk,/*Txi*/T_Erklaerung_haeufiger_Optionen,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -5314,12 +5327,12 @@ void hcl::virtinitopt()
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_fgz_k,T_fgz_l,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_sh,T_standardhilfe,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/3,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_libtest,T_libtest,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/4,/*woher*/1);
-	opn<<new optcl(/*pname*/"cronminut",/*pptr*/&cronminut,/*art*/pdez,T_cm_k,T_cronminuten_l,/*TxBp*/&Txk,/*Txi*/T_Alle_wieviel_Minuten_soll,/*wi*/1,/*Txi2*/T_aufgerufen_werden_0_ist_gar_nicht,/*rottxt*/meinname,/*wert*/-1,/*woher*/1,T_Intervall_Minuten);
+	opn<<new optcl(/*pname*/"cronminut",/*pptr*/&cronminut,/*art*/pdez,T_cm_k,T_cronminuten_l,/*TxBp*/&Txk,/*Txi*/T_Alle_wieviel_Minuten_soll,/*wi*/1,/*Txi2*/T_aufgerufen_werden_0_ist_gar_nicht,/*rottxt*/meinname,/*wert*/-1,/*woher*/1,/*Txtrf*/Txk[T_Alle_wieviel_Minuten_soll]+meinname+Txk[T_aufgerufen_werden_0_ist_gar_nicht],/*obno*/0,/*refstr*/0,/*obfragz*/&mitcron);
 	opn<<new optcl(/*pptr*/&obvi,/*art*/puchar,T_vi_k,T_vi_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei,/*wi*/0,/*Txi2*/T_Logdatei_usw_bearbeiten_sehen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&kfzg,/*art*/puchar,T_kf_k,T_konfzeiglang_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdateinamen,/*wi*/0,/*Txi2*/T_anzeigen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&kschreib,/*art*/puchar,T_ks_k,T_kschreib_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei_schreiben,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obvs,/*art*/puchar,T_vs_k,T_vs_l,/*TxBp*/&Txk,/*Txi*/T_Quelldateien_in,/*wi*/0,/*Txi2*/T_bearbeiten_sehen,/*rottxt*/instvz,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pname*/"autoupd",/*pptr*/&autoupd,/*art*/pint,T_autoupd_k,T_autoupd_l,/*TxBp*/&Txk,/*Txi*/T_Programm_automatisch_aktualisieren,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,T_Programm_automatisch_aktualisieren);
+	opn<<new optcl(/*pname*/"autoupd",/*pptr*/&autoupd,/*art*/pint,T_autoupd_k,T_autoupd_l,/*TxBp*/&Txk,/*Txi*/T_Programm_automatisch_aktualisieren,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,Txk[T_Sollen_neue_Programmversionen_von]+meinname+Txk[T_automatisch_installiert_werden]);
 	opn<<new optcl(/*pptr*/&rzf,/*art*/puchar,T_rf_k,T_rueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_alle_Parameter_werden_abgefragt_darunter_einige_hier_nicht_gezeigte,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&nrzf,/*art*/puchar,T_krf_k,T_keinerueckfragen_l,/*TxBp*/&Txk,/*Txi*/T_keine_Rueckfragen_zB_aus_Cron,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&zeigvers,/*art*/puchar,T_info_k,T_version_l,/*TxBp*/&Txk,/*Txi*/T_Zeigt_die_Programmversion_an,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -5374,7 +5387,7 @@ void hcl::parsecl()
 							ap->agef++; // Parameter gefunden
 							hLog(Txk[T_Parameter]+blaus+acstr+schwarz+Txk[T_gefunden]+(omit->second->pptr?"1":"0"));
 							if (omit->second->pptr) {
-								hLog("pptr gefunden");
+								hLog(Txk[T_pptr_gefunden]);
 								// pzuweis liefert -1, wenn der naechste Parameter als Inhalt verwendet wurde, sonst pcfnr
 								apn=ap; apn++;
 								const char *nacstr=apn==argcmv.end()?"":apn->argcs;
@@ -5444,7 +5457,7 @@ void hcl::virtlieskonfein()
 	} // 	if (akonfdt.empty()) 
 	// agcnfA.init muss spaetetens am Anfang von getcommandl0 kommen
 	// sodann werden die Daten aus gconf den einzelenen Klassenmitgliedsvariablen zugewiesen 
-	// die Reihenfolge muss der in agcnfA.init (in getcommandl0) sowie der in virtrueckfragen entsprechen
+	// die Reihenfolge muss der in agcnfA.init (in getcommandl0) sowie der in rueckfragen entsprechen
 // afcd.cinit(akonfdt,&agcnfA,obverb,'=',/*mitclear=*/0); // hier werden die Daten aus der Datei eingelesen
 	hccd.lies(akonfdt,obverb);
 	hccd.kauswert(&opn,obverb,0);
@@ -5575,25 +5588,87 @@ void hcl::virtzeigversion(const string& ltiffv/*=string()*/)
 
 // wird aufgerufen in lauf void hcl::virtvorrueckfragen() { } // void hcl::virtvorrueckfragen
 
-// wird aufgerufen in lauf
-void hcl::virtrueckfragen()
+void hcl::virtrueckfrage(shared_ptr<optcl>& omit)
 {
+}
+
+void hcl::turueckfrage(shared_ptr<optcl>& omit)
+{
+	uchar obabfrage{1};
+	if (omit->obfragz) if (!*omit->obfragz) obabfrage=0; // wenn entweder der Parameter fehlt oder 0 ist, oder 
+	if (obabfrage) if (omit->fnobfragz) if (!(this->*omit->fnobfragz)()) obabfrage=0; // dif Funktion nicht fehlt und 0 ist, dann obabrage=0;
+  if (obabfrage) {
+		if (omit->fnvorhz) {
+			(this->*omit->fnvorhz)();
+		}
+		if (!omit->pname.empty() && !omit->Txtrf.empty()) {
+			if (!omit->pptr)
+				perror((Txk[T_pptr_darf_nicht_null_sein_bei]+omit->pname+")").c_str());
+			if (obverb) fLog(Txk[T_Frage_ab]+blaus+omit->pname+schwarz+":",obverb,oblog);
+			string pwd2;
+			switch (omit->part) {
+				case pint:
+					(*(int*)omit->pptr)=Tippzahl(omit->Txtrf,omit->pptr?*(int*)omit->pptr:0);
+					break;
+				case plong:
+					(*(long*)omit->pptr)=Tippzahl(omit->Txtrf,omit->pptr?*(long*)omit->pptr:0);
+					break;
+				case pverz:
+					(*(string*)omit->pptr)=Tippverz(omit->Txtrf,(string*)omit->pptr);
+					break;
+				case pdez:
+					(*(string*)omit->pptr)=Tippzahl(omit->Txtrf,omit->pptr?(string*)omit->pptr:0);
+					break;
+				case ppwd:
+					// (*(string*)omit->pptr).clear();
+					do {
+						(*(string*)omit->pptr)=Tippstr(string(omit->Txtrf)+Txk[T_fuer_Benutzer]+dblau+(omit->refstr?*omit->refstr:string())+schwarz+"'"/*,&(*(string*)omit->pptr)*/);
+						pwd2=Tippstr(string(omit->Txtrf)+Txk[T_fuer_Benutzer]+dblau+(omit->refstr?*omit->refstr:string())+schwarz+"'"+" ("+Txk[T_erneute_Eingabe]+")"/*,&pwd2*/);
+					} while ((*(string*)omit->pptr)!=pwd2);
+					break;
+				case pstri:
+				case pfile:
+					(*(string*)omit->pptr)=Tippstr(omit->Txtrf,(string*)omit->pptr);
+					break;
+				case puchar:
+					(*(uchar*)omit->pptr)=Tippob(omit->Txtrf,*(uchar*)omit->pptr?Txk[T_j_af]:"n");
+					break;
+				case pdat:
+				case pbin:
+					break;
+			} // 		switch (omit->part)
+			if (omit->fnnachhz) {
+				(this->*omit->fnnachhz)();
+			}
+		} // 	if (!omit->pname.empty())
+	}
+} // void hcl::turueckfrage
+
+// wird aufgerufen in lauf
+void hcl::rueckfragen()
+{
+	hLog(violetts+Txk[T_rueckfragen]+", rzf: "+blau+ltoan(rzf)+schwarz);
+////	opn.oausgeb(violett);
 	if (rzf) {
 		const char *const locale = setlocale(LC_CTYPE,"");
 		if (langu.empty()) if (locale) if (strchr("defi",locale[0])) langu=locale[0];
-		vector<string> sprachen={"e","d"/*,"f","i"*/};
+		vector<string> sprachen{"e","d"/*,"f","i"*/};
 		langu=Tippstrs(sprachstr.c_str()/*"Language/Sprache/Lingue/Lingua"*/,&sprachen,&langu);
 		virtlgnzuw();
-		if (mitcron)
-			cronminut=Tippzahl(Txk[T_Alle_wieviel_Minuten_soll]+meinname+Txk[T_aufgerufen_werden_0_ist_gar_nicht],&cronminut);
-		autoupd=Tippob(Txk[T_Sollen_neue_Programmversionen_von]+meinname+Txk[T_automatisch_installiert_werden],autoupd?Txk[T_j_af]:"n");
-		logvz=Tippverz(Txk[T_Logverzeichnis],&logvz);
-		logdname=Tippstr(Txk[T_Logdateiname],&logdname);
-		setzlog();
-		oblog=Tippzahl(Txk[T_Oblog_ausf_Protok],oblog);
+		for(auto omit=opn.schl.begin();omit!=opn.schl.end();omit++) {
+			if (!(*omit)->pname.empty() && (*omit)->pptr!=&langu) {
+				if (!(*omit)->pptr)
+					perror((Txk[T_pptr_darf_nicht_null_sein_bei]+(*omit)->pname+")").c_str());
+				if ((*omit)->sonderrf) {
+					virtrueckfrage(*omit);
+				} else {
+					turueckfrage(*omit);
+				}
+			} // 			if (!(*omit)->pname.empty() && (*omit)->pptr!=&langu)
+		} // 		for(auto omit=opn.schl.begin();omit!=opn.schl.end();omit++)
 		findv=3;
 	} // 	if (rzf)
-} // 		void hcl::virtrueckfragen
+} // 		void hcl::rueckfragen
 
 // wird aufgerufen in lauf
 void hcl::pruefggfmehrfach()
@@ -5975,7 +6050,7 @@ int hcl::kompilfort(const string& was,const string& vorcfg/*=string()*/, const s
 
 const string tiffmark{"/usr/local/sclibtiff"};
 
-// aufgerufen bei autofax in: pruefhyla, empfcapi, virtrueckfragen
+// aufgerufen bei autofax in: pruefhyla, empfcapi, rueckfragen
 void hcl::prueftif(string aktvers)
 {
 	hLog(violetts+Txk[T_prueftif]+schwarz+" "+aktvers);
@@ -6380,16 +6455,22 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 	return pzfnr;
 } // int optcl::pzuweis
 
+// zum Ueberladen
+void hcl::fuv0(){}; void hcl::fuv1(){}; void hcl::fuv2(){}; void hcl::fuv3(){}; void hcl::fuv4(){}; void hcl::fuv5(){}; void hcl::fuv6(){}; void hcl::fuv7(){}; void hcl::fuv8(){}; void hcl::fuv9(){}; void hcl::fuv10(){};
+int hcl::fui0(){return 0;}; int hcl::fui1(){return 0;}; int hcl::fui2(){return 0;}; int hcl::fui3(){return 0;}; int hcl::fui4(){return 0;}; int hcl::fui5(){return 0;}; int hcl::fui6(){return 0;}; int hcl::fui7(){return 0;}; int hcl::fui8(){return 0;}; int hcl::fui9(){return 0;}; int hcl::fui10(){return 0;};
+
 optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const long Txrf/*=-1*/,const uchar obno/*=0*/):wpgcl(pname,pptr,part),
+		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const string& Txtrf/*={}*/,const uchar obno/*=(uchar)-1*/,const string* refstr/*=0*/,const uchar* obfragz/*=0*/,fnhcliztyp fnobfragz/*=0*/,fnhclztyp fnnachhz/*=0*/,fnhclztyp fnvorhz/*=0*/,uchar sonderrf/*=0*/):
+	wpgcl(pname,pptr,part),
 	kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),Txi2(Txi2),rottxt(rottxt),iwert(iwert),
-	woher(woher),Txrf(Txrf==-1?Txi:Txrf),obno(obno)/*=0*///,eingetragen(0)
+	woher(woher),Txtrf(Txtrf.empty()?Txi==-1?string():(*TxBp)[Txi]:Txtrf),obno(obno==(uchar)-1?part==puchar?1:0:obno),refstr(refstr),obfragz(obfragz),fnobfragz(fnobfragz),fnnachhz(fnnachhz),sonderrf(sonderrf)/*=0*///,eingetragen(0)
 {
-////	<<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
+	//// <<gruen<<"Erstelle optcl, pname: "<<schwarz<<violett<<pname<<endl;
 }
 
 optcl::optcl(const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno/*=0*/):wpgcl({},pptr,part),
+		const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher,const uchar obno/*=0*/):
+	wpgcl({},pptr,part),
 	kurzi(kurzi),langi(langi),TxBp(TxBp),Txi(Txi),wi(wi),Txi2(Txi2),rottxt(rottxt),iwert(iwert),
 	woher(woher),obno(obno)/*=0*///,eingetragen(0)
 {

@@ -171,9 +171,11 @@ void hhcl::pvirtVorgbSpeziell()
 // wird aufgerufen in lauf
 void hhcl::virtinitopt()
 { //ω
-	opn<<new optcl(/*pname*/"tabname",/*pptr*/&tabname,/*part*/pstri,T_tb_k,T_tabname_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!tabname.empty(),T_Tabellenname_in);
-	opn<<new optcl(/*pname*/"fbusr",/*pptr*/&fbusr,/*part*/pstri,T_fbusr_k,T_fbusr_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbusr.empty(),T_Benutzer_fuer_Fritzbox);
-	opn<<new optcl(/*pname*/"fbpwd",/*pptr*/&fbpwd,/*part*/ppwd,T_fbpwd_k,T_fbpwd_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbpwd.empty(),T_Passwort_fuer_Fritzbox);
+	// Kopiervorlage:
+	// opn<<new optcl(/*pname*/"pname",/*pptr*/pptr,/*art*/pstri,/*kurzi*/T_kurz_k,/*langi*/T_lang_l,/*TxBp*/&Tx,/*Txi*/T_Option_erklaert,/*wi*/1,/*Txi2*/T_Option_Nachtext,/*rottxt*/nix,/*wert*/1,/*woher*/!pname.empty(),/*Txtrf*/{},/*obno*/1,/*refstr*/0,/*obfragz*/0,/*fnobfragz*/0,/*fnnachhz*/&hcl::fu1,/*fnvorhz*/0,/*sonderrf*/0);
+	opn<<new optcl(/*pname*/"tabname",/*pptr*/&tabname,/*part*/pstri,T_tb_k,T_tabname_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!tabname.empty(),Txd[T_Tabellenname_in]+dblaus+dbq+schwarz+"':");
+	opn<<new optcl(/*pname*/"fbusr",/*pptr*/&fbusr,/*part*/pstri,T_fbusr_k,T_fbusr_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbusr.empty(),Tx[T_Benutzer_fuer_Fritzbox]);
+	opn<<new optcl(/*pname*/"fbpwd",/*pptr*/&fbpwd,/*part*/ppwd,T_fbpwd_k,T_fbpwd_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbpwd.empty(),Tx[T_Passwort_fuer_Fritzbox],/*obno*/0,/*refstr*/&fbusr);
 	opn<<new optcl(/*pptr*/&listt,/*art*/puchar,T_listt_k,T_listtel_l,/*TxBp*/&Tx,/*Txi*/T_listet_Datensaetze_aus,/*wi*/1,/*Txi2*/T_mit_Erfolgskennzeichen_auf,/*rottxt*/tabname,/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&suchstr,/*art*/pstri,T_s_k,T_suche_l,/*TxBp*/&Tx,/*Txi*/T_suche_in_verarbeiteten_Faxen_nach,/*wi*/1,/*Txi2*/T_MAX,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&dszahl,/*art*/pdez,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1); //α //ω
@@ -214,26 +216,6 @@ void hhcl::pvirtvorrueckfragen()
 	hLog(violetts+Tx[T_pvirtvorrueckfragen]+schwarz); //ω
 } // void hhcl::pvirtvorrueckfragen //α
 
-
-// wird aufgerufen in lauf
-void hhcl::virtrueckfragen()
-{
-	hLog(violetts+Tx[T_virtrueckfragen]+schwarz);
-	if (rzf) { //ω
-		dhcl::virtrueckfragen();
-		tabname=Tippstr(string(Txd[T_Tabellenname_in])+dblau+dbq+schwarz+"'",&tabname);
-		fbusr=Tippstr(Tx[T_Benutzer_fuer_Fritzbox],&fbusr);
-		string fbpw2;
-		fbpwd.clear();
-		do {
-			fbpwd=Tippstr(string(Tx[T_Passwort_fuer_Fritzbox])+Txk[T_fuer_Benutzer]+dblau+fbusr+schwarz+"'",&fbpwd);
-			fbpw2=Tippstr(string(Tx[T_Passwort_fuer_Fritzbox])+Txk[T_fuer_Benutzer]+dblau+fbusr+schwarz+"'"+" ("+Txk[T_erneute_Eingabe]+")",&fbpw2);
-		} while (fbpwd!=fbpw2);
-		hcl::virtrueckfragen();
-	} // if (rzf) //α
-	//// opn.oausgeb(rot);
-} // void hhcl::virtrueckfragen()
-//ω
 //α
 // wird aufgerufen in lauf
 void hhcl::virtpruefweiteres()
@@ -272,7 +254,7 @@ void hhcl::anhalten()
 } // void hhcl::anhalten() //α
 //ω
 //α
-void hhcl::pvirtvorpruefggfmehrfach()
+void hhcl::pvirtnachrueckfragen()
 {
 	// if (initDB()) exit(schluss(10,Tx[T_Datenbank_nicht_initialisierbar_breche_ab]));  //ω
 		if (initDB()) {
@@ -281,7 +263,7 @@ void hhcl::pvirtvorpruefggfmehrfach()
 		if (listt ||!suchstr.empty()) {
 			tu_listt("1",suchstr);
 		}
-} // void hhcl::pvirtvorpruefggfmehrfach //α
+} // void hhcl::pvirtnachrueckfragen //α
 //ω
 void hhcl::pvirtfuehraus() //α
 { //ω

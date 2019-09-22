@@ -556,7 +556,7 @@ class dhcl:public hcl
 		void virtMusterVorgb();
 		void virtzeigversion(const string& ltiffv=nix);
 		//	void pvirtvorrueckfragen();
-		void virtrueckfragen();
+		//  void virtrueckfragen();
 		//	void virtpruefweiteres();
 		//	void virtzeigueberschrift();
 		//  void pvirtfuehraus();

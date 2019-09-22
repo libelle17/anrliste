@@ -472,7 +472,10 @@ enum Tkons_
 	T_Ausgabezeile,
 	T_pruefmehrfach,
 	T_Sprachen,
-	T_Intervall_Minuten,
+	T_pptr_gefunden,
+	T_pptr_darf_nicht_null_sein_bei,
+	T_rueckfragen,
+	T_Frage_ab,
 	T_konsMAX
 }; // Tkons_
 // Konsistenz in gdb pruefen, z.B.:  p (const char* const)reinterpret_cast<TCtp*>(Txk.TCp)[T_unbek][Txk.lgn]
@@ -794,7 +797,9 @@ template <> inline void WPcl::setze < const char* > (const char** var, string& b
 template <> inline void WPcl::setze < string > (string *var, string& bem) {wert=*var;if (!bem.empty()) bemerk=bem;}
 template <> inline void WPcl::setze < const string > (const string *var, string& bem) {wert=*var; if (!bem.empty()) bemerk=bem;}
 */
-
+struct hcl;
+typedef int (hcl::*fnhcliztyp)();
+typedef void (hcl::*fnhclztyp)();
 // neue Klasse für map
 // fuer Wertepaare, die aus Datei gezogen werden und zusaetzlich ueber die Befehlszeile eingegeben werden koennen
 struct optcl:wpgcl
@@ -813,26 +818,32 @@ struct optcl:wpgcl
 //    uchar obgefunden=0; // braucht man nicht, ist in argcl
 		// ermittelte Optionen:
 		uchar woher{0}; // 1= ueber Vorgaben, 2= ueber Konfigurationsdatei, 3= ueber Befehlszeile gesetzt
-		const long Txrf{-1};
+		const string Txtrf;
     const uchar obno{0}; // ob auch die Option mit vorangestelltem 'no' eingefuegt werden soll
 		uchar gegenteil{0};
 		uchar nichtspeichern{0};
+		const string* refstr{0}; // z.B. der User zu einem Passwort, um bei rueckfragen() bessere Ansagen machen zu koennen
+		const uchar* obfragz; // Zeiger auf Variable, die ggf. mit 1 bezeichnet, dass Option in rueckfragen abgefragt werden soll;
+		fnhcliztyp fnobfragz{0}; // Zeiger auf Funktion, deren Ergebnis sagt, ob die Option bei rueckfragen() abgefragt werden soll
+		fnhclztyp fnnachhz{0}; // Zeiger auf Funktion, die in rueckfragen() vorher aufgerufen wird
+		fnhclztyp fnvorhz{0}; // Zeiger auf Funktion, die in rueckfragen() nach aufgerufen wird
+		uchar sonderrf{0}; // 1 = in rueckfragen individuelle Behandlung
 		const uchar virteinzutragen(/*schAcl<optcl>**/void *schlp,int obverb);
 		void virtweisomapzu(/*schAcl<optcl>**/void *schlp);
 //		void virtloeschomaps(/*schAcl<optcl>**/void *schlp);
 		void virtloeschomaps(schAcl<optcl> *schlp);
 		optcl(const string& pname,const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
-				const uchar wi, const long Txi2, const string rottxt, const int iwert, const uchar woher, const long Txrf=-1, const uchar obno=0);
+				const uchar wi, const long Txi2, const string rottxt, const int iwert, const uchar woher, const string& Txtrf=string(), const uchar obno=(uchar)-1/*dann je nach art*/,const string* refstr=0,const uchar* obfragz=0,fnhcliztyp fnobfragz=0, fnhclztyp fnnachhz=0,fnhclztyp fnvorhz=0,uchar sonderrf=0);
 		optcl(const void* pptr,const par_t art, const int kurzi, const int langi, TxB* TxBp, const long Txi,
 				const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const uchar obno=0);
 		void setzwert();
 		int setzstr(const char* const neuw,uchar *const obzuschreib=0,const uchar ausDatei=0);
 		void virttusetzbemerkwoher(const string& ibemerk,const uchar vwoher);
-		void virtoausgeb() const;
 		int pzuweis(const char *const nacstr, const uchar vgegenteil=0, const uchar vnichtspeichern=0);
 		virtual const string& virtmachbemerk(const Sprache lg,const binaer obfarbe=wahr);
 		void hilfezeile(Sprache lg);
 		void virtfrisch();
+		void virtoausgeb() const;
 		~optcl();
 }; // struct optcl
 
@@ -1348,7 +1359,7 @@ class hcl
 	protected:
 		void vischluss(string& erg,string& zeig);
 		void holbefz0(const int argc, const char *const *const argv);
-    virtual void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
+    virtual void virtlgnzuw(); // wird aufgerufen in: rueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
     int pruefinstv();
 		void setzlog();
 
@@ -1371,8 +1382,10 @@ class hcl
 		void dovi();
 		virtual void virtzeigversion(const string& ltiffv=nix);
 		virtual void pvirtvorrueckfragen()=0;
-		virtual void virtrueckfragen();
-		virtual void pvirtvorpruefggfmehrfach()=0;
+		void turueckfrage(shared_ptr<optcl>& omit);
+		virtual void rueckfragen();
+		virtual void virtrueckfrage(shared_ptr<optcl>& omit);
+		virtual void pvirtnachrueckfragen()=0; // pvirtvorpruefggfmehrfach()=0;
 		void pruefggfmehrfach();
 		virtual void virtpruefweiteres();
 		uchar pruefcron(const string& cm);
@@ -1382,6 +1395,8 @@ class hcl
 		void gitpull(const string& DPROG);
 		virtual void virtschlussanzeige();
 	public:
+		virtual void fuv0(),fuv1(),fuv2(),fuv3(),fuv4(),fuv5(),fuv6(),fuv7(),fuv8(),fuv9(),fuv10();
+		virtual int fui0(),fui1(),fui2(),fui3(),fui4(),fui5(),fui6(),fui7(),fui8(),fui9(),fui10();
 		void pruefcl(); // commandline mit omap und mit argcmv parsen
 		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron,const uchar parstreng=1);
 		~hcl();

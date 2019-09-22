@@ -119,8 +119,7 @@ class hhcl:public dhcl
 		void pvirtvorzaehler();
 		void virtzeigversion(const string& ltiffv=nix);
 		void pvirtvorrueckfragen();
-		void virtrueckfragen();
-		void pvirtvorpruefggfmehrfach();
+		void pvirtnachrueckfragen();
 		void virtpruefweiteres();
 		void virtzeigueberschrift();
 		void pvirtfuehraus();
