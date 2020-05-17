@@ -375,9 +375,9 @@ int hhcl::holanr() // fetchcall()
 		} // 		for(size_t tzn=0;tzn<tz.size();tzn++)
 		dsz++;
 		ersetzAlle(ar.duration,":",".");
-		RS such(My,"SELECT datum FROM `"+tabname+"` WHERE typ="+ar.type+" and Datum='"+vts.str()+"' and Name ='"+ar.name+"'"\
-				" and Rufnummer=if(typ='3','"+ar.called+"','"+ar.caller+"')"\
-				" and EigeneNr=if(typ='3','"+ar.caller+"','"+ar.called+"') and Dauer='"+ar.duration+"'",aktc,ZDB);//Nst wg. Zeichensatz weggel.
+		RS such(My,"SELECT datum FROM `"+tabname+"` WHERE typ="+ar.type+" AND Datum='"+vts.str()+"' AND Name ='"+ar.name+"'"\
+				" AND Rufnummer=if(typ='3','"+ar.called+"','"+ar.caller+"')"\
+				" AND EigeneNr=if(typ='3','"+ar.caller+"','"+ar.called+"') AND Dauer='"+ar.duration+"'",aktc,ZDB);//Nst wg. Zeichensatz weggel.
 		if (!such.obqueryfehler) {
 			char*** cerg=such.HolZeile();
 			if (!cerg || !*cerg) {

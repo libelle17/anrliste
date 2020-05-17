@@ -496,6 +496,7 @@ void DB::init(
 			} // if (!oisok)
 #endif // linux
 			conn=new MYSQL*[conz];
+			for(size_t aktc=0;aktc<conz;aktc++) conn[aktc]=0;
 			this->ConnError=NULL;
 			for(size_t aktc=0;aktc<conz;aktc++) {
 				conn[aktc] = mysql_init(NULL);
@@ -809,19 +810,19 @@ void DB::setzrpw(int obverb/*=0*/,int oblog/*=0*/) // Setze root-password
 
 DB::~DB(void)
 {
-if (0) {
+if (1) {
 	switch (DBS) {
 		case MySQL:
 			if (!this->ConnError) {
 				if (!lassoffen) {
 					for(size_t aktc=0;aktc<conz;aktc++) {
-						mysql_close(conn[aktc]);
+						if (conn[aktc]) {
+							mysql_close(conn[aktc]);
+							conn[aktc]=0;
+						}
 					}
 				} // 				if (!lassoffen)
 			} // 			if (!this->ConnError)
-			for(size_t aktc=0;aktc<conz;aktc++) {
-				conn[aktc]=0;
-			}
 			break;
 		case Postgres:
 			caup<<"hier ~DB"<<endl;
@@ -2476,7 +2477,7 @@ void dhcl::virtlgnzuw()
 int dhcl::initDB()
 {
 	hLog(violetts+"initDB(), db: "+blau+dbq+schwarz);
-	unsigned int fehler=0;
+	unsigned int fehler{0};
 	if (dbq.empty()) {
 		fehler=1046;
 	} else {
@@ -2486,7 +2487,7 @@ int dhcl::initDB()
 				delete My;
 				My=0;
 			} else {
-				My->lassoffen=1;
+//				My->lassoffen=1;
 			} // 			if (My->ConnError) else
 		} // 		if (!My)
 		fehler=My->fehnr;
@@ -2510,7 +2511,7 @@ int dhcl::pruefDB(const string& db)
 			delete My;
 			My=0;
 		}else {
-			My->lassoffen=1;
+//			My->lassoffen=1;
 		}
 	} // 	if (!My)
 	return (fehnr); 
@@ -2518,6 +2519,7 @@ int dhcl::pruefDB(const string& db)
 
 dhcl::~dhcl()
 {
+	if (My) delete My;
 } // dhcl::~dhcl
 
 // wird aufgerufen in lauf

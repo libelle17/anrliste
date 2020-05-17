@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "22.09.19" "Version 0.47258" "\fB²DPROG²\fR man page"
+.TH man 1 "18.05.20" "Version 0.47258" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Fax server functionality\fR: induces automatic fax transmission of files, naming of received faxes and logging of all of them in a database
 .br
@@ -67,7 +67,7 @@ Depending on operating system, accessability and preferences the users thus coul
 .SH OPTIONS 
  '\fB²DPROG² -?\fR' or '\fB²DPROG² -h\fR' shows the important command line options and '\fB²DPROG² -lh\fR' all of them. Some options (e.g. the sql commands for finding an addressee from the fax number) cannot be set via the command line, but only via the configuration file, which can be edited directly by '\fB²DPROG² -vi\fR' or interactively by '\fB²DPROG² -rf\fR'.
 .br
-                                                                                                                                                                                      \fRProgramm: \fB/home/schade/anrliste/anrliste\fR, V: \fB0.47258 \fR
+                                                                                                                                                           \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47258 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -97,7 +97,7 @@ Depending on operating system, accessability and preferences the users thus coul
 .br
 \fB -writec, --writeconf\fR: write configuration file (\fB0\fR)
 .br
-\fB -vs, --vs\fR: edit/view source files in \fB/home/schade/anrliste\fR(finish with ':qa') (\fB0\fR)
+\fB -vs, --vs\fR: edit/view source files in \fB/root/anrliste\fR(finish with ':qa') (\fB0\fR)
 .br
 \fB -ia, --interactive\fR: all parameters will be prompted (some of them not shown here) (\fB0\fR)
 .br
