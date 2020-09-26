@@ -173,7 +173,7 @@ getIPR() {
 	E=1;for A in $QD;do [ -f "$A" ]&& grep -q "^#include .*acl.h>" "$A" &&{ E=;break;};done;[ "$E" -o ! "$QD" ]&&LACL=;
 	E=1;for A in $QD;do [ -f "$A" ]&& grep -q "^#include .*curl.h>" "$A" &&{ E=;break;};done;[ "$E" -o ! "$QD" ]&&LCURL=;
 	E=1;for A in $QD;do [ -f "$A" ]&& grep -q "^#include[ ]*<term.h>" "$A" &&{ E=;break;};done;[ "$E" -o ! "$QD" ]&&LTERM=;
-	[ "$LTERM2" ]||{ 
+	[ "$LTERM" ]||{ 
 	 E=1;for A in $QD;do [ -f "$A" ]&& grep -q "^#include .*curses.h>" "$A" &&{ E=;break;};done;[ "$E" -o ! "$QD" ]&&LCURS=;
 	}
 	E=1;for A in $QD;do [ -f "$A" ]&& grep -q "^#include <spandsp.h>" "$A" &&{ E=;break;};done;[ "$E" -o ! "$QD" ]&&LSPAN=;
