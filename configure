@@ -66,14 +66,19 @@ getIPR() {
 			if test "$ICH" != viall -a -z "$ohneboost" -a "$QD"; then
 			 if test -z "$PAR1" -o -z "$LBOOST" -o -z "$LBIO" -o -z "$LBLO"; then
   			# z.B. 'i+ | boost_1_65-devel |'
-				command="zypper se \"boost*-devel\" libboost_iostreams libboost_locale boost-license";
-				anz="rufe auf/calling: $command ...                   "
-				printf "$anz"
-				zse=$(eval "$command");
-				printf "\r${anz#}\r"
-  			LBOOST=$(echo "$zse"|grep ' | boost'|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
-				LBIO=$(V=libboost_iostreams;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
-				LBLO=$(V=libboost_locale;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
+        if false; then
+          command="zypper se \"boost*-devel\" libboost_iostreams libboost_locale boost-license";
+          anz="rufe auf/calling: $command ...                   "
+          printf "$anz"
+          zse=$(eval "$command");
+          printf "\r${anz#}\r"
+          LBOOST=$(echo "$zse"|grep ' | boost'|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
+          LBIO=$(V=libboost_iostreams;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
+          LBLO=$(V=libboost_locale;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
+        fi;
+        LBOOST=$(grep -s --no-filename "^boost_.*-devel" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
+        LBIO=$(grep -s --no-filename "^libboost_iostreams" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
+        LBLO=$(grep -s --no-filename "^libboost_locale" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
 				[ ! "$LBOOST" ]&&[ "$LBIO" ]&&[ "$LBLO" ]&& LBOOST=$(V=boost-license;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
 			 fi;
 			fi;
