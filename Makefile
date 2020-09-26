@@ -35,6 +35,7 @@
 # "make verschieb" => wie transfer, mit ../<DPROG>rein als Zielverzeichnis
 # "make vsneu" => wie verschieb, löscht vorher das als Zielverzeichnis (geht nur, wenn das github-Repository vorher gelöscht ist)
 # "make mitzieh" => uebertraegt gemeinsame Dateien auf ein ein anderes Programmverzeichnis
+# "make forcemz" => uebertraegt gemeinsame Dateien auf ein ein anderes Programmverzeichnis, auch wenn sie dort juenger sind
 # "make ruf" => ruft das Programm auf
 # "make rufv" => ruft das Programm mit -v auf
 # "make uninstall" => deinstalliert alles, frägt noch manchmal rück
@@ -45,6 +46,7 @@
 ICH::=$(firstword $(MAKEFILE_LIST))
 SRCS::=$(wildcard *.cpp) $(wildcard *.c)
 zOBJ::=$(SRCS:.cpp=.o)
+stest::=$(subst $(subst ,, ),,$(SRCS))
 OBJ::=$(zOBJ:.c=.o)
 DN::= >/dev/null# DevNull
 KR::= $(DN) 2>&1# keine Rueckmeldung
@@ -246,8 +248,9 @@ HTMLS::=$(patsubst %,%.html,$(MANS))
 GZS::=$(patsubst %,%.gz,$(MANS))
 
 .PHONY: all glei opt opt2 opt3 optfast opts optg altc neu new anzeig compiler git
-ifeq (,$(SRCS))
-$(info keine *.c- oder *.cpp-Dateien => kompiliere nichts)
+ifeq (,$(stest))
+  $(info keine *.c- oder *.cpp-Dateien => kompiliere nichts)
+all: anzeig shentw
 all glei opt opt2 opt3 optfast opts optg altc neu new anzeig $(EXEC) $(INSTEXEC) compiler:
 	@printf ""
 else
@@ -275,7 +278,7 @@ neu: anzeig clean weiter
 endif
 
 .PHONY: weiter
-weiter: compiler $(EXEC) $(GZS) 
+weiter: shentw compiler $(EXEC) $(GZS) 
 
 define setz_gitv
 	 @D=$(1)/.git/config; GITV=$$([ -f $$D ]&&sed -n '/ *url =.*com/{s/.*com\/\([^/]*\).*/\1/p}' $$D);\
@@ -320,7 +323,7 @@ pull:
 	@git pull
 	@sh configure
 
-ifeq (,$(SRCS))
+ifeq (,$(stest))
 else
 anzeig:
 	@cno=$$(./configure nuros);if test "$$cno" != "$(OSNR)"; then echo "Achtung: \"$$cno\" != \"$(OSNR)\" => muss ./configure aufrufen.";./configure;:;echo "$$@";make "$$@";\
@@ -338,11 +341,11 @@ anzeig:
 endif
 
 .PHONY: debug debugnew debugneu
-debug debugnew debugneu: DEBUG=-g 
+debug debugnew debugneu: DEBUG=-g3 -O0 
 debug: all
 debugneu debugnew: neu
 
-ifeq (,$(SRCS))
+ifeq (,$(stest))
 else
 $(EXEC): $(OBJ)
 	-@printf " linking/verlinke %s to/zu %b%s%b ..." "$(OBJ)" $(blau) "$@" $(reset) $(BA)
@@ -374,7 +377,7 @@ endif
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
 
-ifeq (,$(SRCS))
+ifeq (,$(stest))
 else
 compiler:
 	@printf " DISTR: %b%s%b, untersuche/examining Compiler ..." $(blau) "$(DName)" $(reset) $(BA)
@@ -432,7 +435,7 @@ endif
 	-@[ "$(LSND)" ]&&{ [ -f /usr/include/sndfile.h ]|| sh configure inst _ "$(LSND)" verbose;}||:
 	-@[ "$(QPDF)" ]&&{ [ -f /usr/include/qpdf/QPDF.hh ]|| sh configure inst _ "$(QPDF)" verbose;}||:
 	-@[ "$(LGSSDP)" ]&&{ grep -qlm1 'Cflags.*gssdp' $(PCFILES)||sh configure inst _ "$(LGSSDP)" verbose;}||:
-	-@[ "$(LCAPI)" ]&&{ grep -qlm1 'capi20' $(PCFILES)||sh configure inst _ "$(LCAPI)" verbose;}||:
+	-@[ "$(LCAPI)" ]&&{ grep -qlm1 'capi20' $(PCFILES)||for kand in $(LCAPI);do sh configure inst _ $$kand verbose;done;}||:
 	-@[ "$(LBOOST)" ]&&{ $(SPR) $(LBOOST) $(KR)|| sh configure inst _ "$(LBOOST)" verbose;}||:
 	-@[ "$(LBIO)" ]&&{ $(SPR) "$(LBIO)" $(KR)||sh configure inst _ "$(LBIO)" verbose;}||:
 	-@[ "$(LBLO)" ]&&{ $(SPR) "$(LBLO)" $(KR)||sh configure inst _ "$(LBLO)" verbose;}||:
@@ -453,7 +456,7 @@ stumm: all
 
 stumminst: install
 
-ifeq (,$(SRCS))
+ifeq (,$(stest))
 else
 $(INSTEXEC): $(EXEC)
 	@printf " Copying program/ Kopiere Programmdatei: %b%s%b -> %b%s%b\n" $(blau) "$(EXEC)" $(reset) $(blau) "$(INSTEXEC)" $(reset) $(BA)
@@ -470,6 +473,102 @@ shlist:
 			grep -qm1 "$$D" "$(AUNF)"||printf "printf \"Loesche/Deleting $$Z/$$D...\\\\n\";$(SUDC)rm -r $$Z/$$D;hash -r;\n" >>"$(AUNF)";\
 		done;:
 
+.PHONY: shziel
+shziel:
+	-@rot="\e[1;31m";\
+  blau="\033[1;34m";\
+  reset="\033[0m";\
+	if test -f ziele; then \
+	 for D in $$(cat ziele);do \
+    case $$D in \
+      [*\]) \
+        Z=$$(printf $$D|sed 's/^[[]//;s/[]]$$//;');;\
+      *) \
+        printf "$$blau$$D $$Z/$$D$$reset\n";\
+        [ -f $$D ]&&AGit=$$(git log -1 --format="%at" -- $$D)||AGit=0;\
+        [ -f $$D ]&&AHr=$$(stat $$D -c%Y)||AHr=0;\
+        [ -f $$Z/$$D ]&&APC=$$(stat $$Z/$$D -c%Y)||APC=0;\
+        echo Zeitstempel AGit: $$AGit;\
+        echo Zeitstempel AHr : $$AHr;\
+        [ 0$$AHr -lt 0$$AGit ]&&AGit=$$AHr;\
+        echo Zeitstempel APC : $$APC;\
+        [ 0$$APC -eq 0 ]&&{ \
+          [ 0$$AGit -eq 0 ]&&{ \
+           echo " $$D fehlt hier und auf Git";\
+          :;}||{ \
+           printf " $$D fehlt hier:$$rot cp -a $$D $$Z/$$reset\n";\
+           cp -a $$D $$Z/;\
+          };\
+        :;}||{ \
+          [ 0$$AGit -eq 0 ]&&{ \
+            echo " $$D fehlt auf Git";\
+          :;}||{ \
+            ls -l $$Z/$$D;\
+            ls -l $$D;\
+            diff $$Z/$$D .;\
+            [ $$? -eq 0 ]||printf "$${rot}Dateien verschieden$${reset}\n";\
+            [ 0$$AGit -lt 0$$APC ]&&echo " $$D auf Git aelter";\
+            [ 0$$AGit -gt 0$$APC ]&&{ printf " $$D hier aelter:$$rot cp -a $$D $$Z/$$reset\n"; cp -a $$D $$Z;};\
+            [ 0$$AGit -eq 0$$APC ]&&echo " $$D auf beiden gleich alt: lasse sie aus";\
+          } \
+        } \
+        ;;\
+    esac;\
+   done;\
+ fi;
+
+.PHONY: shentw
+shentw:
+	-@rot="\e[1;31m";\
+  blau="\033[1;34m";\
+  reset="\033[0m";\
+	if test -f ziele; then \
+	 for D in $$(cat ziele);do \
+    case $$D in \
+      [*\]) \
+        Z=$$(printf $$D|sed 's/^[[]//;s/[]]$$//;');;\
+      *) \
+        printf "$$blau$$D $$Z/$$D$$reset\n";\
+        [ -f $$D ]&&AGit=$$(git log -1 --format="%at" -- $$D)||AGit=0;\
+        [ -f $$D ]&&AHr=$$(stat $$D -c%Y)||AHr=0;\
+        [ -f $$Z/$$D ]&&APC=$$(stat $$Z/$$D -c%Y)||APC=0;\
+        echo Zeitstempel AGit: $$AGit;\
+        echo Zeitstempel AHr : $$AHr;\
+        [ 0$$AHr -lt 0$$AGit ]&&AGit=$$AHr;\
+        echo Zeitstempel APC : $$APC;\
+        [ 0$$APC -eq 0 ]&&{ \
+          [ 0$$AGit -eq 0 ]&&{ \
+           echo " "$$D fehlt hier und auf Git;\
+          :;}||{ \
+           echo " "$$D fehlt hier;\
+          };\
+        :;}||{ \
+          [ 0$$AGit -eq 0 ]&&{ \
+           printf " $$D fehlt auf Git:$$rot cp -a $$Z/$$D .; git add $$D; git commit -m '+$$D' $$D; $$reset\n";\
+           cp -a $$Z/$$D .;\
+           git add $$D;\
+           git commit -m '+$$D' $$D;\
+          :;}||{ \
+            ls -l $$Z/$$D;\
+            ls -l $$D;\
+            diff $$Z/$$D .;\
+            [ $$? -eq 0 ]||printf "$${rot}Dateien verschieden$${reset}\n";\
+            [ 0$$AGit -lt 0$$APC ]&&{\
+              printf " $$D auf Git aelter:$rot cp -a $$Z/$$D .; git add $$D; git commit -m '+$$D' $$D;$$reset\n";\
+              cp -a $$Z/$$D .;\
+              git add $$D;\
+              git commit -m '+$$D' $$D;\
+            };\
+            [ 0$$AGit -gt 0$$APC ]&&echo " $$D hier aelter";\
+            [ 0$$AGit -eq 0$$APC ]&&echo " $$D auf beiden gleich alt: lasse sie aus";\
+          } \
+        } \
+        ;;\
+    esac;\
+   done;\
+ fi;:;
+
+
 man_de.html: LGL::=deutsch
 man_de.gz man_de.html: FKT::=FUNKTIONSWEISE
 man_de.html: AWI::=AUSWIRKUNGEN
@@ -481,7 +580,7 @@ man_en.html: AWI::=IMPLICATIONS
 man_en.gz: OPN::=OPTIONS
 
 .PHONY: install
-install: $(INSTEXEC) $(INSTenMAN) $(INST_MAN) shlist
+install: $(INSTEXEC) $(INSTenMAN) $(INST_MAN) shlist shziel
 
 README.md: $(HTMLS)
 	-@rm -f README.md
@@ -616,14 +715,15 @@ dovers: README.md
 	@git commit -m "Version $$(cat versdt)"
 	@git push
 
-mFERTIG=$(error mitzieh finished/ Fertig mit mitzieh!)
-mZiel::=$(filter-out mitzieh,$(MAKECMDGOALS))
-.PHONY: mitzieh tumitzieh
-mitzieh: tumitzieh
+mZiel::=$(filter-out mitzieh forcemz,$(MAKECMDGOALS))
+mFERTIG=$(error $(MAKECMDGOALS) finished/ Fertig mit $(MAKECMDGOALS)!)
+.PHONY: mitzieh forcemz tumitzieh
+mitzieh forcemz: tumitzieh
 	$(mFERTIG)
 tumitzieh:
 	@TZL=$(mZiel);\
 	blau="\033[1;34m";reset="\033[0m";\
+  Art="$(MAKECMDGOALS)";Art="$${Art%% *}";[ $$Art = mitzieh ]&&Attr="u"||Attr="";\
 	while true;do \
 		case "$$TZL" in "$(DPROG)"|""|.*);;*)TZL="../$$TZL";;esac;\
 		[ -n "$$TZL" -a "$$TZL" != . -a "$$TZL" != "$(DPROG)" -a -d "$$TZL" ]&&break;\
@@ -633,12 +733,12 @@ tumitzieh:
 		Fg="$$Fg\b: ";printf "$$Fg";[ $$obbash -eq 1 ]&&read -e -i "$$TZL" TZL||read TZL;:;\
 	done;\
 	printf "adapt/ mitziehen von %b$$TZL%b\n" $(blau) $(reset);\
-	printf "cp -au $$blau.exrc Makefile install.sh viall configure $$reset\"$$TZL\";\n";\
-	cp -au .exrc Makefile install.sh viall configure "$$TZL";\
-	printf "for A in $${blau}kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h$$reset;do [ -f \"$$TZL/\$$A\" -a -f \"\$$A\" ]&&cp -au \"\$$A\" \"$$TZL\";done;\n";\
+	printf "cp -a$$Attr $$blau.exrc Makefile install.sh viall configure $$reset\"$$TZL\";\n";\
+	cp -a$$Attr .exrc Makefile install.sh viall configure "$$TZL";\
+	printf "for A in $${blau}kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h$$reset;do [ -f \"$$TZL/\$$A\" -a -f \"\$$A\" ]&&cp -a$$Attr \"\$$A\" \"$$TZL\";done;\n";\
 	cd "$$TZL" $(DN);test -d ".git"&&git commit -m"vor mitzieh" $(KR);cd - $(DN);\
-	for A in kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h;do [ -f "$$TZL/$$A" -a -f "$$A" ]&&cp -au "$$A" "$$TZL";done;\
-	cd "$$TZL" $(DN); ohneboost=1 sh configure; cd - $(DN);
+	for A in kons.cpp kons.h DB.cpp DB.h efdr.cpp efdr.h tr64.cpp tr64.h;do [ -f "$$TZL/$$A" -a -f "$$A" ]&&cp -a$$Attr "$$A" "$$TZL";done;\
+	cd "$$TZL" $(DN); sh configure; cd - $(DN);
 
 
 .PHONY: verschieb vsneu

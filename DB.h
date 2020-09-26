@@ -36,7 +36,7 @@ using namespace std;
 // #ifdef _MSC_VER
 //#pragma comment(lib, "libmysql.lib")
 // #endif // MSC_VER
-extern class cuscl cus;
+extern struct cuscl cus;
 const char *cjj(const char * const* const* cerg, const int nr);
 
 enum Txdb_ 
@@ -122,15 +122,14 @@ enum Txdb_
 	T_dbMAX,
 }; // enum Txdb_ 
 
-// extern class Txdbcl Txd;
+// extern struct Txdbcl Txd;
 extern const char *DB_T[T_dbMAX+1][SprachZahl];
-extern class TxB Txd;
+extern struct TxB Txd;
 /*//
-class Txdbcl: public TxB
+struct Txdbcl: TxB
 {
-  public:
-    static const char *TextC[][SprachZahl];
-    Txdbcl();
+	static const char *TextC[][SprachZahl];
+	Txdbcl();
 };
 */
 svec holdbaussql(string sql);
@@ -138,7 +137,7 @@ svec holdbaussql(string sql);
 enum DBSTyp {MySQL, Postgres};
 extern const DBSTyp myDBS;
 
-class sqlft: public string 
+struct sqlft: string 
 {
   private:
     ////	char dbuf[21];
@@ -162,7 +161,7 @@ class sqlft: public string
     sqlft(DBSTyp eDBS, const unsigned long int i);
     sqlft(DBSTyp eDBS, const long long int i);
     sqlft(DBSTyp eDBS, const chrono::system_clock::time_point* const tp);
-}; // class sqlft: public string 
+}; // struct sqlft: string 
 
 
 template<typename T, size_t N> T * end(T (&ra)[N]) 
@@ -170,45 +169,44 @@ template<typename T, size_t N> T * end(T (&ra)[N])
   return ra + N;
 } // template<typename T, size_t N> T * end(T (&ra)[N]) 
 
-class instyp 
+struct instyp 
 {
- public:
-    const string feld;
-    string wert;
-    uchar obkeinwert; // bei update wird <wert> nicht als Wert, sondern ohne Anf'z.(z.B.als Feld) verwendet (z.B. update xy set altdatum = datum)
-  private:
-    ////	char dbuf[21];
-    inline string ersetze(const char *const u, const char* const alt, const char* const neu);
-    inline string *sersetze( string *const src, string const& target, string const& repl);
-  public:
-    /*1*/template <typename tC> explicit instyp (DBSTyp eDBS, const char* const feld, tC vwert): feld(feld) {
-      wert=sqlft(eDBS,vwert);
-      obkeinwert=0;
-    }
-////    void init(){feld=string();wert=string();obkeinwert=0;}
+	const string feld;
+	string wert;
+	uchar obkeinwert; // bei update wird <wert> nicht als Wert, sondern ohne Anf'z.(z.B.als Feld) verwendet (z.B. update xy set altdatum = datum)
+	private:
+	////	char dbuf[21];
+	inline string ersetze(const char *const u, const char* const alt, const char* const neu);
+	inline string *sersetze( string *const src, string const& target, string const& repl);
+	public:
+	/*1*/template <typename tC> explicit instyp (DBSTyp eDBS, const char* const feld, tC vwert): feld(feld) {
+		wert=sqlft(eDBS,vwert);
+		obkeinwert=0;
+	}
+	////    void init(){feld=string();wert=string();obkeinwert=0;}
 
-    /*3*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert):feld(feld) {
-      wert=sqlft(eDBS,vwert,false);
-      obkeinwert=0;
-    }
-    /*4*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const char* const zs):feld(feld) {
-      wert=sqlft(eDBS,vwert,zs);
-      obkeinwert=0;
-    }
-    /*5*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const bool obzahl):feld(feld) {
-      wert=sqlft(eDBS,vwert,obzahl);
-      obkeinwert=0;
-    }
-    /*6*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const uchar vobkeinwert):feld(feld) {
-      wert=vwert;
-      obkeinwert=vobkeinwert;
-    }
-    /*7*/instyp(DBSTyp eDBS, const char* const feld,const string& vwert):feld(feld) {
-      wert=sqlft(eDBS,vwert);
-      obkeinwert=0;
-    }
-		void ausgeb();
-}; // class instyp 
+	/*3*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert):feld(feld) {
+		wert=sqlft(eDBS,vwert,false);
+		obkeinwert=0;
+	}
+	/*4*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const char* const zs):feld(feld) {
+		wert=sqlft(eDBS,vwert,zs);
+		obkeinwert=0;
+	}
+	/*5*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const bool obzahl):feld(feld) {
+		wert=sqlft(eDBS,vwert,obzahl);
+		obkeinwert=0;
+	}
+	/*6*/instyp(DBSTyp eDBS, const char* const feld, const char *const vwert,const uchar vobkeinwert):feld(feld) {
+		wert=vwert;
+		obkeinwert=vobkeinwert;
+	}
+	/*7*/instyp(DBSTyp eDBS, const char* const feld,const string& vwert):feld(feld) {
+		wert=sqlft(eDBS,vwert);
+		obkeinwert=0;
+	}
+	void ausgeb();
+}; // struct instyp 
 ////string ersetze(const char *u, const char* alt, const char* neu);
 
 // delimiter value begin
@@ -278,15 +276,15 @@ struct sfeld: vector<Feld*>
 		this->push_back(fdp);
 //		return *this;
 	}
-}; // class svec: public vector<std::string>
+}; // struct svec: public vector<std::string>
 
 struct Index 
 {
 	const string name;
-    Feld *const felder;
-    const unsigned feldzahl;
-		uchar unique;
-    Index(const string& vname, Feld *const vfelder, const unsigned vfeldzahl, const uchar unique=0);
+	Feld *const felder;
+	const unsigned feldzahl;
+	uchar unique;
+	Index(const string& vname, Feld *const vfelder, const unsigned vfeldzahl, const uchar unique=0);
 }; // struct Index 
 
 enum refact:uchar {cascade,set_null,restrict_,no_action,set_default};
@@ -306,95 +304,94 @@ struct Constraint
 			Feld *const felder2, const unsigned feldz2, const refact onupdate=restrict_, const refact ondelete=restrict_);
 };
 
-class RS;
+struct RS;
 
 
-class DB 
+struct DB 
 {
-  public:
-    // muss außerhalb der Klasse und einer Funktion noch mal definiert werden
-    static uchar oisok; // 1=Installation von MariaDB wurde ueberprueft
-    string db_systemctl_name; // mysql, mariadb je nach System
-		servc *dbsv{0};
-		// 1= mariadb=geprueft
-		MYSQL **conn;
-		static const string defmyengine;
-		static const string defmycharset;
-		static const string defmycollat;
-		static const string defmyrowform;
+	// muss außerhalb der Klasse und einer Funktion noch mal definiert werden
+	static uchar oisok; // 1=Installation von MariaDB wurde ueberprueft
+	string db_systemctl_name; // mysql, mariadb je nach System
+	servc *dbsv{0};
+	// 1= mariadb=geprueft
+	MYSQL **conn;
+	static const string defmyengine;
+	static const string defmycharset;
+	static const string defmycollat;
+	static const string defmyrowform;
 #ifdef mitpostgres 
-		PGconn *pconn,*pmconn;
+	PGconn *pconn,*pmconn;
 #endif // mitpostgres
-    const DBSTyp DBS;
-    char dnb; // delimiter name begin
-    char dne; // delimiter name end
-    char dvb; // delimiter value begin
-    char dve; // delimiter value end
-    ////	char* ConStr;
-    ////  const char* db;
-    const string mysqlbef{"mysql"}, 
-					mysqlben{"mysql"}; // mysql-Befehl, mysql-Benutzer
-		////  const char* host;
-    const string host;
-    ////  const char* user;
-		const string charset;
-		const string collate;
-    const string user;
-    string passwd; // kann in pruefrpw dem eingegebenen rootpw gleichgesetz werden, deshalb nicht const
-    const string dbname;
-    string myloghost; // einheitliche Benennung von 'localhost' bzw. '%', zu kompliziert, um in jedem DB::DB aufzufuehren, deshalb nicht const
-    string rootpwd; // root-Passwort // wird in pruefrpw geaendert, deshalb nicht const
-		size_t conz; // Zahl der Verbindungen (s.o., conn)
-    unsigned int fehnr;
-    const char* ConnError;
-    uchar miterror;
-    vector<string> myr;
-    string cmd;
-    string datadir;
-		uchar lassoffen{0};
+	const DBSTyp DBS;
+	char dnb; // delimiter name begin
+	char dne; // delimiter name end
+	char dvb; // delimiter value begin
+	char dve; // delimiter value end
+	////	char* ConStr;
+	////  const char* db;
+	const string mysqlbef{"mysql"}, 
+				mysqlben{"mysql"}; // mysql-Befehl, mysql-Benutzer
+	////  const char* host;
+	const string host;
+	////  const char* user;
+	const string charset;
+	const string collate;
+	const string user;
+	string passwd; // kann in pruefrpw dem eingegebenen rootpw gleichgesetz werden, deshalb nicht const
+	const string dbname;
+	string myloghost; // einheitliche Benennung von 'localhost' bzw. '%', zu kompliziert, um in jedem DB::DB aufzufuehren, deshalb nicht const
+	string rootpwd; // root-Passwort // wird in pruefrpw geaendert, deshalb nicht const
+	size_t conz; // Zahl der Verbindungen (s.o., conn)
+	unsigned int fehnr;
+	const char* ConnError;
+	uchar miterror;
+	vector<string> myr;
+	string cmd;
+	string datadir;
+	uchar lassoffen{0};
 	private:
-		void instmaria(int obverb, int oblog);
+	void instmaria(int obverb, int oblog);
 	public:
-		int usedb(const string& db,const size_t aktc/*=0*/);
-		void pruefrpw(const string& wofuer, unsigned versuchzahl);
-		void setzrpw(int obverb=0, int oblog=0);
-		void prueffunc(const string& pname, const string& body, const string& para, const size_t aktc, int obverb, int oblog);
-		vector< vector<instyp> > ins;
-		void erweitern(const string& tab, vector<instyp> einf,const size_t aktc,int obverb,uchar obsammeln=0, const unsigned long *maxl=0) const;
-		uchar tuerweitern(const string& tab, const string& feld,long wlength,const size_t aktc,int obverb) const;
-    int machbinaer(const string& tabs, const size_t aktc, const string& fmeld,int obverb) const;
-    ////	DB(DBSTyp DBS, const char* host, const char* user,const char* passwd, const char* db, unsigned int port, const char *unix_socket, unsigned long client_flag);
-		///*1*/DB();
-		/*2*/DB(const DBSTyp nDBS,const char* const phost, const char* const user,const char* const ppasswd, 
-				const size_t conz/*=1*/, const char* const uedb="", unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,
-			 int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1);
-    /*3*/DB(const DBSTyp nDBS, const char* const phost, const char* const user, const char* const ppasswd,
-		   const char* const prootpwd, const size_t conz/*=1*/, const char* const uedb="", unsigned int port=0, const char *const unix_socket=NULL, 
-			 unsigned long client_flag=0, int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3, 
-			 const uchar ggferstellen=1);
-    /*4*/DB(const DBSTyp nDBS,const string& phost, const string& puser, const string& ppasswd, 
-		const size_t conz/*=1*/, 
-		   const string& uedb=string(), unsigned int port=0, const char* const unix_socket=NULL, unsigned long client_flag=0,
-       int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1);
-    void init(const string charset, const string collate,
-				unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,int obverb=0,int oblog=0,unsigned versuchzahl=3,
-				const uchar ggferstellen=1);
-    ~DB(void);
-    /*//
-       int Abfrage(const char* sql,const char** erg=(const char**)&"", int obverb=1);
-       int Abfrage(string sql,const char** erg=(const char**)&"", int obverb=1);
-       int AbfragemE(const char* sql,const char** erg=(const char**)&"", int obverb=1); // mit Ende
-       int AbfragemE(string sql,const char** erg=(const char**)&"", int obverb=1);      // mit Ende
-     */
-    ////	int insert(const char* tab, vector<instyp> einf, const char** erg=(const char**)&"",uchar sammeln=0);
-    ////	void AbfrageEnde();
-    void LetzteID(string* erg,const size_t aktc);
-    char* tmtosql(tm *tmh,char* buf);
-    char* tmtosqlmZ(tm *tmh,char* buf);
-    ////	char** HolZeile();
-    my_ulonglong affrows(const size_t aktc) const; // unsigned __int64
-		uchar obtabspda(const char* const tab,const char* const sp);
-}; // class DB 
+	int usedb(const string& db,const size_t aktc/*=0*/);
+	void pruefrpw(const string& wofuer, unsigned versuchzahl);
+	void setzrpw(int obverb=0, int oblog=0);
+	void prueffunc(const string& pname, const string& body, const string& para, const size_t aktc, int obverb, int oblog);
+	vector< vector<instyp> > ins;
+	void erweitern(const string& tab, vector<instyp> einf,const size_t aktc,int obverb,uchar obsammeln=0, const unsigned long *maxl=0) const;
+	uchar tuerweitern(const string& tab, const string& feld,unsigned long wlength,const size_t aktc,int obverb) const;
+	int machbinaer(const string& tabs, const size_t aktc, const string& fmeld,int obverb) const;
+	////	DB(DBSTyp DBS, const char* host, const char* user,const char* passwd, const char* db, unsigned int port, const char *unix_socket, unsigned long client_flag);
+	///*1*/DB();
+	/*2*/DB(const DBSTyp nDBS,const char* const phost, const char* const user,const char* const ppasswd, 
+			const size_t conz/*=1*/, const char* const uedb="", unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,
+			int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1);
+	/*3*/DB(const DBSTyp nDBS, const char* const phost, const char* const user, const char* const ppasswd,
+			const char* const prootpwd, const size_t conz/*=1*/, const char* const uedb="", unsigned int port=0, const char *const unix_socket=NULL, 
+			unsigned long client_flag=0, int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3, 
+			const uchar ggferstellen=1);
+	/*4*/DB(const DBSTyp nDBS,const string& phost, const string& puser, const string& ppasswd, 
+			const size_t conz/*=1*/, 
+			const string& uedb=string(), unsigned int port=0, const char* const unix_socket=NULL, unsigned long client_flag=0,
+			int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1);
+	void init(const string charset, const string collate,
+			unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,int obverb=0,int oblog=0,unsigned versuchzahl=3,
+			const uchar ggferstellen=1);
+	~DB(void);
+	/*//
+		int Abfrage(const char* sql,const char** erg=(const char**)&"", int obverb=1);
+		int Abfrage(string sql,const char** erg=(const char**)&"", int obverb=1);
+		int AbfragemE(const char* sql,const char** erg=(const char**)&"", int obverb=1); // mit Ende
+		int AbfragemE(string sql,const char** erg=(const char**)&"", int obverb=1);      // mit Ende
+	 */
+	////	int insert(const char* tab, vector<instyp> einf, const char** erg=(const char**)&"",uchar sammeln=0);
+	////	void AbfrageEnde();
+	void LetzteID(string* erg,const size_t aktc);
+	char* tmtosql(tm *tmh,char* buf);
+	char* tmtosqlmZ(tm *tmh,char* buf);
+	////	char** HolZeile();
+	my_ulonglong affrows(const size_t aktc) const; // unsigned __int64
+	uchar obtabspda(const char* const tab,const char* const sp);
+}; // struct DB 
 
 struct Tabelle 
 {
@@ -432,11 +429,11 @@ struct Tabelle
 	int machind(const size_t aktc,int obverb=0, int oblog=0);
 	int machconstr(const size_t aktc,int obverb=0, int oblog=0);
 	int prueftab(const size_t aktc,int obverb=0,int oblog=0);
-}; // class Tabelle 
+}; // struct Tabelle 
 
 
 
-class RS 
+struct RS 
 {
 	private:
 		unsigned long zaehler{0}; // Zahl der ueber tbins tatsaechlich einzufuegenden Datensaetze 
@@ -468,7 +465,7 @@ class RS
     vector<long> lenge;
     vector<long> prec;
     vector<string> kommentar;
-    char*** HolZeile();
+    char*** HolZeile(); 
     void setzzruck();
     void dsclear();
     template<typename sT> 
@@ -495,7 +492,7 @@ class RS
   private:
     int doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/);
 		void abfragefertig();
-}; // class RS
+}; // struct RS
 
 struct insv
 {
@@ -536,7 +533,7 @@ struct insv
 
 #endif // DB_H_DRIN
 
-class dhcl:public hcl
+struct dhcl:public hcl
 {
 	private:
 	protected:
@@ -565,10 +562,10 @@ class dhcl:public hcl
 		dhcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron);
 		~dhcl();
 		int  initDB();
-		int  pruefDB(const string& db);
+		int  pruefDB(DB** testMy, const string& db);
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
 			;
 
-}; // class hhcl //ω
+}; // struct hhcl //ω

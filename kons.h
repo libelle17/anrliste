@@ -143,14 +143,14 @@ extern const string devtty;
 
 typedef unsigned long long ull;
 extern uchar findv/*=3*/; // find-Version 1=system, 2=intern mit readdir, 3=intern mit nftw
-class elem2;
+struct elem2;
 #ifdef mitset
 typedef set<elem2> el2set;
 #else // mitset
 typedef map<elem2,ull> el2set;
 #endif // mitset else
 extern el2set::iterator it2;
-class elem3;
+struct elem3;
 extern set<elem3>::iterator it3;
 
 extern const string nix/*={}*/;
@@ -161,9 +161,8 @@ struct linst_cl;
 extern linst_cl* linstp/*=0*/; // globales Objekt
 // typedef const char *TCtp[][SprachZahl];
 typedef const char * const * const TCtp[SprachZahl];
-class TxB // Text-Basisklasse
+struct TxB // Text-Basisklasse
 {
- public:
   Sprache lgn; // Sprache numerisch
 //  TCtp* TCp;
   const char * const * const * const *TCp;
@@ -172,7 +171,7 @@ class TxB // Text-Basisklasse
 		TCtp *hilf = reinterpret_cast<TCtp*>(TCp);
 		return (const char* const)hilf[nr][lgn];
 	}
-}; // class TxB // Text-Basisklasse
+}; // struct TxB // Text-Basisklasse
 
 string meinpfad();
 
@@ -482,19 +481,18 @@ enum Tkons_
 
 extern const string sprachstr;
 /*
-extern class Txkonscl Txk;
+extern struct Txkonscl Txk;
 
-class Txkonscl : public TxB
+struct Txkonscl : public TxB
 {
-  public:
     static const char *TextC[T_konsMAX+1][SprachZahl];
     Txkonscl();
 //    inline const char* operator[](Tkons_ const& nr) const { return TextC[nr][lgn]; }
 };
 */
-extern class TxB Txk;
+extern struct TxB Txk;
 extern char const *DPROG_T[][SprachZahl];
-extern class TxB Tx;
+extern struct TxB Tx;
 
 extern uchar nrzf; // nicht rueckzufragen, fuer Aufruf aus Cron
 template<typename T> size_t elemzahlT(T& v){return sizeof(v)/sizeof(*v);}
@@ -507,7 +505,7 @@ struct errmsgcl
 		errmsgcl(int errnr,const string& msg):errnr(errnr),msg(msg){}
 };
 // aktueller Benutzer
-class cuscl
+struct cuscl
 {
 	private:
 		struct passwd *passwd;
@@ -518,10 +516,9 @@ class cuscl
 		cuscl();
 };
 
-// arg-Class
-class argcl
+// arg-struct
+struct argcl
 {
- public:
  const char *argcs;  // Zeiger auf einen Commandline-Parameter
  uchar agef=0; // dieser wurde gefunden
  argcl(const int i, const char *const *const argv);
@@ -529,31 +526,31 @@ class argcl
 
 // Gebrauch, z.B.: ic_cl ic("UTF8","CP850");
 ////			caus<<ic.convert(inh)<<endl;
-class ic_cl 
+struct ic_cl 
 {
-	iconv_t ict;
-	static const size_t grenze=500, 
-							 reserve=4*grenze;
-	char ergcont[reserve],
-			 *ergdyn=0;
+	private:
+		iconv_t ict;
+		static const size_t grenze=500, 
+								 reserve=4*grenze;
+		char ergcont[reserve],
+		*ergdyn=0;
 	public:
-	char *ergebnis;
-	ic_cl(const char* nach, const char* von); 
-	~ic_cl();
-	char *convert(string& eing,size_t ab=0);
+		char *ergebnis;
+		ic_cl(const char* nach, const char* von); 
+		~ic_cl();
+		char *convert(string& eing,size_t ab=0);
 };
 
-class perfcl
+struct perfcl
 {
- public:
- string vonwo;
- clock_t zp0, zp1, zp1alt;
- time_t t0=0, t1;
- unsigned long nr=0;
- perfcl(const string& vvonwo);
- void ausgeb(const string& stelle=nix,uchar obdauer=0);
- void ausgab1000(const string& stelle=nix);
- int oberreicht(unsigned long sek);
+	string vonwo;
+	clock_t zp0, zp1, zp1alt;
+	time_t t0=0, t1;
+	unsigned long nr=0;
+	perfcl(const string& vvonwo);
+	void ausgeb(const string& stelle=nix,uchar obdauer=0);
+	void ausgab1000(const string& stelle=nix);
+	int oberreicht(unsigned long sek);
 };
 
 string holsystemsprache(int obverb=0);
@@ -561,15 +558,15 @@ int pruefberecht(const string& datei,const string& benutzer,const mode_t mod=01,
 int untersuser(const string& uname,__uid_t *uidp=0, __gid_t *gidp=0, vector<gid_t> *gids=0,struct passwd* ustr=0);
 double verszuzahl(const string& vers);
 
-class mdatei: public fstream
+struct mdatei: fstream
 {
-  public:
-  int oboffen=0;
+  int oboffen{0};
   mdatei(const string& filename, ios_base::openmode mode=ios_base::in|ios_base::out, uchar faclbak=1, int obverb=0, int oblog=0);
-}; // class mdatei: public fstream
+}; // struct mdatei: fstream
 
 // Zeitausgabeklasse, um time_t-Variablen formatiert in ostream-Objekte ausgeben zu koennen, z.B. <<ztacl(zt,"%F %T")<<
-class ztacl {
+struct ztacl 
+{
 	private:
 		tm tmloc;
 		const time_t zt;
@@ -700,28 +697,27 @@ std::string string_to_hex(const std::string& input);
 int dateivgl(const string& d1, const string& d2,uchar obzeit=0);
 void kuerzevtz(string *vzp);
 
-struct svec: public vector<std::string>
+struct svec: vector<std::string>
 {
 	inline svec& operator<<(const std::string& str) {
 		this->push_back(str);
 		return *this;
 	}
-}; // class svec: public vector<std::string>
+}; // struct svec: vector<std::string>
 
 //svec& operator<<(svec& v, const std::string& str);
 template<typename T>
-class tsvec: public vector<T>
+struct tsvec: vector<T>
 {
-  public:
     inline tsvec<T>& operator<<(const T& str) {
       this->push_back(str);
 //      ((T&)str).init();
       return *this;
     } // inline tsvec
-}; // template<typename T> class tsvec: public vector<T>
+}; // template<typename T> struct tsvec: public vector<T>
 
 
-template <typename SCL> class schAcl;
+template <typename SCL> struct schAcl;
 
 enum par_t:uchar {pstri,pdez,ppwd,pverz,pfile,puchar,pbin,pint,plong,pdat}; // Parameterart: Sonstiges, Verzeichnis, Datei, uchar, int, long, Datum (struct tm)
 ////enum war_t:uchar {wlong,wbin,wstr,wdat}; // Parameterart: Sonstiges, Verzeichnis, Zahl, binär
@@ -763,7 +759,7 @@ struct WPcl:wpgcl
 //		void hole(struct tm *tmp);
 		void virtoausgeb() const;
 		void virtfrisch();
-}; // class WPcl
+}; // struct WPcl
 /*
 template <> inline void WPcl::hole < char* > (char** var) {*var = (char*)wert.c_str(); }
 template <> inline void WPcl::hole < const char* > (const char** var) {*var = wert.c_str(); }
@@ -854,7 +850,7 @@ struct aScl {
    const string name;
    const string *wertp;
    aScl(const string& name, const string *wertp):name(name),wertp(wertp) {}
-}; // class aScl
+}; // struct aScl
 
 struct aSvec:vector<aScl>
 {
@@ -862,10 +858,9 @@ struct aSvec:vector<aScl>
 		this->push_back(aS);
 		return *this;
 	}
-}; // class aSvec: public vector<std::string>
+}; // struct aSvec: vector<std::string>
 
-template <typename SCL> class schAcl {
- public:
+template <typename SCL> struct schAcl {
 	string name;
 // WPcl *schl=0; 
 	//vector<SCL*> schl; // Schlüsselklasse Schlüssel
@@ -911,21 +906,22 @@ template <typename SCL> class schAcl {
  void eintrinit();
  void frisch();
  ~schAcl();
-}; // class schAcl
+}; // struct schAcl
 template <> void schAcl<WPcl>::sinit(size_t vzahl, ...);
 template <> void schAcl<WPcl>::eintrinit();
 template <> void schAcl<optcl>::eintrinit();
 
 // Linux-System-Enum
 enum lsysen:uchar {usys,sus,deb,fed};
-class lsyscl
+struct lsyscl
 {
+	private:
     lsysen sys=usys; 
 		string usr_lib64_vz;
   public:
     lsysen getsys(int obverb=0,int oblog=0);
 		string& getlib64(int obverb=0,int oblog=0);
-}; // class lsyscl
+}; // struct lsyscl
 
 // enum betrsys {keins,suse,ubuntu,fedora};
 // betrsys pruefos();
@@ -980,7 +976,7 @@ struct absch
  const string *const suche(const char* const sname);
  const string *const suche(const string& sname);
  void clear();
-}; // class absch
+}; // struct absch
 
 struct paarcl
 {
@@ -988,7 +984,7 @@ struct paarcl
 	string wert;
 	string bemerk;
 	paarcl(const string& name, const string *const wertp, const string& bemerk);
-}; // kpaar
+}; // struct paarcl
 
 // Konfigurationsdatei-Klasse, Nachfolger von confdat
 struct confdcl 
@@ -1006,7 +1002,7 @@ struct confdcl
 	int lies(const string& vfname, int obverb, const char tz='=');
 	template <typename SCL> void kauswert(schAcl<SCL> *sA, int obverb=0,const uchar mitclear=1);
 	void Abschn_auswert(int obverb=0, const char tz='=');
-};
+}; // struct confdcl 
 
 extern const char *logdt;
 
@@ -1098,11 +1094,10 @@ struct linst_cl
  int doggfinst(const string& prog,int obverb=0,int oblog=0,uchar ohneabh=0);
  int douninst(const string& prog,int obverb=0,int oblog=0,uchar obyes=1);
  int obfehlt(const string& prog,int obverb=0,int oblog=0);
-}; // class linst_cl
+}; // struct linst_cl
 
 // Service aus SystemD
-class servc {
-  public:
+struct servc {
 		string systemd; // Dienst-Datei
     int svfeh=-1; // Ausgangseinstellung
 		int svf0=-1; // Einstellung nach erstem Ablauf von obsvfeh
@@ -1146,30 +1141,31 @@ struct elem2
     elem2(const string& mutter,const string& name);
     void init(const string& vmutter, const string& name);
     const bool operator<(const elem2& el) const;
-}; // class elem2
+}; // struct elem2
 
-class find2cl: elem2
+struct find2cl: elem2
 {
-  string typ;
-  vector<string> stack;
-  DIR *dir;
-  struct dirent *dent;
-  public:
-  el2set *ergp=0;
-  set<string> *vznp=0; 
-  ull *nrp=0;
-  int zuloeschen=1;
-  int eingefuegt, verzneu;
-	int obverb,oblog;
-	find2cl(int _obverb=0, int _oblog=0, find2cl *stamm=0);
-  ~find2cl();
-  void weiszu();
-  void init(const string& mutter, const string& name, regex_t *reg, const int folge,const long maxdepth, const int& typbit,
-      vector<string> stack,time_t ab, time_t bis,int nurexec);
-  void ausgeb();
-  int finde(svec *wovp, const string& muster=nix,const long tiefe=-1,int typbit=B_Alle,int folge=Fol_Dat,
-	          time_t ab=0, time_t bis=0,int obicase=0,int nurexec=0,int obnoext=0);
-	void zuvec(svec *zu,uchar anteil=0);
+	private:
+		string typ;
+		vector<string> stack;
+		DIR *dir;
+		struct dirent *dent;
+	public:
+		el2set *ergp=0;
+		set<string> *vznp=0; 
+		ull *nrp=0;
+		int zuloeschen=1;
+		int eingefuegt, verzneu;
+		int obverb,oblog;
+		find2cl(int _obverb=0, int _oblog=0, find2cl *stamm=0);
+		~find2cl();
+		void weiszu();
+		void init(const string& mutter, const string& name, regex_t *reg, const int folge,const long maxdepth, const int& typbit,
+				vector<string> stack,time_t ab, time_t bis,int nurexec);
+		void ausgeb();
+		int finde(svec *wovp, const string& muster=nix,const long tiefe=-1,int typbit=B_Alle,int folge=Fol_Dat,
+				time_t ab=0, time_t bis=0,int obicase=0,int nurexec=0,int obnoext=0);
+		void zuvec(svec *zu,uchar anteil=0);
 };
 #endif // altfind
 
@@ -1187,7 +1183,7 @@ struct elem3
     elem3(string pfad, const struct stat *sbp, int& tflag, const struct FTW *ftwp, string lnk,const struct stat& lst):
           pfad(pfad),sb(*sbp),tflag(tflag),ftw(*ftwp),lnk(lnk),lst(lst){}
     const bool operator<(const elem3& el) const;
-};
+}; // struct elem3
 
 // Wurzelelement
 struct wele
@@ -1197,7 +1193,7 @@ struct wele
     wele(const string& pfad=nix, const long& maxd=-1):pfad(pfad),maxd(maxd){}
     const bool operator<(const wele& el) const;
 //    bool operator()(const wele& el3) const {return (this->pfad<el3.pf);}
-}; // class wele
+}; // struct wele
 
 // nur eine Instanz der Klasse kann gleichzeitig gefuellt werden wegen der statischen Elemente
 struct find3cl
@@ -1229,7 +1225,7 @@ struct find3cl
     int finde(svec *wovp,const string& muster=nix,long tiefe=-1,int _typbit=B_Alle,int _folge=Fol_Dat,
 		           time_t _mab=0,time_t _mbis=0,int obicase=0,int nurexec=0,int obnoext=0);
 		void zuvec(svec *zu,uchar anteil=0);
-}; // class find3cl
+}; // struct find3cl
 #endif // neufind
 #if defined(altfind) && defined(neufind)
 void findfile(svec *qrueck,uchar findv,int obverb=0,int oblog=0,uchar anteil=0,
@@ -1263,13 +1259,12 @@ extern const string& defnachs; // ="/archive/master.tar.gz";
 void viadd(string *const cmdp,string* const zeigp,const string& datei,const uchar ro=0,const uchar hinten=0, const uchar unten=0);
 int schluss(const int fnr,const string text={},int oblog=0);
 
-extern class lsyscl lsys;
+extern struct lsyscl lsys;
 
 // Haupt-Klasse
-class hcl
+struct hcl
 {
 	private:
-		uchar obsetz=1; // setzzaehler
 		const char* const DPROG;
 		const uchar mitcron; // ob Programm auch in Cron eingetragen werden kann; kann im Konstruktor angegeben werden
 		const uchar parstreng; // breche Programm ab, wenn Parameter nicht gefunden
@@ -1278,6 +1273,7 @@ class hcl
     double tstart, tende;
     size_t optslsz=0; // last opts.size()
 		uchar mitpids=0; // mehrere pids
+		uchar obsetz=1; // setzzaehler
 	public:
 		confdcl hccd;
 	protected:
@@ -1325,7 +1321,7 @@ class hcl
 #ifdef alt
     vector<optioncl> opts;
 #endif
-		vector<argcl> argcmv; // class member vector
+		vector<argcl> argcmv; // struct member vector
 		ulong aufrufe=0; // Zahl der bisherigen Programmaufrufe
 		struct tm laufrtag={0}; // Tag des letztes Aufrufs
 		ulong tagesaufr=0; // Zahl der bisherigen Programmaufrufe heute
@@ -1396,7 +1392,7 @@ class hcl
 		virtual void virtschlussanzeige();
 	public:
 		virtual void fuv0(),fuv1(),fuv2(),fuv3(),fuv4(),fuv5(),fuv6(),fuv7(),fuv8(),fuv9(),fuv10();
-		virtual int fui0(),fui1(),fui2(),fui3(),fui4(),fui5(),fui6(),fui7(),fui8(),fui9(),fui10();
+		virtual int fui0(),fui1(),fui2(),fui3(),fui4(),fui5(),fui6(),fui7(),fui8(),fui9(),fui10(),fui11();
 		void pruefcl(); // commandline mit omap und mit argcmv parsen
 		hcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron,const uchar parstreng=1);
 		~hcl();
@@ -1412,7 +1408,7 @@ class hcl
 		void zeigkonf();
 		void reduzierlibtiff();
 		void setzbenutzer(string *const user);
-}; // class hcl
+}; // struct hcl
 /*
 // sollte dann unnötig werden
 template<typename SCL> void schAcl<SCL>::initv(vector<optcl*> optpv,vector<size_t> optsv)

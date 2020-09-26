@@ -216,7 +216,7 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
   // T_laeuft_schon_einmal_seit
   {"' laeuft schon einmal seit ","' is running already once since "},
 	// T_sec_Breche_ab
-  {"sec. Breche ab.","sec. Aborting."},
+  {". Breche ab.",". Aborting."},
 	// T_laueft_schon_einmal_aber
 	{"' laeuft schon einmal, aber","' is running already once, but"},
 	// T_wird_deshalb_abgebrochen
@@ -719,10 +719,10 @@ Txkonscl::Txkonscl()
   TCp=(const char* const * const * const *)&TextC;
 }
 */
-class TxB Txk((const char* const* const* const*)kons_T);
-extern class TxB Tx;
+struct TxB Txk((const char* const* const* const*)kons_T);
+extern struct TxB Tx;
 
-////class Txkonscl Txk;
+////struct Txkonscl Txk;
 
 uchar nrzf{0}; // nicht rueckzufragen, fuer Aufruf aus Cron, wird auch in DB verwendet 
 
@@ -1867,7 +1867,7 @@ string& lsyscl::getlib64(int obverb/*=0*/,int oblog/*=0*/)
 	return usr_lib64_vz;
 } // string& lsyscl::getlib64(int obverb/*=0*/,int oblog/*=0*/)
 
-class lsyscl lsys;
+struct lsyscl lsys;
 
 /*//
 betrsys pruefos()
@@ -2032,7 +2032,7 @@ linst_cl::linst_cl(int obverb,int oblog)
 					uypr=upr+"-y ";
 					upd=sudc+"zypper patch";
 					repos=sudc+"zypper lr | grep 'g++\\|devel_gcc'>/dev/null 2>&1 || "+
-						sudc+"zypper ar http://download.opensuse.org/repositories/devel:/gcc/`cat /etc/*-release |"
+						sudc+"zypper ar -f http://download.opensuse.org/repositories/devel:/gcc/`cat /etc/*-release |"
 						"grep ^NAME= | cut -d'\"' -f2 | sed 's/ /_/'`_`cat /etc/*-release | grep ^VERSION_ID= | cut -d'\"' -f2`/devel:gcc.repo;";
 					compil="gcc gcc-c++ gcc6-c++";
 					break;
@@ -2762,7 +2762,7 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 {
 	fLog(violetts+Txk[T_pruefmehrfach]+schwarz,obverb,0);
-	const long smax{3600}; // maximal tolerierte Sekundenzahl, bevor statt dem eigenen Prozess der andere abgebrochen wird
+	const long smax{7200}; // maximal tolerierte Sekundenzahl, bevor statt dem eigenen Prozess der andere abgebrochen wird
 	svec rueck;
 	const string iwen{wen.empty()?base_name(meinpfad()):wen};
 	// bei valgrind steht z.B. 'memecheck-amd64-' am Anfang
@@ -2770,34 +2770,48 @@ void pruefmehrfach(const string& wen,int obverb/*=0*/,uchar obstumm/*=0*/)
 	const string bef{"ps -eo comm,args,etimes,pid|grep -P 'valgrind.*"+iwen+"|^"+iwen+"'|grep -P '"+iwen+"([[:space:]]|\\z)'|grep -v '[[:space:]]grep -P'"};
 	systemrueck(bef,obverb,0,&rueck,/*obsudc=*/0);
 	long sek{0};
+	uchar obaufhoeren{0};
 	for(int aru=0;aru<3;aru++) {
-		if (rueck.size()==1) // ich
-			break;
+		// if (rueck.size()==1) // ich break; // geht nicht so einfach, da jeder Aufruf mehrere Prozesse beinhalten kann
 		if (aru<2) {
 			for(unsigned iru=0;iru<rueck.size();iru++) {
-				// z.B. 'autofax      57  2939'
-				svec pvec;
-				aufSplit(&pvec,rueck[iru],' ',/*auchleer=*/0); 
-				if (pvec.size()>2 && pvec[2]!=ltoan(getpid())) { // und wenn nicht ich
-					sek=atol(pvec[1].c_str());
-					if (sek>smax) {    // wenn es mindestens eine Stunde laeuft
-						cout<<Txk[T_Program]<<blau<<iwen<<schwarz<<Txk[T_laueft_schon_einmal_aber]<<" "<<rot<<sek<<schwarz<<" s (> "<<blau<<smax<<schwarz<<" s), "<<Txk[T_wird_deshalb_abgebrochen]<<endl;
-						if (!systemrueck(string("kill ")+(aru?"-9 ":"")+pvec[2]+" 2>/dev/null",obverb,0,0,/*obsudc=*/1)) {
-							rueck.erase(rueck.begin()+iru);
-							continue;
+				if (!obaufhoeren) {
+					// z.B. 'autofax      57  2939'
+					svec pvec;
+					aufSplit(&pvec,rueck[iru],' ',/*auchleer=*/0); 
+					// <<"pvec[pvec.size()-1]: "<<gruen<<pvec[pvec.size()-1]<<" "<<getpid()<<schwarz<<endl;
+					// und wenn nicht ich; pvec-Index muss wegen Befehlszeilenparameter von hinten gezaehlt werden
+					if (pvec.size()>2 && pvec[pvec.size()-1]!=ltoan(getpid())) { 
+						sek=atol(pvec[pvec.size()-2].c_str());
+						if (sek>smax) {    // wenn es mindestens zwei Stunden laeuft
+							cout<<Txk[T_Program]<<blau<<iwen<<schwarz<<Txk[T_laueft_schon_einmal_aber]<<" "<<rot<<sek<<schwarz<<" s";
+							if (sek>60) {
+								cout<<" ("<<rot<<(sek/60)<<schwarz<<" min";
+								if (sek>3600) 
+									cout<<" ("<<rot<<(sek/3600)<<schwarz<<" h)";
+								cout<<")";
+							} // 							if (sek>60)
+							cout<<" (> "<<blau<<smax<<schwarz<<" s), "<<Txk[T_wird_deshalb_abgebrochen]<<endl;
+							if (!systemrueck(string("kill ")+(aru?"-9 ":"")+pvec[pvec.size()-1]+" 2>/dev/null",obverb,0,0,/*obsudc=*/1)) {
+								rueck.erase(rueck.begin()+iru);
+								continue;
+							}
+						} else {
+							// wenn ein fremder Prozess noch nicht die Zeitgrenze ueberschritten hat, dann diesen Aufruf hier beenden
+							obaufhoeren=1;
 						}
-					} // 				if (sek>15)
-				} // 			if (pvec.size()>2)
+					} // 			if (pvec.size()>2)
+				} // 				if (!obaufhoeren)
 			} // 		for(int iru=0;iru<rueck.size();iru++)
 			// if (aru<2)
-		} else {
+		} else if (obaufhoeren) {
 			if (obstumm)
 				exit(schluss(0));
-			cout<<blau<<bef<<schwarz<<endl;
-			for(unsigned iru=0;iru<rueck.size();iru++) {
-				cout<<blau<<iru<<schwarz<<": "<<rueck[iru]<<endl;
-			}
-			exit(schluss(98,Txk[T_Program]+blaus+wen+schwarz+Txk[T_laeuft_schon_einmal_seit]+blau+ltoan(sek)+" "+schwarz+Txk[T_sec_Breche_ab],/*oblog*/0));
+			//// <<blau<<bef<<schwarz<<endl;
+			//// for(unsigned iru=0;iru<rueck.size();iru++) { cout<<blau<<iru<<schwarz<<": "<<rueck[iru]<<endl; }
+			const string min{ltoan(sek/60)};
+			const string std{ltoan(sek/3600)};
+			exit(schluss(98,Txk[T_Program]+blaus+wen+schwarz+Txk[T_laeuft_schon_einmal_seit]+blau+ltoan(sek)+" s"+(sek>60?" ("+min+" min"+(sek>3600?" ("+std+" h)":"")+")":"")+schwarz+Txk[T_sec_Breche_ab],/*oblog*/0));
 		} // if (aru<2) else
 	} // 	for(int aru=0;aru<3;aru++) 
 	/*//
@@ -4554,7 +4568,7 @@ int kopier(const string& quel, const string& ziel, int obverb, int oblog)
 					fehler=0;
 					bool chmerg __attribute__((unused))=chmod(ziel.c_str(),statq.st_mode);
 					bool choerg __attribute__((unused))=chown(ziel.c_str(),statq.st_uid,statq.st_gid);
-					struct utimbuf ubuf={0};
+					struct utimbuf ubuf{0};
 					ubuf.actime=ubuf.modtime=statq.st_mtime;
 					utime(ziel.c_str(),&ubuf);
 				} // if (erg==-1)
@@ -5438,7 +5452,7 @@ void hcl::parsecl()
 // wird aufgerufen in lauf
 void hcl::virtMusterVorgb()
 {
-} // void hhcl::MusterVorgb
+} // void hhcl::virtMusterVorgb
 
 // wird aufgerufen in lauf; liest die Konfiguration ein
 void hcl::virtlieskonfein()
@@ -5676,7 +5690,7 @@ void hcl::rueckfragen()
 // wird aufgerufen in lauf
 void hcl::pruefggfmehrfach()
 {
-	if (!obhilfe &&!obvi && !kfzg &&!obvs &&!zeigvers &&!rzf) {
+	if (!obhilfe &&!obvi &&!kfzg &&!obvs &&!zeigvers &&!rzf) {
 		pruefmehrfach(meinname,obverb,nrzf);
 	}
 } // void hhcl::pruefggfmehrfach
@@ -6023,7 +6037,7 @@ int hcl::kompilfort(const string& was,const string& vorcfg/*=string()*/, const s
 		 */
 		const string b1{"cd \""+ivw+"\"&&"+(vorcfg.empty()?s_true:vorcfg)+(ohneconf?"":"&& [ -f configure ]&&./configure ")+cfgbismake+" make"};
 		const string b2{"cd \""+ivw+"\"&& make install"};
-		const string b3{"cd \""+ivw+"\"&&{ M=Makefile;[ -f $M ]&&{ grep -q 'distclean:' $M&&make distclean||{ grep -q 'clean:' $M&&make clean;};};};"
+		const string b3{"cd \""+ivw+"\"&&{ M=Makefile;[ -f $M ]&&{ grep -q 'clean:' $M&&make clean||{ grep -q 'distclean:' $M&&make distclean;};};};"
 			"[ -f configure ]&&./configure; make"};
 		////		const string b4="ldconfig "+lsys.getlib64();
 		const string b4{"ldconfig /usr"};
@@ -6128,9 +6142,9 @@ void hcl::zeigkonf()
 {
 	struct stat kstat{0};
 	cout<<Txk[T_aktuelle_Einstellungen_aus]<<blau<<akonfdt<<schwarz<<"' (";
-	//// char buf[100]={0};
+	//// char buf[100]{0};
 	if (!lstat(akonfdt.c_str(),&kstat)) {
-		//// struct tm tm={0};
+		//// struct tm tm{0};
 		//// pthread_mutex_lock(&timemutex);
 		//// memcpy(&tm, localtime(&kstat.st_mtime),sizeof(tm));
 		cout<<ztacl(kstat.st_mtime,"%d.%m.%Y %H.%M.%S");
@@ -6460,7 +6474,7 @@ int optcl::pzuweis(const char *const nacstr, const uchar vgegenteil/*=0*/, const
 
 // zum Ueberladen
 void hcl::fuv0(){}; void hcl::fuv1(){}; void hcl::fuv2(){}; void hcl::fuv3(){}; void hcl::fuv4(){}; void hcl::fuv5(){}; void hcl::fuv6(){}; void hcl::fuv7(){}; void hcl::fuv8(){}; void hcl::fuv9(){}; void hcl::fuv10(){};
-int hcl::fui0(){return 0;}; int hcl::fui1(){return 0;}; int hcl::fui2(){return 0;}; int hcl::fui3(){return 0;}; int hcl::fui4(){return 0;}; int hcl::fui5(){return 0;}; int hcl::fui6(){return 0;}; int hcl::fui7(){return 0;}; int hcl::fui8(){return 0;}; int hcl::fui9(){return 0;}; int hcl::fui10(){return 0;};
+int hcl::fui0(){return 0;}; int hcl::fui1(){return 0;}; int hcl::fui2(){return 0;}; int hcl::fui3(){return 0;}; int hcl::fui4(){return 0;}; int hcl::fui5(){return 0;}; int hcl::fui6(){return 0;}; int hcl::fui7(){return 0;}; int hcl::fui8(){return 0;}; int hcl::fui9(){return 0;}; int hcl::fui10(){return 0;}; int hcl::fui11(){return 0;};
 
 optcl::optcl(const string& pname,const void* pptr,const par_t part, const int kurzi, const int langi, TxB* TxBp, const long Txi, const uchar wi, const long Txi2, const string rottxt, const int iwert,const uchar woher, const string& Txtrf/*={}*/,const uchar obno/*=(uchar)-1*/,const string* refstr/*=0*/,const uchar* obfragz/*=0*/,fnhcliztyp fnobfragz/*=0*/,fnhclztyp fnnachhz/*=0*/,fnhclztyp fnvorhz/*=0*/,uchar sonderrf/*=0*/,fnhcliztyp fngueltigz/*=0*/):
 	wpgcl(pname,pptr,part),
@@ -7223,5 +7237,5 @@ int mntpunkt(const char* mntpfad) {
 }
 
 // damit nicht Template-Klassen-Funktionen in Header-Dateien geschrieben werden muessen
-template class schAcl<WPcl>;
-template class schAcl<optcl>;
+template struct schAcl<WPcl>;
+template struct schAcl<optcl>;

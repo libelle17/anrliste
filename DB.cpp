@@ -169,9 +169,9 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"",""}
 };
 // Txdbcl::Txdbcl() {TCp=(const char* const * const * const *)&TextC;}
-// class Txdbcl Txd;
-// class TxB Txd(DB_T);
-class TxB Txd((const char* const* const* const*)DB_T);
+// struct Txdbcl Txd;
+// struct TxB Txd(DB_T);
+struct TxB Txd((const char* const* const* const*)DB_T);
 
 #ifdef mitpostgres 
 const DBSTyp myDBS=Postgres;
@@ -933,7 +933,7 @@ void Tabelle::tuzeigspalte(size_t spnr,int obverb/*=0*/,int oblog/*=0*/)
 } // void Tabelle::zeigspalten
 
 // enum refact:uchar {cascade,set_null,restrict,no_action,set_default};
-const string refacts[]={"CASCADE","SET NULL","RESTRICT","NO ACTION","SET DEFAULT"};
+const string refacts[]{"CASCADE","SET NULL","RESTRICT","NO ACTION","SET DEFAULT"};
 
 int Tabelle::machconstr(const size_t aktc, int obverb/*=0*/, int oblog/*=0*/)
 {
@@ -1263,7 +1263,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 } // int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 
 // erweitert die Spaltenbreite einer Spalte auf mindenstens wlength, falls sie geringer ist
-uchar DB::tuerweitern(const string& tabs, const string& feld,long wlength,const size_t aktc,int obverb) const
+uchar DB::tuerweitern(const string& tabs, const string& feld,unsigned long wlength,const size_t aktc,int obverb) const
 {
   stringstream korr;
   string lenge;
@@ -1275,12 +1275,15 @@ uchar DB::tuerweitern(const string& tabs, const string& feld,long wlength,const 
     while(cerg= spaltlen.HolZeile(),cerg?*cerg:0) {
       if (*(*cerg+0)) {
         lenge=*(*cerg+0);
-        if (atol(lenge.c_str())<wlength) {
+        if ((ulong)atol(lenge.c_str())<wlength) {
           fLog(Txd[T_Erweitere_Feld]+tabs+"."+feld+Txd[T_von]+lenge.c_str()+Txd[T_auf]+ltoan(wlength),1,1);
           korr.str(std::string()); korr.clear();
           if (*(*cerg+1) && *(*cerg+2)) {
-            korr<<"ALTER TABLE `"<<tabs<<"` MODIFY COLUMN `"<<feld<<"` "<<*(*cerg+1)/*data_type*/<<"("<<wlength<<") "<<
-              (!strcasecmp(*(*cerg+2),"yes")?"NULL":"NOT NULL")<<" "<<(cjj(cerg,3)?string("DEFAULT '")+cjj(cerg,3)+"'":"")<<
+						const string defroh{ersetzAllezu(cjj(cerg,3),"'","\\'")}, 
+									defz{defroh.substr(0,wlength-(wlength<defroh.length()&&defroh[wlength-1]=='\\'?1:0))},
+									defa{defz.substr(0,wlength-(wlength<defz.length()&&defz[wlength-1]=='\\'?1:0))};
+						korr<<"ALTER TABLE `"<<tabs<<"` MODIFY COLUMN `"<<feld<<"` "<<*(*cerg+1)/*data_type*/<<"("<<wlength<<") "<<
+              (!strcasecmp(*(*cerg+2),"yes")?"NULL":"NOT NULL")<<" "<<(cjj(cerg,3)?string("DEFAULT '")+defa+"'":"")<<
               " COMMENT '"<<ersetzAllezu(cjj(cerg,4),"'","\\'")<<"'";
             RS spaltaend(this,korr.str(),aktc,obverb);
             if (spaltaend.fnr==1074) {
@@ -1297,9 +1300,9 @@ uchar DB::tuerweitern(const string& tabs, const string& feld,long wlength,const 
               else if (!strcasecmp(*(*cerg+1),"mediumtext")) neufeld="longtext";
               else if (!strcasecmp(*(*cerg+1),"mediumblob")) neufeld="longblob";
               if (!neufeld.empty()) {
-                fLog(Txd[T_Aendere_Feld]+tabs+"."+feld+" von: "+*(*cerg+1)+" auf: "+neufeld,1,1);
+                fLog(Txd[T_Aendere_Feld]+tabs+"."+feld+Txd[T_von]+*(*cerg+1)+Txd[T_auf]+neufeld,1,1);
                 korr<<"ALTER TABLE `"<<tabs<<"` MODIFY COLUMN `"<<feld<<"` "<<neufeld/*data_type*/<<" "<<
-                  (!strcasecmp(*(*cerg+2),"yes")?"NULL":"NOT NULL")<<" "<<(cjj(cerg,3)?string("DEFAULT '")+cjj(cerg,3)+"'":"")<<
+                  (!strcasecmp(*(*cerg+2),"yes")?"NULL":"NOT NULL")<<" "<<(cjj(cerg,3)?string("DEFAULT '")+defa+"'":"")<<
                   " COMMENT '"<<ersetzAllezu(cjj(cerg,4),"'","\\'")<<"'";
                 RS spaltaend2(this,korr.str(),aktc,obverb);
               }
@@ -2499,21 +2502,17 @@ int dhcl::initDB()
 	return 0;
 } // initDB
 
-// wird aufgerufen in virtrueckfragen
-int dhcl::pruefDB(const string& db)
+// wird aufgerufen in autofax.pvirtnachrueckfragen
+int dhcl::pruefDB(DB **testMy, const string& db)
 {
 	hLog(violetts+Txk[T_pruefDB]+db+")"+schwarz);
 	unsigned fehnr{0};
-	if (!My) {
-		My=new DB(myDBS,host,muser,mpwd,maxconz,db,0,0,0,obverb,oblog,DB::defmycharset,DB::defmycollat,3,0);
-		fehnr=My->fehnr;
-		if (My->ConnError) {
-			delete My;
-			My=0;
-		}else {
-//			My->lassoffen=1;
+		*testMy=new DB(myDBS,host,muser,mpwd,maxconz,db,0,0,0,obverb,oblog,DB::defmycharset,DB::defmycollat,3,0);
+		fehnr=(*testMy)->fehnr;
+		if ((*testMy)->ConnError) {
+			delete (*testMy);
+			(*testMy)=0;
 		}
-	} // 	if (!My)
 	return (fehnr); 
 } // pruefDB
 
