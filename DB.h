@@ -262,9 +262,12 @@ struct Feld
     bool nnull;
     string defa;
 		bool unsig;
+		string chset;
+		string coll;
 		Feld();
     Feld(const string& name, string typ=string(), const string& lenge=string(), const string& prec=string(), 
-         const string& comment=string(), bool obind=0, bool obauto=0, bool nnull=0, const string& defa=string(), bool unsig=0);
+     const string& comment=string(), bool obind=0, bool obauto=0, bool nnull=0, const string& defa=string(), 
+		 bool unsig=0,const string& chset=string(), const string& coll=string());
 //		Feld(Feld const& copy);
 		// um im Konstruktor von Tabelle aus einem Feld-vector ein Feld-Array machen zu koennen
 		Feld& operator=(const Feld* fur);
