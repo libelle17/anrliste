@@ -2528,6 +2528,7 @@ string dir_name(const string& path)
   return path.substr(0,letzt);
 } // string dir_name(string const & path)
 
+
 // soll fuer den Fall eines uebergebenen 'rueck'-Zeigers den Rueckgabewert der aufgerufenen Funktion zuruckliefern,
 // ausser bei 'find', da die Zahl der Funde
 // bei rueck==0 liefert es das Ergebnis der system(..)-Funktion zurueck
@@ -2584,10 +2585,11 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 	char tmpd[tmpd0.size()+1];
 	strcpy(tmpd,tmpd0.c_str());
 	const int mksterg{mkstemp(tmpd)};
+	if (mksterg!=-1) close(mksterg);
 	// '... 2>/dev/null' nicht unbedingt aufheben
 	const string bef{(obsudc?sudc+(obsudc==2&&!sudc.empty()?"-H ":""):"")+
-		(obdirekt?hcmd:"env PATH='"+spath+"' "+"sh -c '"+ersetzAllezu(hcmd,"'","'\\''")+"'"+
-		 (mksterg!=-1&&(hcmd.find(" 2>")==string::npos||obverb>0)?string(" 2>")+tmpd:string()))};
+		(obdirekt?hcmd:"env PATH='"+spath+"' "+"sh -c '"+ersetzAllezu(hcmd,"'","'\\''")+"'"
+		 +(mksterg!=-1&&(hcmd.find(" 2>")==string::npos||obverb>0)?string(" 2>")+tmpd:string()))};
 	const string befanz{ersetze(bef.c_str(),spath.c_str(),"...")};
 	const string hsubs{befanz.substr(0,getcols()-7-aktues.length())};
 	string meld{aktues+": "+blau+hsubs+schwarz+" ..."};
@@ -2597,22 +2599,23 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
 	} else { 
 		if (obverb||oblog) fLog(meld,obverb>0?-1:0,oblog); 
 	}
-	if (!rueck) if (obergebnisanzeig) {neurueck=1;rueck=new vector<string>;}
-	// #define systemrueckprofiler
+  if (!rueck) if (obergebnisanzeig) {neurueck=1;rueck=new vector<string>;}
+  // #define systemrueckprofiler
 #ifdef systemrueckprofiler
-	perfcl prf("systemrueck");
+  perfcl prf("systemrueck");
 #endif // systemrueckprofiler
-	// obsudc==0 nichts, obsudc==1: "sudo ", obsudc==2: "sudo -H "
-////	<<violett<<"bef: "<<blau<<bef<<schwarz<<endl;
-	if (rueck) {
-		//// <<gruen<<bef<<schwarz<<endl;
+  // obsudc==0 nichts, obsudc==1: "sudo ", obsudc==2: "sudo -H "
+  ////	<<violett<<"bef: "<<blau<<bef<<schwarz<<endl;
+  if (rueck) {
+    //// <<gruen<<bef<<schwarz<<endl;
+    // caus<<violett<<bef<<schwarz<<endl;
     if (FILE* pipe{popen(bef.c_str(),"r")}) {
-		/*//
-		int fd=fileno(pipe);
-		int flags=fcntl(fd, F_GETFL, 0);
-		flags|=O_NONBLOCK;
-		fcntl(fd, F_SETFL, flags);
-		*/
+      /*//
+        int fd=fileno(pipe);
+        int flags=fcntl(fd, F_GETFL, 0);
+        flags|=O_NONBLOCK;
+        fcntl(fd, F_SETFL, flags);
+       */
 #ifdef systemrueckprofiler
       prf.ausgeb();
 #endif
