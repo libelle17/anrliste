@@ -8,15 +8,15 @@ static int writer(char *data, size_t size, size_t nmemb, std::string *writerData
 {
   if(writerData == NULL)
     return 0;
-
   writerData->append(data, size*nmemb);
-
   return size * nmemb;
 }
 
-int holurl(const std::string url, std::string* bufp)
+int holurl(const std::string url, std::string* bufp, const int obverb)
 {
-  //std::cout<<"url: "<<url<<std::endl;
+  // std::cout<<"url: "<<url<<std::endl;
+	if (obverb>1)
+		fprintf(stdout,"url: %s\n",url.c_str());
   CURL *hnd = NULL;
   CURLcode code;
   static char errorBuffer[CURL_ERROR_SIZE];
@@ -38,11 +38,12 @@ int holurl(const std::string url, std::string* bufp)
 		return -2;
   }
   return 0;
-} // int holurl(const std::string url, std::string* bufp)
+} // int holurl
 
 // XML-Inhalt ermitteln
-size_t holraus(const std::string xml,std::string item,std::string *ergp,size_t anf/*=0*/)
+size_t holraus(const std::string xml,std::string item,std::string *ergp,size_t anf/*=0*/,const int obverb)
 {
+	size_t hr{0};
   const std::string von="<"+item+">", bis="</"+item+">";
   if (ergp) {
     ergp->clear();
@@ -52,12 +53,14 @@ size_t holraus(const std::string xml,std::string item,std::string *ergp,size_t a
       size_t p2=xml.find(bis,p1);
       if (p2!=std::string::npos) {
         *ergp=xml.substr(p1,p2-p1);
-        return p2+bis.length();
+        hr=p2+bis.length();
       }
     }
   }
-  return 0;
-} // size_t holraus(const std::string xml,std::string item,std::string *ergp;size_t anf=0)
+	if (obverb>1)
+		fprintf(stdout,"rausgeholt: %s\n",ergp?ergp->c_str():"");
+  return hr;
+} // size_t holraus
 
 
 tr64cl::tr64cl(std::string fbusr,std::string fbpwd):
@@ -72,7 +75,7 @@ tr64cl::tr64cl(std::string fbusr,std::string fbpwd):
 }
 
 // ermittelt aus test3.sh mit curl ... --libcurl test3.c
-int tr64cl::fragurl(const std::string zurl, const std::string zservT, const std::string action, std::string* bufp,const vector<string>* iname/*=0*/,const vector<string>* ival/*=0*/)
+int tr64cl::fragurl(const std::string zurl, const std::string zservT, const std::string action, std::string* bufp,const vector<string>* iname/*=0*/,const vector<string>* ival/*=0*/, const int obverb)
 {
   //std::cout<<"url: "<<url<<std::endl;
   CURL *hnd = NULL;
@@ -99,6 +102,8 @@ int tr64cl::fragurl(const std::string zurl, const std::string zservT, const std:
 			postfield+="<"+iname->at(vnr)+">"+ival->at(vnr)+"</"+iname->at(vnr)+">\n";
 		}
 	postfield+="</u:"+action+">\n</s:Body>\n</s:Envelope>";
+	if (obverb>1)
+		fprintf(stdout,"postfield: %s\n",postfield.c_str());
 	if ((code=curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, postfield.c_str()))!=CURLE_OK) {
 		fprintf(stderr, "Fehler bei postfield [%s]\n", errorBuffer);
 		return false;

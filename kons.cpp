@@ -707,6 +707,8 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"rueckfragen()","callbacks()"},
 	// T_Frage_ab
 	{"Frage ab: ","Asking for: "},
+  // T_dateivgl
+	{"dateivgl()","filecmp()"},
 	{"",""}
 }; // const char *Txkonscl::TextC[T_konsMAX+1][SprachZahl]=
 
@@ -3027,6 +3029,10 @@ int pruefberecht(const string& datei,const string& benutzer,const mode_t mod/*=0
 {
 	int bererg{0};
 	const auto pwnamzg{getpwnam(benutzer.c_str())};
+	if (obverb) {
+		fLog(violetts+Txk[T_pruefberecht]+schwarz+Txk[T_Datei]+blau+datei+schwarz+Txk[T_Benutzer]+blau+benutzer+schwarz+", mode: "+blau+ltoan(mod,8)+
+				schwarz+Txk[T_Erg]+blau+(bererg==3?"3":bererg==2?"2":bererg==1?"1":"0")+schwarz,obverb,0);
+	}
 	if (pwnamzg) {
 		const uid_t uid{pwnamzg->pw_uid};
 		gid_t gid;
@@ -3108,7 +3114,7 @@ int pruefberecht(const string& datei,const string& benutzer,const mode_t mod/*=0
 		bererg=3; // Benutzer gibt es nicht
 	}
 	if (obverb) {
-		fLog(violetts+Txk[T_pruefberecht]+schwarz+Txk[T_Datei]+blau+datei+schwarz+Txk[T_Benutzer]+blau+benutzer+schwarz+", mode: "+blau+ltoan(mod,8)+
+		fLog(violetts+Txk[T_Ende]+Txk[T_pruefberecht]+schwarz+Txk[T_Datei]+blau+datei+schwarz+Txk[T_Benutzer]+blau+benutzer+schwarz+", mode: "+blau+ltoan(mod,8)+
 				schwarz+Txk[T_Erg]+blau+(bererg==3?"3":bererg==2?"2":bererg==1?"1":"0")+schwarz,obverb,0);
 	}
 	return bererg;
@@ -4114,7 +4120,7 @@ int servc::machfit(int obverb/*=0*/,int oblog/*=0*/, binaer nureinmal/*=falsch*/
 	////  if (servicelaeuft)
 	if (!svfeh&&!obenabled)
 		enableggf(obverb,oblog);
-	fLog(violetts+"Ende "+Txk[T_machfit]+schwarz+" sname: "+violett+sname+schwarz+" svfeh: "+blau+ltoan(svfeh)+schwarz, obverb,oblog);
+	fLog(violetts+Txk[T_Ende]+Txk[T_machfit]+schwarz+" sname: "+violett+sname+schwarz+" svfeh: "+blau+ltoan(svfeh)+schwarz, obverb,oblog);
 	return !svfeh;
 } // int servc::machfit
 
@@ -5051,8 +5057,9 @@ void findfile(svec *qrueckp,uchar findv,int obverb/*=0*/,int oblog/*=0*/,uchar a
 #endif // #if defined(altfind) && defined(neufind)
 
 // 1= Dateien unterschiedlich, 0 = gleich; obzeit => vergleiche auch die letzte Aenderungszeit
-int dateivgl(const string& d1, const string& d2,uchar obzeit/*=0*/)
+int dateivgl(const string& d1, const string& d2,uchar obzeit/*=0*/,int obverb/*=0*/, int oblog/*=0*/)
 {
+	fLog(violetts+Txk[T_dateivgl]+schwarz+d1+", "+d2+", "+(obzeit?"1":"0"),obverb,oblog);
 	int erg{0};
 	// wenn ein Unterschied am Anfang der Dateien war oder die Groesse < 300 kB lag, war boost schneller; 'cmp' war nie schneller als 'diff'.
 	////	perfcl prf("vgl");
@@ -5077,6 +5084,7 @@ int dateivgl(const string& d1, const string& d2,uchar obzeit/*=0*/)
 		} // 		if (lst1||st1.st_size>1000000) else
 	} // 	if (!erg)
 	////	prf.ausgeb();
+	fLog(violetts+Txk[T_Ende]+Txk[T_dateivgl]+schwarz,obverb,oblog);
 	return erg;
 } // int dateivgl(const string& d1, const string& d2)
 
@@ -5278,6 +5286,7 @@ void hcl::virtlgnzuw()
 		Txk.lgn=deutsch;
 	} // 	if (langu=="d" || langu=="D" || langu=="deutsch" || langu=="Deutsch") else else
 	Tx.lgn=Txk.lgn;
+	fLog(violetts+Txk[T_Ende]+Txk[T_virtlgnzuw_langu]+schwarzs+": "+langu,obverb,oblog);
 } // void hcl::virtlgnzuw
 
 // wird aufgerufen in paramcl::paramcl, pruefunpaper, holvomnetz, kompilbase, kompilfort
@@ -5364,7 +5373,6 @@ void hcl::parsecl()
 {
 	hLog(violetts+Txk[T_parsecl]+schwarz);
 	// (opts[optslsz].pruefpar(&argcmv,&i,&obhilfe))
-	if (obverb) obverb=0; // damit nicht aus -v obverb=2 wird
 	vector<argcl>::iterator ap,apn;
 	for(ap=argcmv.begin();ap!=argcmv.end();ap++) {
 		uchar nichtspeichern{0}, gegenteil{0}, kurzp{0}, langp{0};
@@ -5403,26 +5411,25 @@ void hcl::parsecl()
 						// omit ist also jetzt iterator fuer die relevante map auf die aktuelle Option (kurz oder lang)
 						if (omit->first) if (!strcmp(omit->first,acstr)) {
 							ap->agef++; // Parameter gefunden
-							hLog(Txk[T_Parameter]+blaus+acstr+schwarz+Txk[T_gefunden]+(omit->second->pptr?"1":"0"));
+							string hierlog{Txk[T_Parameter]+blaus+acstr+schwarz+Txk[T_gefunden]+"second->pptr: "+(omit->second->pptr?"1":"0")};
 							if (omit->second->pptr) {
-								hLog(Txk[T_pptr_gefunden]);
 								// pzuweis liefert -1, wenn der naechste Parameter als Inhalt verwendet wurde, sonst pcfnr
 								apn=ap; apn++;
-								const char *nacstr=apn==argcmv.end()?"":apn->argcs;
-								optcl* trick=(optcl*)omit->second;
-								int pcfnr{trick->pzuweis(nacstr,gegenteil,nichtspeichern)};
-								//int pcfnr=omit->second->pzuweis(nacstr,gegenteil,nichtspeichern);
+								const char * const nacstr=apn==argcmv.end()?"":apn->argcs;
+								optcl* const trick{(optcl*)omit->second};
+								const int pcfnr{trick->pptr==&obverb?0:trick->pzuweis(nacstr,gegenteil,nichtspeichern)}; // obverb in holbefz0 schon zugewiesen
 								if (pcfnr==-1) { // String-Parameter erfolgreich zugewiesen
 									ap++;
 									ap->agef++; // Zusatzparameter gefunden
 									if (ap==argcmv.end()) break;
+									hierlog+=", nachstr: "+string(nacstr);
 								}
 								if (pcfnr<=0) { // erfolgreich zugewiesen
-									if (omit->second->pptr==&langu) {
+									if (trick->pptr==&langu) {
 										virtlgnzuw();
-									} else if (omit->second->pptr==&logvz || omit->second->pptr==&logdname) {
+									} else if (trick->pptr==&logvz || trick->pptr==&logdname) {
 										setzlog();
-									} else if (omit->second->pptr==&cronminut) {
+									} else if (trick->pptr==&cronminut) {
 										keineverarbeitung=1;
 										cmeingegeben=1;
 									}
@@ -5432,6 +5439,7 @@ void hcl::parsecl()
 									if (!obhilfe) obhilfe=1;
 								} // 								if (pcfnr<=0) else
 							} // 								if (omit->second->pptr)
+							hLog(hierlog);
 							break; // Parameter schon gefunden, die anderen nicht mehr suchen
 						} // 							if (!omit->first.find(acstr))
 					} // 						for(omit=omp->begin();omit!=omp->end();omit++)
@@ -5838,7 +5846,8 @@ void hcl::gitpull(const string& DPROG)
 {
 	if (autoupd && tagesaufr == 2) {
 ////		perfcl perf("main");
-		if (systemrueck("wget https://raw.githubusercontent.com/"+gitv+"/"+DPROG+"/master/versdt -qO"+instvz+"/versdtakt&&"
+//		if (systemrueck("wget https://raw.githubusercontent.com/"+gitv+"/"+DPROG+"/master/versdt -qO"+instvz+"/versdtakt&&" // geandert 13.2.22
+		if (systemrueck("curl -sL https://raw.githubusercontent.com/"+gitv+"/"+DPROG+"/master/versdt >"+instvz+"/versdtakt&&"
 					/*//				"[ $(echo $(cat "+instvz+"/versdtakt)'>'$(cat "+instvz+"/versdt)|bc -l) -eq 0 ]",2,oblog))*/
 			// Berechnung mit |bc -l schlecht, da z.B. auf Ubuntu bc nicht unbedingt standardmaessig installiert
 			"awk \"BEGIN{print $(cat "+instvz+"/versdt)-$(cat "+instvz+"/versdtakt)}\"|grep -q ^-",obverb,oblog,/*rueck=*/0,/*obsudc=*/0)) {
@@ -6514,7 +6523,8 @@ void hcl::pruefsamba(const vector<const string*>& vzn,const svec& abschni,const 
 	uchar obinst{0}; // ob Samba installiert werden soll bzw. die smb.conf bearbeitet
 	uchar obfw{0}; // ob SuSEfirewall bearbeitet werden soll
 	//// <<violett<<"Stelle 0"<<endl;systemrueck("systemctl -n 0 status 'nmbd'",obverb,oblog,/*rueck=*/0,/*obsudc=*/0);
-	linstp->doggfinst("libwbclient0",obverb,oblog);
+//	linstp->doggfinst("libwbclient0",obverb,oblog);
+	linstp->doggfinst("samba-client-libs",obverb,oblog);
 	// bei dieser Initialisierung werden nur die Namen zugewiesen
 	servc smb("smb","smbd");
 	servc smbd("smbd","smbd");

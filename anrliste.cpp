@@ -330,20 +330,34 @@ int hhcl::holanr() // fetchcall()
   tz.push_back("Date");
   tz.push_back("Duration");
   tz.push_back("Count");
+/*
+	if (obverb>1) {
+		caus<<"fbuser: '"<<fbusr<<"'"<<endl;
+		caus<<"fbpwd: '"<<fbpwd<<"'"<<endl;
+	}
+*/
+    string filename("fbpwd.txt");
+    fstream file_out;
 
+    file_out.open(filename, std::ios_base::out);
+    if (!file_out.is_open()) {
+        cout << "failed to open " << filename << '\n';
+    } else {
+        file_out <<fbpwd<< endl;
+    }
 
 	tr64cl tr64(fbusr,fbpwd);
   std::string buffer,nurl;
-  tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList",&buffer);
+  tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList",&buffer,0,0,obverb);
 
   //std::cout<<buffer<<std::endl;
 	// bei falschem Passwort hier noch Fehler 401 abfangen
-  holraus(buffer,"NewCallListURL",&nurl,0);
-  holurl(nurl,&buffer);
+  holraus(buffer,"NewCallListURL",&nurl,0,obverb);
+  holurl(nurl,&buffer,obverb);
 	// caus<<buffer<<endl;
   size_t pos=0,enr=0;
 	RS rins(My,tabname); 
-	while ((pos=holraus(buffer,"Call",&nurl,pos))) {
+	while ((pos=holraus(buffer,"Call",&nurl,pos,obverb))) {
 		stringstream ausg;
 		ausg<<++enr<<": ";
 		size_t ipos=0;
@@ -353,7 +367,7 @@ int hhcl::holanr() // fetchcall()
 		for(size_t tzn=0;tzn<tz.size();tzn++) {
 			std::string it;
 			size_t tza=(ar.type=="3"?(tzn==2?3:(tzn==3?2:tzn)):tzn);
-			ipos=holraus(nurl,tz[tza],&it,ipos);
+			ipos=holraus(nurl,tz[tza],&it,ipos,obverb);
 			switch (tza) {
 				case 0: ar.id=it;break;
 				case 1: ar.type=it;break;
@@ -403,7 +417,7 @@ int hhcl::holanr() // fetchcall()
 				fLog(ausg.str(),obverb,oblog);
 			} // 					if (!cerg || !*cerg)
 		} // 				if (!such.obqueryfehler)
-	} // 	while ((pos=holraus(buffer,"Call",&nurl,pos)))
+	} // 	while ((pos=holraus
 	rins.tbins(0,aktc,/*sammeln=*/0,/*oberb=*/ZDB,/*idp=*/0,/*eindeutig=*/0);  // einfuegen
 	fLog(blaus+ltoan(dsz)+schwarz+Tx[T_Datensaetze_gelesen],1,0);
 	fLog(blaus+ltoan(egz)+schwarz+Tx[T_Datensaetze_eingetragen],1,0);

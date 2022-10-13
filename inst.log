@@ -30327,3 +30327,221 @@ Benachrichtigungen jetzt anzeigen? [j/n] (n): n
 ustring: ''
 ustring: ''
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.5.17-150300.3.21.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,3 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.5.17-150300.3.21.1.x86_64.rpm (1/1),  21,3 MiB (139,7 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.5.17-150300.3.21.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.5.17-150300.3.21.1.x86_64 (/var/adm/update-messages/mariadb-10.5.17-150300.3.21.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Metadaten von Repository 'Update repository with updates from SUSE Linux Enterprise 15' abrufen [...................fertig]
+Cache für Repository 'Update repository with updates from SUSE Linux Enterprise 15' erzeugen [....fertig]
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 21,2 MiB. Bereits im Cache gespeichert: 0 B. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Paket mariadb-10.6.9-150400.3.14.1.x86_64 abrufen (1/1),  21,2 MiB (140,6 MiB entpackt)
+Abrufen: mariadb-10.6.9-150400.3.14.1.x86_64.rpm [....fertig (6,5 MiB/s)]
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [.............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-10.6.9-150400.3.14.1.x86_64' aus Repository 'Update repository with updates from SUSE Linux Enterprise 15' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+Gesamtgröße des Downloads: 0 B. Bereits im Cache gespeichert: 21,2 MiB. Nach diesem Vorgang wird kein zusätzlicher Speicherplatz belegt oder freigegeben.
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-10.6.9-150400.3.14.1.x86_64.rpm (1/1),  21,2 MiB (140,6 MiB entpackt)
+
+Überprüfung auf Dateikonflikte läuft: [.......fertig]
+(1/1) Installieren: mariadb-10.6.9-150400.3.14.1.x86_64 [............
+/usr/lib64/mysql/plugin/auth_pam_tool_dir/auth_pam_tool: on an insecure path - /usr/lib64/mysql/plugin/auth_pam_tool_dir has different non-root owner who could tamper with the file.
+fertig]
+Aktualisierungsbenachrichtigungen wurden von den folgenden Paketen empfangen:
+mariadb-10.6.9-150400.3.14.1.x86_64 (/var/adm/update-messages/mariadb-10.6.9-150400.3.14.1-something)
+Benachrichtigungen jetzt anzeigen? [j/n] (n): n
+ustring: ''
+ustring: ''
