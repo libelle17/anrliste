@@ -5452,7 +5452,7 @@ void hcl::parsecl()
 	if (parstreng)
 		for(size_t i=0;i<argcmv.size();i++) {
 			if (!argcmv[i].agef) {
-				exit(schluss(17,rots+"Parameter: "+gruen+argcmv[i].argcs+rot+Txk[T_nicht_erkannt]+schwarz));
+				exit(schluss(17,rots+Txk[T_Parameter]+gruen+argcmv[i].argcs+rot+Txk[T_nicht_erkannt]+schwarz));
 				if (!obhilfe) obhilfe=1;
 			} //     if (!argcmv[i].agef)
 		} //   for(size_t i=0;i<argcmv.size();i++)
