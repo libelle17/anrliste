@@ -332,7 +332,7 @@ struct DB
 	char dve; // delimiter value end
 	////	char* ConStr;
 	////  const char* db;
-	const string mysqlbef{"mysql"}, 
+	const string mysqlbef{"mariadb"}, 
 				mysqlben{"mysql"}; // mysql-Befehl, mysql-Benutzer
 	////  const char* host;
 	const string host;
