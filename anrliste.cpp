@@ -350,8 +350,8 @@ int hhcl::holanr() // fetchcall()
   std::string buffer,nurl;
   tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList",&buffer,0,0,obverb);
 
-	if (obverb>1) {
-		std::cout<<"Buffer: "<<buffer<<std::endl;
+	if (obverb) {
+		std::cout<<"Buffer: "<<endl<<buffer<<std::endl;
 	}
 	// bei falschem Passwort hier noch Fehler 401 abfangen
   holraus(buffer,"NewCallListURL",&nurl,0,obverb);
