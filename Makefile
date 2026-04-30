@@ -156,7 +156,7 @@ ifneq ($(LCURS),)
 	LDFLAGS::=$(LDFLAGS) -lncursesw -ltinfo
 endif
 ifneq ($(LTERM),)
-	LDFLAGS::=$(LDFLAGS) -L/usr/lib64/termcap/ -ltermcap
+#  LDFLAGS::=$(LDFLAGS) -ltinfo
 endif
 ifneq ($(LSPAN),)
 	LDFLAGS::=$(LDFLAGS) -lspandsp
@@ -356,7 +356,7 @@ $(EXEC): $(OBJ)
 #	-@find /usr/lib -iname zlib.so -exec false {}+&&{ sh configure inst _ zlib-$(dev) verbose;};:
 	-@ld -lz $(KF)||{ sh configure inst _ zlib-$(dev) verbose;};:
 	-@printf " (Version: %b%s%s%b\n " $(blau) "$$(cat versdt)" ")" $(reset) $(BA)
-	$(CC) $^ $(DEBUG)-o $@ $(LDFLAGS)
+	$(CC) $(DEBUG)-o $@ $^ $(LDFLAGS)
 	-@ls .d/*.Td $(KR) &&{ for datei in .d/*.Td; do mv -f $${datei} $${datei%.Td}.d; done;};:
 	$(shell touch *.o $${EXEC})
 	-@printf " Fertig mit/Finished with %b$(ICH)%b, Target: %b$@%b:, nachher/afterwords:\n" $(blau) $(reset) $(blau) $(reset)
@@ -372,9 +372,9 @@ endif
 	-@if ! test -f instvz; then printf \"$$(pwd)\" >instvz; fi; # wird in kons.cpp verwendet
 	-$(CC) $(DEBUG)$(DEPFLAGS) $(CFLAGS) -c $< $(BFA);
 	-@sed -i 's/versdt //g;s/gitvdt //g' $(DEPDIR)/*.Td
-	-@if test -s fehler.txt; then vi +0/"error:\|Fehler:\|Warnung:\|warning:" fehler.txt; else rm -f fehler.txt; fi;
+	-@if grep -q "error:\\|Fehler:" fehler.txt 2>/dev/null; then vi +0/"error:\|Fehler:" fehler.txt; else rm -f fehler.txt; fi;
 #	-@$(shell $(POSTCOMPILE))
-	@if test -s fehler.txt; then false; fi;
+	@if grep -q "error:\\|Fehler:" fehler.txt 2>/dev/null; then false; fi;
 
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
@@ -430,7 +430,7 @@ endif
 	-@[ "$(LACL)" ]&&{ [ -f /usr/include/sys/acl.h ]|| sh configure inst _ "$(LACL)" verbose;}||:
 	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h -o -f /usr/include/x86_64-linux-gnu/curl/curl.h ]|| sh configure inst _ "$(LCURL)" verbose;}||:
 	-@[ "$(LCURS)" ]&&{ [ -f /usr/include/ncursesw/ncurses.h -o -f /usr/include/x86_64-linux-gnu/ncursesw/ncurses.h ]||{ for kand in $(LCURS);do sh configure inst _ "$$kand-$(dev)" verbose;done;};}||:
-	-@[ "$(LTERM)" ]&&{ [ -f /usr/lib64/termcap/libtermcap.so ]|| sh configure inst _ "$(LTERM)" verbose;}||:
+	-@[ "$(LTERM)" ]&&{ [ -f /usr/lib64/libtinfo.so ]||[ -f /usr/lib64/libtinfo.so.6 ]|| sh configure inst _ "$(LTERM)" verbose;}||:
 	-@[ "$(LSPAN)" ]&&{ [ -f /usr/include/spandsp.h ]|| sh configure inst _ "$(LSPAN)" verbose;}||:
 	-@[ "$(LGLIB)" ]&&{ [ -f /usr/include/glib-2.0/glib.h ]|| sh configure inst _ "$(LGLIB)" verbose;}||:
 	-@[ "$(LSOUP)" ]&&{ [ -f /usr/include/libsoup-2.4/libsoup/soup.h ]|| sh configure inst _ "$(LSOUP)" verbose;}||:

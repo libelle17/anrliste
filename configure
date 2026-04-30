@@ -59,9 +59,26 @@ getIPR() {
 			REPOS="${SUDC}$Z lr|grep 'g++\|devel_gcc' \>$KR||${SUDC}$Z ar http://download.opensuse.org/repositories/devel:/gcc/\`cat /etc/*-release|grep ^NAME= |cut -d'\"' -f2|sed 's/ /_/'\`_\`cat /etc/*-release|grep ^VERSION_ID= |cut -d'\"' -f2\`/devel:gcc.repo;";
 			UREPO="${SUDC}$Z lr|grep \\\\\"g++\\\\\|devel_gcc\\\\\" \>$KR && ${SUDC}$Z rr devel_gcc;";
 			COMP="gcc gcc-c++"; # \$(CCInst)";
-			test -f vars && LBOOST=$(grep LBOOST vars|cut -d= -f2) ||LBOOST=;
-			test -f vars && LBIO=$(grep LBIO vars|cut -d= -f2) ||LBIO=;
-			test -f vars && LBLO=$(grep LBLO vars|cut -d= -f2) ||LBLO=;
+      test -f vars && LBOOST=$(grep "^LBOOST::=" vars|cut -d= -f2) ||LBOOST=;
+      test -f vars && LBIO=$(grep "^LBIO::=" vars|cut -d= -f2) ||LBIO=;
+      test -f vars && LBLO=$(grep "^LBLO::=" vars|cut -d= -f2) ||LBLO=;
+      # OpenSUSE 16.0+: Boost-Paketnamen direkt aus zypper-Cache ermitteln
+      # Gelesene Boost-Werte aus vars prüfen – existieren sie im Cache?
+      if [ "$LBOOST" ] && ! grep -qs "^$LBOOST" /var/cache/zypp/solv/*/solv.idx 2>/dev/null; then
+        LBOOST=; LBIO=; LBLO=;  # ungültig → neu ermitteln lassen
+      fi;      
+      _OSV=$(grep "^VERSION_ID=" /etc/os-release 2>/dev/null|cut -d'"' -f2);
+      if [ -z "$LBOOST" ]; then
+      _BV=$(grep -s --no-filename "^libboost_locale" /var/cache/zypp/solv/*/solv.idx 2>/dev/null \
+        | awk '$3=="x86_64" && $1~/[0-9]-devel$/ && $1!~/debuginfo|32bit|v3/' \
+        | cut -f1 | head -n1);
+      if [ "$_BV" ]; then
+        _BN=$(echo "$_BV"|sed 's/libboost_locale//;s/-devel//');
+        LBOOST=boost-devel;
+        LBIO=libboost_iostreams${_BN}-devel;
+        LBLO=$_BV;
+      fi;  
+      fi;      
 			# der Aufruf `zypper se ...boost...` dauert so lang und sollte bei `make mitzieh` meist nicht noetig sein
 			if test "$ICH" != viall -a -z "$ohneboost" -a "$QD"; then
 			 if test -z "$PAR1" -o -z "$LBOOST" -o -z "$LBIO" -o -z "$LBLO"; then
@@ -76,9 +93,9 @@ getIPR() {
           LBIO=$(V=libboost_iostreams;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
           LBLO=$(V=libboost_locale;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
         fi;
-        LBOOST=$(grep -s --no-filename "^boost_.*-devel" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
-        LBIO=$(grep -s --no-filename "^libboost_iostreams" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
-        LBLO=$(grep -s --no-filename "^libboost_locale" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
+        [ -z "$LBOOST" ] && LBOOST=$(grep -s --no-filename "^boost_.*-devel" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
+        [ -z "$LBIO" ] && LBIO=$(grep -s --no-filename "^libboost_iostreams" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
+        [ -z "$LBLO" ] && LBLO=$(grep -s --no-filename "^libboost_locale" /var/cache/zypp/solv/*/solv.idx |cut -f1 | sort -r --unique|head -n1);
 				[ ! "$LBOOST" ]&&[ "$LBIO" ]&&[ "$LBLO" ]&& LBOOST=$(V=boost-license;echo "$zse" $V|grep "| $V"|tail -n1|cut -d'|' -f2|sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//');
 			 fi;
 			fi;

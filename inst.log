@@ -32574,3 +32574,31 @@ mariadb-10.10.3-lp154.2.1.x86_64 (/var/adm/update-messages/mariadb-10.10.3-lp154
 Benachrichtigungen jetzt anzeigen? [j/n] (n): n
 ustring: ''
 ustring: ''
+
+Rueckmeldung bei einricht termcap:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+'termcap' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
+IP: ''
+
+Rueckmeldung bei einricht termcap:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+'termcap' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
+IP: ''
+
+Rueckmeldung bei einricht termcap:
+Refreshing service 'openSUSE'.
+Loading repository data...
+Reading installed packages...
+'termcap' not found in package names. Trying capabilities.
+IP: ''
+
+Rueckmeldung bei einricht termcap:
+Refreshing service 'openSUSE'.
+Loading repository data...
+Reading installed packages...
+'termcap' not found in package names. Trying capabilities.
+IP: ''
