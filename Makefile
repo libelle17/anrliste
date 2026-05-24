@@ -156,7 +156,7 @@ ifneq ($(LCURS),)
 	LDFLAGS::=$(LDFLAGS) -lncursesw -ltinfo
 endif
 ifneq ($(LTERM),)
-#  LDFLAGS::=$(LDFLAGS) -ltinfo
+	LDFLAGS::=$(LDFLAGS) -L/usr/lib64/termcap/ -ltermcap
 endif
 ifneq ($(LSPAN),)
 	LDFLAGS::=$(LDFLAGS) -lspandsp
@@ -298,8 +298,8 @@ endef
 # xclip -sel clip < ~/.ssh/id_rsa_git.pub
 # auf http://github.com -> view profile and more -> settings -> SSH and GPG keys -> New SSH key <Titel> <key> einfuegen
 git: README.md
-#	@git config --global user.name "Gerald Schade"
-#	@git config --global user.email "gerald.schade@gmx.de"
+# @git config --global user.name "Gerald Schade"
+# @git config --global user.email "gerald.schade@gmx.de"
 	@$(call machvers);
 	@printf " Copying files from/ Kopiere Dateien von: %b%s%b (Version %b%s%b) -> git (%b%s%b)\n" \
 		$(blau) "$(PWD)" $(reset) $(blau) $$(cat versdt) $(reset) $(blau) \
@@ -310,10 +310,11 @@ git: README.md
 	}
 	$(call setz_gitv,".")
 	-git config --global push.default simple;\
-	 git add -u;\
-   git commit -m "Version $$(cat versdt)";\
-   [ "$(DPROG)" ]&&{ grep remote\ \"origin\"] .git/config $(KR)||git remote add origin git+ssh://git@github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git;};:;\
-	 git push -u origin master;
+	git add -u;\
+	git commit --allow-empty -m "Version $$(cat versdt)";\
+	[ "$(DPROG)" ]&&{ git remote get-url origin $(KR)&&git remote set-url origin git+ssh://git@github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git||git remote add origin git+ssh://git@github.com/$$(sed 's/"//g' gitvdt)/$(DPROG).git;};\
+	git push -u origin master;\
+	printf "Fertig mit make .git\n";
 
 .PHONY: giterlaub
 giterlaub:
@@ -356,7 +357,7 @@ $(EXEC): $(OBJ)
 #	-@find /usr/lib -iname zlib.so -exec false {}+&&{ sh configure inst _ zlib-$(dev) verbose;};:
 	-@ld -lz $(KF)||{ sh configure inst _ zlib-$(dev) verbose;};:
 	-@printf " (Version: %b%s%s%b\n " $(blau) "$$(cat versdt)" ")" $(reset) $(BA)
-	$(CC) $(DEBUG)-o $@ $^ $(LDFLAGS)
+	$(CC) $^ $(DEBUG)-o $@ $(LDFLAGS)
 	-@ls .d/*.Td $(KR) &&{ for datei in .d/*.Td; do mv -f $${datei} $${datei%.Td}.d; done;};:
 	$(shell touch *.o $${EXEC})
 	-@printf " Fertig mit/Finished with %b$(ICH)%b, Target: %b$@%b:, nachher/afterwords:\n" $(blau) $(reset) $(blau) $(reset)
@@ -372,9 +373,9 @@ endif
 	-@if ! test -f instvz; then printf \"$$(pwd)\" >instvz; fi; # wird in kons.cpp verwendet
 	-$(CC) $(DEBUG)$(DEPFLAGS) $(CFLAGS) -c $< $(BFA);
 	-@sed -i 's/versdt //g;s/gitvdt //g' $(DEPDIR)/*.Td
-	-@if grep -q "error:\\|Fehler:" fehler.txt 2>/dev/null; then vi +0/"error:\|Fehler:" fehler.txt; else rm -f fehler.txt; fi;
+	-@if grep -q "error:\|Fehler:" fehler.txt 2>/dev/null; then [ -t 1 ] && vi +0/"error:\|Fehler:\|Warnung:\|warning:" fehler.txt || cat fehler.txt; else rm -f fehler.txt; fi;
 #	-@$(shell $(POSTCOMPILE))
-	@if grep -q "error:\\|Fehler:" fehler.txt 2>/dev/null; then false; fi;
+	@if test -s fehler.txt; then false; fi;
 
 $(DEPDIR)/%.d: ;
 .PRECIOUS: $(DEPDIR)/%.d
@@ -430,7 +431,7 @@ endif
 	-@[ "$(LACL)" ]&&{ [ -f /usr/include/sys/acl.h ]|| sh configure inst _ "$(LACL)" verbose;}||:
 	-@[ "$(LCURL)" ]&&{ [ -f /usr/include/curl/curl.h -o -f /usr/include/x86_64-linux-gnu/curl/curl.h ]|| sh configure inst _ "$(LCURL)" verbose;}||:
 	-@[ "$(LCURS)" ]&&{ [ -f /usr/include/ncursesw/ncurses.h -o -f /usr/include/x86_64-linux-gnu/ncursesw/ncurses.h ]||{ for kand in $(LCURS);do sh configure inst _ "$$kand-$(dev)" verbose;done;};}||:
-	-@[ "$(LTERM)" ]&&{ [ -f /usr/lib64/libtinfo.so ]||[ -f /usr/lib64/libtinfo.so.6 ]|| sh configure inst _ "$(LTERM)" verbose;}||:
+	-@[ "$(LTERM)" ]&&{ [ -f /usr/lib64/termcap/libtermcap.so ]|| sh configure inst _ "$(LTERM)" verbose;}||:
 	-@[ "$(LSPAN)" ]&&{ [ -f /usr/include/spandsp.h ]|| sh configure inst _ "$(LSPAN)" verbose;}||:
 	-@[ "$(LGLIB)" ]&&{ [ -f /usr/include/glib-2.0/glib.h ]|| sh configure inst _ "$(LGLIB)" verbose;}||:
 	-@[ "$(LSOUP)" ]&&{ [ -f /usr/include/libsoup-2.4/libsoup/soup.h ]|| sh configure inst _ "$(LSOUP)" verbose;}||:
@@ -528,8 +529,6 @@ shziel:
 	if test -f ziele; then \
 	 for D in $$(cat ziele);do \
     case $$D in \
-      los.sh) \
-       zwi=zeit.tmp;zw="qverz=";touch -r $$D $$zwi;sed -i '/^[ ]*'$$zw'/s:'$$zw'.*:'$$zw$$(pwd)':' $$D; touch -r $$zwi $$D; rm $$zwi;;\
     esac; \
     case $$D in \
       [*\]) \
@@ -552,8 +551,10 @@ shziel:
           [ 0$$AHr -gt 0$$APC ]&&{ \
             PF=$$(dirname $$D);\
             [ -d "$$Z/$$PF" ]||$(SUDC)mkdir -p "$$Z/$$PF";\
-            printf " $${rot}$(SUDC)cp -a $$D $$Z/$$PF/; $$reset\n";\
-            $(SUDC)cp -a $$D $$Z/$$PF/;\
+            BNAME=$$(basename $$D);\
+            printf " $${rot}$(SUDC)cp→mv $$D → $$Z/$$PF/$$BNAME; $$reset\n";\
+            $(SUDC)cp -a $$D $$Z/$$PF/.$$BNAME.new && $(SUDC)mv $$Z/$$PF/.$$BNAME.new $$Z/$$PF/$$BNAME;\
+            echo "$$BNAME"|grep -qE '\.sh$$'&&$(SUDC)chmod +x "$$Z/$$PF/$$BNAME"||true;\
           };\
         fi;\
         ;;\
@@ -588,8 +589,8 @@ endef
 
 define priv_html
 	-@printf " erstelle/generating:%b$(1)%b..." $(blau) $(reset)
-	-@groff -mandoc -Thtml -v $(KR);EXC="$$$$?"; \
-		bp=$$$$(echo $(PGROFF));for p in $$$$bp;do { [ $$$$EXC -eq 0 ]&&which groff $(KR)&&$(SPR) $$$$p $(KR);}||{ sh configure inst _ $$$$p verbose;};done;:;
+	-@groff -mandoc -Thtml -v $(KR);EXC="$$?"; \
+		bp=$$(echo $(PGROFF));for p in $$bp;do $(SPR) $$p $(KR)||{ sh configure inst _ $$p verbose;};done;:;
 	-@rm -f $(1).html
 	-@sed -e 's/²gitv²/$(GITV)/g;s/²DPROG²/$(DPROG)/g;'\
 	 -e 's/Ä/\&Auml;/g;s/Ö/\&Ouml;/g;s/Ü/\&Uuml;/g;s/ä/\&auml;/g;s/ö/\&ouml;/g;s/ü/\&uuml;/g;s/ß/\&szlig;/g;'\

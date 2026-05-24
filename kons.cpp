@@ -5739,7 +5739,7 @@ uchar hcl::pruefcron(const string& cm)
 			setztmpcron();
 			const string vaufr{mpfad+" -noia"}, // /usr/bin/<DPROG> -noia // (vollaufruf) z.B. '/usr/bin/<DPROG> -noia >/dev/null 2>&1'
 						zsaufr{base_name(vaufr)}, // ersetzAllezu(cbef,"/","\\/"); // Suchstring zum Loeschen
-						vorsaetze{" "+linstp->ionicepf+" -c2 -n7 "+linstp->nicepf+" -n19 "},
+						vorsaetze{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+cpt+"/ ]&&"+linstp->ionicepf+" -c2 -n7 "+linstp->nicepf+" -n19 "},
 						cabfr{vorsaetze+".*"+zsaufr},// <DPROG> -noia // Suchstring in Crontab // Befehl zum Abfragen der Cronminuten aus aktuellem Cron-Script
 						cbef{string("*/")+cmhier+" * * * *"+vorsaetze+vaufr+" -cf "+akonfdt+" >/dev/null 2>&1"}, // "-"-Zeichen nur als cron
 						czt{" \\* \\* \\* \\*"};

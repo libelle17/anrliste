@@ -32602,3 +32602,47 @@ Loading repository data...
 Reading installed packages...
 'termcap' not found in package names. Trying capabilities.
 IP: ''
+
+Rueckmeldung bei einricht boost-devel:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'boost-devel-1.86.0-160000.2.2.noarch' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende NEUE Paket wird installiert:
+  boost-devel
+
+1 neues Paket zu installieren.
+
+Größe des Pakets zum Herunterladen:     8,2 KiB
+
+Änderung der Installationsgröße des Pakets:
+            |        34 B  erforderlich für Pakete, die installiert werden sollen
+      34 B  |  -      0 B  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Pakete vorladen [..
+Vorladen: boost-devel-1.86.0-160000.2.2.noarch.rpm [fertig]
+.fertig]
+Abrufen: boost-devel-1.86.0-160000.2.2.noarch (repo-oss (16.0)) (1/1),   8,2 KiB    
+
+Überprüfung auf Dateikonflikte läuft: [..fertig]
+(1/1) Installieren: boost-devel-1.86.0-160000.2.2.noarch [..fertig]
+Nach-Transaktions-Skripte werden ausgeführt [...fertig]
+IP: ''
+
+Rueckmeldung bei einricht verbose:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+'verbose' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
+IP: ''
+
+Rueckmeldung bei einricht verbose:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+'verbose' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
+IP: ''
