@@ -110,6 +110,10 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"host","host"},
 	// T_host_l
 	{"host","host"},
+	// T_mcnfdat_k
+	{"mcnfdat","mcnfdat"},
+	// T_mcnfdat_l
+	{"mcnfdat","mcnfdat"},
 	// T_muser_k
 	{"muser","muser"},
 	// T_muser_l
@@ -130,6 +134,8 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"Bildschirmausgabe mit SQL-Befehlen","screen output with SQL commands"},
 	// T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf
 	{"verwendet die Datenbank auf Host <string> anstatt auf","takes the database on host <string> instead of"},
+	// T_verwendet_fuer_MySQL_MariaDB_Rootbefehle_die_defaults_extra_file_string_anstatt
+	{"verwendet fuer MySQL/MariaDB-Rootbefehle die defaults-extra-file <string> anstatt","uses the MySQL/MariaDB defaults-extra-file <string> for root commands instead of"},
 	// T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt
 	{"verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt","takes the user <string> for MySQL/MariaDB instead of"},
 	// T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string
@@ -150,6 +156,9 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"pruefDB(","checkDB("},
 	// T_Host_fuer_MySQL_MariaDB_Datenbank
 	{"Host fuer MySQL/MariaDB-Datenbank","host for mysql/mariadb-database"},
+	// T_defaults_extra_file_fuer_MySQL_MariaDB_Rootbefehle
+	{"defaults-extra-file fuer MySQL/MariaDB-Rootbefehle (ersetzt -uroot/-p bei GRANT und Root-Passwort-Pruefung, wenn nicht leer)",
+	 "defaults-extra-file for MySQL/MariaDB root commands (replaces -uroot/-p for GRANT and root password checks, if not empty)"},
 	// T_Benutzer_fuer_MySQL_MariaDB,
 	{"Benutzer fuer MySQL/MariaDB:","user for mysql/mariadb:"},
 	// T_Passwort_fuer_MySQL_MariaDB,
@@ -370,11 +379,20 @@ uchar DB::oisok{0};
 /*2*/DB::DB(const DBSTyp nDBS, const string& phost, const string& puser, const string& ppasswd, 
 		const size_t conz/*=1*/, const string& uedb, 
        unsigned int port, const char *const unix_socket, unsigned long client_flag,
-    int obverb,int oblog,const string charset, const string collate, int versuchzahl, const uchar ggferstellen):DBS(nDBS),
-		host(phost),user(puser),passwd(ppasswd),dbname(uedb), conz(conz)
+    int obverb,int oblog,const string charset, const string collate, int versuchzahl, const uchar ggferstellen,
+		const string& pmcnfdat):DBS(nDBS),
+		host(phost),user(puser),passwd(ppasswd),dbname(uedb),mcnfdat(pmcnfdat), conz(conz)
 {
   init(charset,collate,port,unix_socket,client_flag,obverb,oblog,versuchzahl, ggferstellen);
 } // DB::DB
+
+// baut das Anmelde-Fragment fuer root-CLI-Befehle: ueber mcnfdat (defaults-extra-file), wenn gesetzt, sonst wie bisher -uroot/-p<rootpwd>
+string DB::credarg() const
+{
+	return mcnfdat.empty()
+			? (" -uroot -h'"+host+"' "+(rootpwd.empty()?string():"-p"+rootpwd))
+			: (" --defaults-extra-file="+mcnfdat+" -h'"+host+"'");
+} // DB::credarg
 
 /*3*/DB::DB(const DBSTyp nDBS, const char* const phost, const char* const puser,const char* const ppasswd, 
       const char* const prootpwd, const size_t conz/*=1*/, 
@@ -547,7 +565,7 @@ void DB::init(
 								case 1698: // dasselbe auf Ubuntu
 									for(unsigned aru=0;aru<1;aru++) {
 										for(unsigned iru=0;iru<2;iru++) {
-											cmd=mysqlbef+" -uroot -h'"+host+"' "+(rootpwd.empty()?"":"-p"+rootpwd)+" -e \"GRANT ALL ON "+dbname+".* TO '"+
+											cmd=mysqlbef+credarg()+" -e \"GRANT ALL ON "+dbname+".* TO '"+
 												user+"'@'"+myloghost+"' IDENTIFIED BY '"+ersetze(passwd.c_str(),"\"","\\\"")+"' WITH GRANT OPTION\" 2>&1";
 											if (iru) break;
 											pruefrpw(cmd, versuchzahl);
@@ -716,7 +734,7 @@ void DB::pruefrpw(const string& wofuer, unsigned versuchzahl)
 {
   myloghost=!strcasecmp(host.c_str(),"localhost")||!strcmp(host.c_str(),"127.0.0.1")||!strcmp(host.c_str(),"::1")?"localhost":"%";
   for(unsigned versuch=0;versuch<versuchzahl;versuch++) {
-		cmd=mysqlbef+" -uroot -h'"+host+"' "+(rootpwd.empty()?"":"-p"+rootpwd)+" -e \"show variables like 'gibts wirklich nicht'\" 2>&1";
+		cmd=mysqlbef+credarg()+" -e \"show variables like 'gibts wirklich nicht'\" 2>&1";
     myr.clear();
     systemrueck(cmd,-1,0,&myr,/*obsudc=*/1);
     miterror=1;
@@ -778,7 +796,7 @@ void DB::setzrpw(int obverb/*=0*/,int oblog/*=0*/) // Setze root-password
 						 anfgg(unindt,rcmd,cmd,obverb,oblog);
 						} // 						if (gef)
 					} // 					if (!lstat(verbot.c_str(),&st))
-					const string cmd{sudc+mysqlbef+" -uroot -h'"+host+"' -e \"GRANT ALL ON *.* TO 'root'@'"+myloghost+
+					const string cmd{sudc+mysqlbef+credarg()+" -e \"GRANT ALL ON *.* TO 'root'@'"+myloghost+
 						"' IDENTIFIED BY '"+ersetzAllezu(rootpwd,"\"","\\\"")+"' WITH GRANT OPTION\""};
 					fLog(Txd[T_Fuehre_aus_db]+blaus+cmd+schwarz,1,1);
 					int erg __attribute__((unused))=system(cmd.c_str());
@@ -2473,6 +2491,7 @@ void RS::dsclear()
 void dhcl::virtinitopt()
 {
 	opn<<new optcl(/*pname*/"host",/*pptr*/&host,/*part*/pstri,T_host_k,T_host_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!host.empty(),Txd[T_Host_fuer_MySQL_MariaDB_Datenbank]);
+	opn<<new optcl(/*pname*/"mcnfdat",/*pptr*/&mcnfdat,/*part*/pstri,T_mcnfdat_k,T_mcnfdat_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_Rootbefehle_die_defaults_extra_file_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mcnfdat.empty(),Txd[T_defaults_extra_file_fuer_MySQL_MariaDB_Rootbefehle]);
 	opn<<new optcl(/*pname*/"muser",/*pptr*/&muser,/*part*/pstri,T_muser_k,T_muser_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!muser.empty(),Txd[T_Benutzer_fuer_MySQL_MariaDB]);
 	opn<<new optcl(/*pname*/"mpwd",/*pptr*/&mpwd,/*part*/ppwd,T_mpwd_k,T_mpwd_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mpwd.empty(),Txd[T_Passwort_fuer_MySQL_MariaDB],0,&muser);
 	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty(),Txd[T_Datenbankname_fuer_MySQL_MariaDB_auf]);
@@ -2501,7 +2520,8 @@ int dhcl::initDB()
 		fehler=1046;
 	} else {
 		if (!My) {
-			My=new DB(myDBS,host,muser,mpwd,maxconz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/CLIENT_MULTI_STATEMENTS,obverb,oblog);
+			My=new DB(myDBS,host,muser,mpwd,maxconz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/CLIENT_MULTI_STATEMENTS,obverb,oblog,
+			DB::defmycharset,DB::defmycollat,/*versuchzahl=*/3,/*ggferstellen=*/1,mcnfdat);
 			if (My->ConnError) {
 				delete My;
 				My=0;
@@ -2523,7 +2543,7 @@ int dhcl::pruefDB(DB** testMy, const string& db)
 {
 	hLog(violetts+Txk[T_pruefDB]+db+")"+schwarz);
 	unsigned fehnr{0};
-  *testMy=new DB(myDBS,host,muser,mpwd,maxconz,db,0,0,0,obverb,oblog,DB::defmycharset,DB::defmycollat,3,0);
+  *testMy=new DB(myDBS,host,muser,mpwd,maxconz,db,0,0,0,obverb,oblog,DB::defmycharset,DB::defmycollat,3,0,mcnfdat);
   fehnr=(*testMy)->fehnr;
   if ((*testMy)->ConnError) {
     delete (*testMy);
@@ -2583,6 +2603,11 @@ void insv::ausgeb()
 insv::insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets):My(My),itabp(&itab),aktc(aktc),eindeutig(eindeutig),eindfeld(eindfeld),asy(asy),csets(csets)
 {
 	rsp=new RS(My,itab);
+}
+
+insv::~insv()
+{
+	delete rsp;
 }
 
 my_ulonglong insv::schreib(const uchar sammeln/*=0*/,int obverb/*=0*/,string* const idp/*=0*/,uchar mitupd/*=0*/)

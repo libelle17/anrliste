@@ -84,6 +84,8 @@ enum Txdb_
 	T_Datenbankbenutzer_leer,
 	T_host_k,
 	T_host_l,
+	T_mcnfdat_k,
+	T_mcnfdat_l,
 	T_muser_k,
 	T_muser_l,
 	T_mpwd_k,
@@ -94,6 +96,7 @@ enum Txdb_
 	T_tabelle_l,
 	T_Bildschirmausgabe_mit_SQL_Befehlen,
 	T_verwendet_die_Datenbank_auf_Host_string_anstatt_auf,
+	T_verwendet_fuer_MySQL_MariaDB_Rootbefehle_die_defaults_extra_file_string_anstatt,
 	T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,
 	T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,
 	T_verwendet_die_Datenbank_string_anstatt,
@@ -104,6 +107,7 @@ enum Txdb_
 	T_Breche_ab,
 	T_pruefDB,
 	T_Host_fuer_MySQL_MariaDB_Datenbank,
+	T_defaults_extra_file_fuer_MySQL_MariaDB_Rootbefehle,
 	T_Benutzer_fuer_MySQL_MariaDB,
 	T_Passwort_fuer_MySQL_MariaDB,
 	T_Datenbankname_fuer_MySQL_MariaDB_auf,
@@ -342,6 +346,7 @@ struct DB
 	const string user;
 	string passwd; // kann in pruefrpw dem eingegebenen rootpw gleichgesetz werden, deshalb nicht const
 	const string dbname;
+	const string mcnfdat; // Pfad zu einer mariadb-defaults-extra-file; wenn nicht leer, ersetzt sie bei Root-CLI-Befehlen '-uroot'/'-p<rootpwd>'
 	string myloghost; // einheitliche Benennung von 'localhost' bzw. '%', zu kompliziert, um in jedem DB::DB aufzufuehren, deshalb nicht const
 	string rootpwd; // root-Passwort // wird in pruefrpw geaendert, deshalb nicht const
 	size_t conz; // Zahl der Verbindungen (s.o., conn)
@@ -354,6 +359,7 @@ struct DB
 	uchar lassoffen{0};
 	private:
 	void instmaria(int obverb, int oblog);
+	string credarg() const; // "-uroot -h'<host>' -p<rootpwd>" bzw. "--defaults-extra-file=<mcnfdat> -h'<host>'", je nachdem ob mcnfdat gesetzt ist
 	public:
 	int usedb(const string& db,const size_t aktc/*=0*/);
 	void pruefrpw(const string& wofuer, unsigned versuchzahl);
@@ -375,7 +381,8 @@ struct DB
 	/*4*/DB(const DBSTyp nDBS,const string& phost, const string& puser, const string& ppasswd, 
 			const size_t conz/*=1*/, 
 			const string& uedb=string(), unsigned int port=0, const char* const unix_socket=NULL, unsigned long client_flag=0,
-			int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1);
+			int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1,
+			const string& pmcnfdat=string());
 	void init(const string charset, const string collate,
 			unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,int obverb=0,int oblog=0,unsigned versuchzahl=3,
 			const uchar ggferstellen=1);
@@ -515,6 +522,7 @@ struct insv
 	inline size_t size(){return ivec.size();}
 	//	my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar sammeln/*=0*/, int obverb/*=0*/,string *idp/*=0*/,const uchar eindeutig/*=0*/,const svec& eindfeld/*=nix*/,const uchar asy/*=0*/,svec *csets/*=0*/) 
 	insv(DB *My,const string& itab,const size_t aktc,const uchar eindeutig,const svec& eindfeld,const uchar asy,svec *csets);
+	~insv();
 	my_ulonglong schreib(const uchar sammeln=0,int obverb=0,string* const idp=0,uchar mitupd=0);
 	my_ulonglong ergaenz(const string& bedingung,const uchar sammeln=0,int obverb=0,string* const idp=0);
 	void hzp(const instyp it);
@@ -545,6 +553,7 @@ struct dhcl:public hcl
 	private:
 	protected:
 		string host;  // fuer MySQL/MariaDB
+		string mcnfdat; // Pfad zu einer mariadb-defaults-extra-file fuer Root-CLI-Befehle, statt -uroot/-p<rootpwd>, wenn nicht leer
 		string dbq; // Datenbank
 	public:
 		uchar ZDB{0}; // fuer Zusatz-Debugging (SQL): ZDB 1, sonst: 0
