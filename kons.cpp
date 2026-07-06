@@ -1406,7 +1406,7 @@ int yLog(const short screen,const short file, const bool oberr,const short klobv
 		vsnprintf(buf,groe,format,args);
 		erg=fLog(buf,screen,file,oberr,klobverb);
 #ifdef vagenau
-		delete buf;
+		delete[] buf;
 		buf=0;
 #endif // vagenau
 		va_end(args);
@@ -3233,7 +3233,8 @@ int pruefverz(const string& verz,int obverb/*=0*/,int oblog/*=0*/, uchar obmitfa
 			if (obselinux==-1) 
 				obselinux=obprogda("sestatus",obverb,oblog,/*pfad*/0,keinsu);
 			if (obselinux) {
-				systemrueck("chcon -R -t samba_share_t '"+verz+"'",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+//				systemrueck("chcon -R -t samba_share_t '"+verz+"'",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
+				systemrueck("if test $(ls -Zd '"+verz+"'|awk '{print $1}'|cut -d: -f3) != samba_share_t; then chcon -R -t samba_share_t '"+verz+"';fi",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 			}
 		} // 		if (obmitcon)
 	} // 	if (!verz.empty())
@@ -5109,7 +5110,7 @@ const string& spath=
 const string s_true{"true"};
 const string s_dampand{"&&"};
 const string s_gz{"gz"};
-const string& defvors{"https://github.com/"+gitv+"/"};
+const string& defvors{"git+ssh://github.com/"+gitv+"/"};
 const string& defnachs{"/archive/master.tar.gz"};
 
 // wird aufgerufen in main
@@ -5566,7 +5567,8 @@ void hcl::lieszaehlerein()
 	////<<"azaehlerdt: "<<blau<<azaehlerdt<<schwarz<<endl;
 	zlzn.kauswert(&zcnfA);
 	//// if (&aufrufe) <<blau<<"aufrufe: "<<schwarz<<aufrufe<<endl;
-	if (&laufrtag) {
+//	if (&laufrtag) {
+  {
 		string ldat;
 		thr_strftime(&laufrtag,&ldat);
 		////<<blau<<"letztes Datum: "<<schwarz<<ldat<<endl;
