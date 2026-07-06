@@ -254,11 +254,27 @@ void hhcl::anhalten()
 } // void hhcl::anhalten() //α
 //ω
 //α
+// TEMP-Fix 2026-07-06: schliesst alle noch offenen My->conn[i] sauber, bevor der Prozess sich beendet
+// (direktes exit() ueberspringt sonst DB::~DB(), was zu 'Aborted connection' im MariaDB-Log fuehrt -
+// besonders relevant hier, da initDB() erst den ganzen Verbindungspool oeffnet und danach auf Fehler prueft)
+void hhcl::kexit(int code)
+{
+	if (My) {
+		for (size_t i=0;i<My->conz;i++) {
+			if (My->conn[i]) {
+				mysql_close(My->conn[i]);
+				My->conn[i]=0;
+			}
+		}
+	}
+	exit(code);
+} // void hhcl::kexit(int code)
+
 void hhcl::pvirtnachrueckfragen()
 {
 	// if (initDB()) exit(schluss(10,Tx[T_Datenbank_nicht_initialisierbar_breche_ab]));  //ω
 		if (initDB()) {
-			exit(schluss(10,Tx[T_Datenbank_nicht_initialisierbar_breche_ab]));
+			kexit(schluss(10,Tx[T_Datenbank_nicht_initialisierbar_breche_ab]));
 		}
 		if (listt ||!suchstr.empty()) {
 			tu_listt("1",suchstr);
@@ -455,7 +471,7 @@ void hhcl::pruefanrufe(DB *My, const string& tabelle, const int obverb, const in
 				Tx[T_Telefonprotokoll_der_Fritzbox]/*//,"InnoDB","utf8","utf8_general_ci","DYNAMIC"*/);
 		if (taba.prueftab(aktc,obverb)) {
 			fLog(rots+Tx[T_Fehler_beim_Pruefen_von]+schwarz+tabelle,1,1);
-			exit(11);
+			kexit(11);
 		}
 	} // if (!direkt)
 } // int hhcl::pruefanrufe(DB *My, string touta, int obverb, int oblog, uchar direkt=0)

@@ -130,5 +130,7 @@ class hhcl:public dhcl
 		~hhcl();
 		friend class fsfcl;
 		void pruefanrufe(DB *My, const string& tabelle, const int obverb, const int oblog, const uchar direkt=0);
+		// TEMP-Fix 2026-07-06: schliesst alle offenen DB-Verbindungen sauber vor exit() (sonst "Aborted connection" im MariaDB-Log)
+		void kexit(int code);
 		int holanr();
 }; // class hhcl //ω
