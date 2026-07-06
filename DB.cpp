@@ -4,6 +4,21 @@
 #define caup cout // zum Debuggen von Postgres
 #define exitp exit // zum Debuggen von Postgres
 
+// TEMP-Fix 2026-07-06: siehe DB.h
+void kexitDB(const DB *dbp, int code)
+{
+	if (dbp) {
+		DB *const ncdbp{const_cast<DB*>(dbp)};
+		for (size_t i=0;i<ncdbp->conz;i++) {
+			if (ncdbp->conn[i]) {
+				mysql_close(ncdbp->conn[i]);
+				ncdbp->conn[i]=0;
+			}
+		}
+	}
+	exit(code);
+} // void kexitDB(const DB *dbp, int code)
+
 //const char *Txdbcl::TextC[T_dbMAX+1][SprachZahl]={
 const char *DB_T[T_dbMAX+1][SprachZahl]={
   // T_DB_wird_initialisiert
@@ -510,7 +525,7 @@ void DB::init(
 					////			throw "Fehler beim Erstellen einer mariadb-Verbindung";
 				} else {
 					if (user.empty()) {
-						exit(schluss(13,Txd[T_Datenbankbenutzer_leer]));
+						kexitDB(this,schluss(13,Txd[T_Datenbankbenutzer_leer]));
 					}
 					RS *rs;
 					for(unsigned versuch=0;versuch<versuchzahl;versuch++) {
@@ -1830,7 +1845,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 				string* sqlp=&sql;
 				for (unsigned versuche=0;versuche<maxversuche;versuche++) {
 					if (versuche==maxversuche-1)
-						exit(schluss(99,Txd[T_Versuche_in_doAbfrage_mehr_als]+ltoan(maxversuche),oblog));
+						kexitDB(dbp,schluss(99,Txd[T_Versuche_in_doAbfrage_mehr_als]+ltoan(maxversuche),oblog));
 					if (asy) {
 						obfalsch=mysql_send_query(dbp->conn[aktc],sqlp->c_str(),sqlp->length());
 					} else {
@@ -1928,7 +1943,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 				striktzurueck(altsqlm,aktc);
 				fnr=altfnr;
 				if (hoerauf) 
-					exit(schluss(hoerauf,fehler,oblog));
+					kexitDB(dbp,schluss(hoerauf,fehler,oblog));
 			} // if (!db->conn[aktc]) else
 			if (obqueryfehler) {
 				//// pthread_mutex_lock(&printf_mutex);
@@ -2371,7 +2386,7 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 							} else if (fnr==1366) { // Incorrect string value
 								dbp->machbinaer(table,aktc,fmeld,0);
 							} else {
-								exit(schluss(113,rots+Txk[T_Fehler]+schwarz+ltoan(fnr)+Txd[T_bei_sql_Befehl]+isql));
+								kexitDB(dbp,schluss(113,rots+Txk[T_Fehler]+schwarz+ltoan(fnr)+Txd[T_bei_sql_Befehl]+isql));
 								break; 
 							} // if (fnr==1213) else else
 						} //             if (idp) else else else

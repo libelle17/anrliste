@@ -396,6 +396,10 @@ struct DB
 	uchar obtabspda(const char* const tab,const char* const sp);
 }; // struct DB 
 
+// TEMP-Fix 2026-07-06: schliesst alle offenen dbp->conn[i] sauber vor exit() (sonst "Aborted connection" im MariaDB-Log,
+// da direktes exit() DB::~DB() fuer bereits erfolgreich geoeffnete Slots ueberspringt)
+void kexitDB(const DB *dbp, int code);
+
 struct Tabelle 
 {
 	const DB* dbp;
