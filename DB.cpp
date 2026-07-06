@@ -1181,9 +1181,9 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 						+(felder[i].coll!=""?" COLLATE "+felder[i].coll:"")
 						+(felder[i].unsig  ?  " UNSIGNED":"")
             +(felder[i].nnull  ?  " NOT NULL":"")
-            +(felder[i].defa=="NULL"||felder[i].defa=="null"||((felder[i].defa.empty()&&!felder[i].nnull)||(felder[i].obind && felder[i].obauto)||utyp.find("LONGTEXT")!=string::npos)?"":" DEFAULT '"+felder[i].defa+"'")
-            +(felder[i].obauto?" AUTO_INCREMENT":" ")
-            +(felder[i].obind && felder[i].obauto?" PRIMARY KEY":" ")
+            +(felder[i].defa=="NULL"||felder[i].defa=="null"||((felder[i].defa.empty()&&!felder[i].nnull)||(felder[i].obind && felder[i].obauto)/*||utyp.find("LONGTEXT")!=string::npos rausgenommen 30.3.25 wg. laboryus.Termine*/)?"":" DEFAULT '"+felder[i].defa+"'")
+            +(felder[i].obauto?" AUTO_INCREMENT":"")
+            +(felder[i].obind && felder[i].obauto?" PRIMARY KEY":"")
             +((felder[i].comment.empty())?"":
                 (" COMMENT '"+felder[i].comment+"'"));
           if (felder[i].obind && !felder[i].obauto) {
