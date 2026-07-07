@@ -2,25 +2,22 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "06.07.26" "Version 0.47258" "Manual-Seite für ²DPROG²"
+.TH man 1 "07.07.26" "Version 0.4726" "Manual-Seite für ²DPROG²"
 .SH NAME
-\fB²DPROG² \- FaxServer-Funktionalität\fR: veranlasst automatischen Faxversand von Dateien, Benennung empfangener Faxe und Protokollierung aller Faxe in einer Datenbank 
+\fB²DPROG² \- Anrufliste\fR: liest die Anrufliste einer AVM FRITZ!Box per TR-064 aus und trägt neue Anrufe in eine MariaDB-Datenbank ein
 .br
 (manpage available in english: 'man ²DPROG²' or 'man -Len ²DPROG²')
 .SH SYNOPSIS
 \fB²DPROG² [-<kurzopt>|--<langopt> [<ergänzung>]] ...\fR
 .SH KURZBESCHREIBUNG
-\fB²DPROG²\fR bietet quasi die Funktionalität eines Faxservers, welcher für manche auch hinter einer schnellen Datenleitung sinnvoll sein kann.
+\fB²DPROG²\fR ist ein Befehlszeilenprogramm, das sich über das TR-064-Protokoll (Dienst \fBX_AVM-DE_OnTel\fR, Aktion \fBGetCallList\fR) bei einer AVM FRITZ!Box anmeldet und deren Anrufliste abruft.
 .br
-\fB²DPROG²\fR ist ein Befehlszeilenprogramm, mit dem Dateien in einem bestimmten Verzeichnis automatisch an \fBhylafax\fR (falls ein linux-kompatibles Fax-Modem angeschlossen ist) und/oder \fBcapisuite\fR (falls eine Fritzcard 2.0 oder 2.1 angeschlossen ist) weiterleitet werden, wenn die Faxnummer im Dateinamen wie vorgesehen eingetragen ist,
-und das weiterhin die versandten Faxe in einer MariaDB-Datenbank abspeichert. 
+Jeder Anruf (Typ, Anrufer, angerufene Nummer, Name, Gerät, Datum, Dauer usw.) wird geprüft und, falls noch nicht vorhanden, in eine MariaDB-Datenbanktabelle eingetragen.
 .br
-Außerdem können von \fBhylafax\fR/\fBcapisuite\fR empfangene Faxe automatisch nach dem Sender anhand dessen Faxnummer benannt und abgespeichert werden.
-.br
-Die Netzwerkintegration (z.B. auch in ein Windows-Netzwerk mit nur einem Linuxrechner) geschieht durch automatischen Eintrag der für ²DPROG² relevanten Verzeichnisse in einen Samba-Server. Sie könnte ergänzt werden durch eine Maske für die mariadb-Datenbank.
+Das Programm eignet sich für den regelmäßigen, automatisierten Abgleich der Anrufliste einer FRITZ!Box mit einer Datenbank, z.B. zur Anzeige von Anrufer-Informationen in einer Praxisverwaltungssoftware.
 .SH INSTALLATION
 .br
-Zunächst lesen Sie bitte die untenstehenden Kapitel 'Funktionsweise','Voraussetzungen','Automatisch installierte Programmpakete' und 'Auswirkungen des Programmablaufs'.
+Zunächst lesen Sie bitte die untenstehenden Kapitel 'Funktionsweise', 'Voraussetzungen', 'Automatisch installierte Programmpakete' und 'Auswirkungen des Programmablaufs'.
 .br
 Anschließend verbinden Sie den Rechner falls nötig mit dem Internet und rufen Sie auf (z.B. durch Kopieren der Zeile in die Zwischenablage und Einfügen in einem Terminal):
 .br
@@ -30,44 +27,17 @@ Zuletzt rufen Sie auf:
 .br
  \fB²DPROG²\fR
 .br
-und beantworten einige Rueckfragen des Programms.
-.br
-Der erste Programmaufruf und die erste Faxverarbeitung eines gesandten/empfangenen Faxes mit Hylafax/Capsiuite können jeweils etwas dauern und ein paar zusätzliche Eingaben erfordern.
-.br
-\fR²DPROG² -erneut\fR für jedes von Ihnen. Hierdurch wird gleichzeitig die notwendige Programminstallation für künftige Faxe vervollständigt.
+und beantworten einige Rückfragen des Programms, insbesondere den Benutzernamen und das Passwort für den Zugriff auf die FRITZ!Box (Optionen \fB-fbusr\fR/\fB-fbpwd\fR).
 .SH GEBRAUCH
-Im Idealfall sollte sich das Programm nach dem/n erstem/n Aufruf/en (s.o.) und Beantworten einmaliger Rückfragen so eingerichtet haben, dass es von selbst weiter läuft.
+Im Idealfall sollte sich das Programm nach dem ersten Aufruf und Beantworten einmaliger Rückfragen so eingerichtet haben, dass es von selbst weiterläuft.
 .br
-Es existiert dann ein Verzeichnis z.B. '\fBzufaxen\fR', in das z.B. Benutzer im Netzwerk (z.B. über die o.g. Samba-Freigabe) zu faxende Dateien stellen können wie z.B. 
+Das Programm wird typischerweise periodisch über \fBcron\fR aufgerufen (Option \fB-cm\fR/\fB--cronminuten\fR). Bei jedem Aufruf wird die komplette, von der FRITZ!Box gelieferte Anrufliste durchgegangen; bereits in der Datenbanktabelle (Standard: \fBanrufe\fR) vorhandene Einträge (anhand Typ, Datum, Name, Rufnummer und Dauer) werden übersprungen, neue werden eingetragen.
 .br
-"\fBArztbericht zu Franz Krank an Dr. Gesund und Franz Krank an Fax 099 987654321 und 088 887654321.doc\fR" (es könnte auch z.B. eine *.xls, eine *.jpg, eine *.tif, eine *.txt oder eine *.pdf-Datei sein; die Passage 'an Dr. Gesund und Franz Krank ' ist optional für die spätere Zordnung der Faxnummer(n) in der Datenbank, sie darf auch fehlen; auf der anderen Seite darf für den Fall, dass das Programm die letzten (1-)3 Faxe zu einem Adressaten eindeutig einer Faxnummer zuordnen kann, die Passage ' an Fax 099 987654321 und 088 887654321' auch fehlen).
+Mit \fB²DPROG² -listtel\fR können die zuletzt eingetragenen Datensätze samt Erfolgskennzeichen aufgelistet werden, die Zahl der angezeigten Datensätze lässt sich mit \fB-n\fR einstellen.
+.SH OPTIONEN
+ '\fB²DPROG² -?\fR' oder '\fB²DPROG² -h\fR' zeigt die wichtigen Befehlszeilenoptionen und '\fB²DPROG² -lh\fR' alle. Die Konfigurationsdatei kann über '\fB²DPROG² -vi\fR' direkt editiert oder über '\fB²DPROG² -rf\fR' interaktiv gepflegt werden.
 .br
-Wenn \fB²DPROG²\fR beim nächsten Mal automatisch aufgerufen wird (standardmäßig alle 2 Minuten), wird die o.g. Beispieldatei zunächst kopiert und umbenannt in 
-.br
-"\fBArztbericht zu Franz Krank an Dr. Gesund an Fax 099 987654321.doc\fR" und 
-.br
-"\fBArztbericht zu Franz Krank an Franz Krank an Fax 088 887654321.doc\fR" und in die PDF-Dateien 
-.br
-"\fBArztbericht zu Franz Krank an Dr. Gesund an Fax 099 987654321.pdf\fR" und 
-.br
-"\fBArztbericht zu Franz Krank an Franz Krank an Fax 088 887654321.pdf\fR" umgewandelt.
-.br
-Diese werden dann automatisch an \fBhylafax\fR oder \fBCapisuite\fR weitergeleitet und von dort aus verschickt.
-.br
-Gleichzeitig werden sie aus '\fBzufaxen\fR' in das Warteverzeichnis, z.B. '\fBwarteauffax\fR' verschoben und in die Spooltabelle \fBspooltab\fR eingetragen.
-.br
-Gibt es in '\fBzufaxenfR' Unterverzeichnisse, deren Namen aus einem Datum oder Uhrzeit bestehen (z.B. '\fB20180101 0800\fR' oder '\fB2200\fR'), so werden darin enthaltene Faxe erst nach diesem Zeitpunkt verarbeitet und im ersteren Fall das Unterverzeichnis nach Leerung geloescht.
-.br
-Bei jedem Aufruf überprüft ²DPROG² den Status von \fBhylafax\fR und/oder \fBCapisuite\fR. Der Abschluss eines Faxvorgangs dort hat zur Folge, dass ²DPROG² die Quelldateien (also hier die o.g. .doc- und .pdf-Dateien) aus dem Warteverzeichnis in ein oder mehrere alternative Archivverzeichnisse oder ein Verzeichnis für gescheiteterte Faxe ablegt und den Datenbankeintrag von '\fBspooltab\fR' in die Archivtabelle '\fBouta\fR' verschiebt.
-.br
-Weiterhin werden über \fBhylafax\fR oder \fBCapisuite\fR angekommene Faxe in ein Empfangsverzeichnis kopiert und ggf. nach dem Sender benannt. Hierzu werden, falls angegeben, konfigurierbare SQL-Befehle verwendet, die in frei festlegbarer Zahl der Reihe nach so lange aufgerufen werden, bis einer einen Datensatz zu der Faxnummer findet.
-.br
-Der Benutzer könnte also je nach Betriebssystem, Zugriffsmöglichkeit und Präferenz in den genannten Verzeichnissen, in den Datenbanktabellen oder durch Aufruf von z.B. '\fB²DPROG²\fB', '\fB²DPROG² -lista\fR', '\fB²DPROG² -listf\fR' oder '\fB²DPROG² -listi\fR' den Stand des Faxens überprüfen. 
-
-.SH OPTIONEN 
- '\fB²DPROG² -?\fR' oder '\fB²DPROG² -h\fR' zeigt die wichtigen Befehlszeilenoptionen und '\fB²DPROG² -lh\fR' alle. Einige Optionen (z.B. die SQL-Befehle zur Suche eines Adressaten aus der Faxnummer) können nicht über die Befehlszeile, sondern nur über die Konfigurationsdatei eingegeben werden, die wiederum über '\fB²DPROG² -vi\fR' direkt editiert oder auch über '\fB²DPROG² -rf\fR' interaktiv gepflegt werden kann.
-.br
-                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47258 \fR
+                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47260 \fR
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br
@@ -115,11 +85,15 @@ Der Benutzer könnte also je nach Betriebssystem, Zugriffsmöglichkeit und Präf
 .br
 \fB -host, --host <string>\fR: verwendet die Datenbank auf Host <string> anstatt auf ('\fBlocalhost\fR')
 .br
+\fB -mcnfdat, --mcnfdat <string>\fR: verwendet fuer MySQL/MariaDB-Rootbefehle die defaults-extra-file <string> anstatt ('\fB\fR')
+.br
 \fB -muser, --muser <string>\fR: verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt ('\fB\fR')
 .br
 \fB -mpwd, --mpwd <string>\fR: verwendet fuer MySQL/MariaDB das Passwort <string>
 .br
 \fB -db, --datenbank <string>\fR: verwendet die Datenbank <string> anstatt ('\fBfaxeinp\fR')
+.br
+\fB -sz, --sperrzeit <zahl>\fR: setzt die maximale Wartezeit bei fremden Tabellensperren auf <zahl> Sekunden (lock_wait_timeout) anstatt (\fB180\fR)
 .br
 \fB -sp, --sprache <string>\fR: Language/Sprache/Lingue/Lingua [\fBd\fReutsch,\fBe\fRnglisch] ('\fBd\fR')
 .br
@@ -132,228 +106,101 @@ Der Benutzer könnte also je nach Betriebssystem, Zugriffsmöglichkeit und Präf
 \fB -cm, --cronminuten <string>\fR: alle wieviel Minuten soll \fBanrliste\fR ueber crontab aufgerufen werden (0=gar nicht), anstatt  ('\fB0\fR')
 .br
 \fB -autoakt, --autoaktual <zahl>\fR: Programm automatisch aktualisieren (\fB1\fR)
-                                                                                                                                                                                                                                                                                                                                                                            .SH FUNKTIONSWEISE
+.SH FUNKTIONSWEISE
 .LP
-Beim Aufruf von '\fB²DPROG²\fR' geschieht folgendes:
+Beim Aufruf führt '\fB²DPROG²\fR' folgende Schritte aus:
 .LP
-\fB1)\fR Die aktuelle Hardware wird überprüft:
-.br
-\fBa)\fR mit dem Befehl '\fBlspci | grep -i isdn\fR' bezüglich einer ISDN-Karte
-.br
-\fBb)\fR mit dem Befehl '\fBstty -F\fR' bezüglich eines Fax-Modems.
+\fB1)\fR Allgemeine und programmspezifische Vorgabewerte werden gesetzt.
 .LP
-\fB2)\fR Die Fax-Konfigurationsdatei \fBfax.conf\fR der Capisuite wird eingelesen, falls es sie gibt
+\fB2)\fR Die Konfigurationsdatei wird eingelesen, falls vorhanden (Standard: \fB²DPROG².conf\fR im selben Verzeichnis wie \fB²DPROG²\fR, Standard: \fB/usr/local/sbin/²DPROG²\fR).
 .LP
-\fB3)\fR Weitere Vorgaben aus dem Programmcode werden zugewiesen, die durch die ²DPROG²-Konfigurationsdatei (siehe 4), Kommandozeilenargumente oder Antworten auf Rückfragen (siehe 5) überdeckt werden können.
+\fB3)\fR Befehlszeilenparameter werden ausgewertet und überschreiben ggf. die Konfigurationsdatei.
 .LP
-\fB4)\fR Vorgaben werden geladen aus der Konfigurationsdatei, falls existent (standardmäßig \fB²DPROG².conf\fR im selben Verzeichnis wie \fB²DPROG²\fR, standardmäßig \fB/usr/local/sbin/²DPROG²\fR)) 
+\fB4)\fR Rückfragen werden gestellt, falls Werte (insbesondere \fBfbusr\fR/\fBfbpwd\fR) fehlen oder eine interaktive Option gesetzt ist.
 .LP
-\fB5)\fR Rückfragen werden gestellt, falls in der Konfigurationsdatei Werte fehlen oder falls eine Kommandozeilenoption Interaktivität verlangt.
+\fB5)\fR Das Programm trägt sich auf Wunsch in das \fBcrontab\fR von root ein, um in einstellbaren Abständen automatisch aufgerufen zu werden.
 .LP
-\fB6)\fR Das Verzeichnis von \fBhylafax\fR wird ermittelt (\fB/var/spool/hylafax\fR oder \fB/var/spool/fax\fR), falls hylafax installiert ist.
+\fB6)\fR Die MariaDB-Datenbank wird initialisiert.
 .LP
-\fB7)\fR Von Benutzern verwendete Verzeichnisse für zu verschickende, wartende, versandte und gescheiterte und empfangene Fax-Dateien werden überprüft und ggf. erstellt. Dabei können in der Konfiguration angegebene Dateinamensmuster berücksichtigt werden, um erfolgreich versandte Faxe je nach Dateinamen in verschiedenen Verzeichnissen zu speichern.
+\fB7)\fR Über TR-064 (Dienst \fBX_AVM-DE_OnTel:1\fR) wird bei der FRITZ!Box die Aktion \fBGetCallList\fR aufgerufen; die Antwort enthält eine URL, unter der die eigentliche Anrufliste als XML abgerufen wird.
 .LP
-\fB8)\fR Das Programm trägt sich ggf. in \fBcrontab\fR (des Benutzers root) ein, um auf Wunsch in (einstellbaren) Abständen aufgerufen zu werden. Um dies zu verhindern, kann entweder '\fBcronminut\fR' auf \fB0\fR eingestellt werden oder die bereits erstellten ²DPROG²-Einträge mit \fBcrontab -e\fR mit einem vorangestellten '\fB#\fR' auskommentiert werden.
+\fB8)\fR Jeder Anrufeintrag wird geparst (Felder \fBId\fR, \fBType\fR, \fBCaller\fR, \fBCalled\fR, \fBCalledNumber\fR, \fBName\fR, \fBNumbertype\fR, \fBDevice\fR, \fBPort\fR, \fBDate\fR, \fBDuration\fR, \fBCount\fR); bei abgehenden Anrufen (Type 3) werden Anrufer- und Zielfeld vertauscht.
 .LP
-\fB9)\fR Das Programm überprüft, ob alle benutzerreleventen Verzeichnisse (s. 7) von Sambafreigaben in \fB/etc/samba/smb.conf\fR erfasst werden, solche werden nötigenfalls ergänzt.
+\fB9)\fR Für jeden Eintrag wird geprüft, ob bereits ein Datensatz mit gleichem Typ, Datum, Name, Rufnummer und Dauer in der Tabelle (Standard: \fBanrufe\fR) existiert; falls nicht, wird er eingefügt.
 .LP
-\fB10)\fR Der Betrieb von MariaDB wird überprüft, ggf. wird es (installiert und) in Betrieb gesetzt, die Datenbanktabellen \fBspooltab\fR (für gerade laufende Faxe), \fBouta\fR (für gesandte und gescheiterte Faxe) und \fBinca\fR (für angekommene Faxe) werden überprüft und ggf. erstellt oder erweitert.
+\fB10)\fR Die Konfigurationsdatei wird ggf. neu geschrieben.
 .LP
-\fB11)\fR Im Fall der entsprechenden Kommandozeilenoptionen werden Korrekturen bei Dateien im Warteverzeichnis oder den Protokolltabellen durchgeführt oder deren Inhalt aufgelistet und das Programm dann beendet.
-.LP
-\fB12)\fR Andernfalls werden Dateien im \fBZufaxenverzeichnis\fR analysiert. Jede Datei, deren im Dateinamen enthaltene Faxnummer(n) ermittelbar ist/sind und die in eine PDF-Datei umwandelbar ist (oder schon so vorliegt), wird ins Warteverzeichnis verschoben und in \fBspooltab\fR eingetragen.
-.br
-Falls eine Datei mehrere Faxnummern enthält und/oder eine PDF-Umwandlung nötig ist, werden zusätzliche Dateien erstellt und die ursprüngliche Datei ggf. umbenannt.
-Falls nötig, können die Dateien zusätzliche Zifferm nahe ihrem Namensende bekommen, so dass die Namen mit keinem anderen der unter 7) genannten Verzeichnisse in Konflikt steht.
-.br
-Falls neue Dateien erstellt wurden, werden die nachfolgenden Verschiebungen und Protokollierungen mit allen durchgeführt.
-.\" DateienHerricht(), WVZinDatenbank()
-.LP
-\fB13)\fR Je nach Konfiguration wird die Funktionsfähigkeit von \fBhylafax\fR und/oder \fBcapisuite\fR überprüft und ggf. nach Möglichkeit hergestellt (falls nötig und möglich auch mit Installation dieser Programme; für eine Fritzcard 2.0 sowie für ein Faxmodem USR5637 kann/wird auch eine automatische Konfiguration erfolgen). Kernelmodule für hylafax bzw. capisuite werden für die aktuelle Kernelversion erstellt, auch bei etwaigen Kernelupdates.
-.LP
-\fB14)\fR Im Fall entsprechender Kommandozeilenoptionen werden Faxe gelöscht und das Programm dann beendet.
-.LP
-\fB15)\fR Andernfalls werden die unter 12) in \fBspooltab\fR eingetragenen Dateien an \fBhylafax\fR oder \fBcapisuite\fR weitergeleitet und dies in \fBspooltab\fR protokolliert.
-.\" faxealle()
-.LP
-\fB16)\fR Alle in \fBspooltab\fR als wartend stehenden Faxe werden in \fBhylafax\fR/\fBcapisuite\fR auf ihren Status überprüft, dieser wird in \fBspooltab\fR aktualisiert (Zahl der bisherigen Faxversuche).
-.br
-Falls sowohl hylafax als auch capisuite aktiv sind und eine voreingestellte Zahl an Anwahlversuchen im Programm der ersten Präferenz dieser beiden erfolglos erreicht ist, wird das Fax auch noch an das jeweils andere Programm weitergeleiet.
-.br
-Falls der Faxvorgang (erfolgreich oder erfolglos) beendet ist, wird die Datei aus dem Warteverzeichnis in die Verzeichnisse für fertige bzw. gescheiterte Faxe verschoben, optional mit ocrmypdf einer Texterkennung unterzogen (falls ein ausreichend junges Python3 > 3.5 installiert ist), und der Datenbankeintrag aus \fBspooltab\fR in die Tabelle \fBouta\fR verschoben.
-.br
-Der Status der genannten Faxe wird angezeigt.
-.\" untersuchespool()
-.LP
-\fB17)\fR Weitere in der Warteschleife von hylafax/capisuite befindliche, nicht über ²DPROG² erstellte Faxe werden ggf. angezeigt.
-In Intervallen werden sie in die ²DPROG²-Datenbank integriert (ohne die fehlende Information über den ursprünglichen Dateinamen)
-.LP
-\fB18)\fR Über \fBhylafax\fR/\fBcapisuite\fR empfangene Faxe werden ggf. mit Hilfe der Faxnummer anhand voreingestellter SQL-Befehle nach dem Namen des Absenders benannt und in ein Empfangsverzeichnis gestellt.
-.br
-Solche SQL-Befehle sollen (mindestens) zwei Ergebnisfelder (mit benutzerdefinierter Bedeutung) liefern, deren Inhalt dann, durch ein Komma getrennt, von ²DPROG² zur Benennung eines empfangenen Faxes verwendet werden. Vor der Anwendung des SQL-Befehls wird die Zeichenfolge '&&faxnr&&' zur aktuellen Faxnummer erweitert. Beispiel fuer einen solchen SQL-Befehl:
-.br
-.br
-\fIselect concat(haname,', ',ort,', ',kvnu) name, zulg from kvaerzte.hae where concat(if(mid(fax1k,1,1)='0','','08131'), replace(replace(replace(replace(fax1k,' ',''),'-',''),'/',''),'\'','')) = '&&faxnr&&'\fR
-.br
-.br
-Wenn mehrere SQL-Befehle angegeben werden, so wird der jeweils naechste angewandt, wenn einer kein Ergebnis liefert.
-.br
-Optional werden die empfangenen Dateien mit Hilfe von \fBocrmypdf\fR einer Texterkennung unterzogen.
-.LP
-\fB19)\fR Die Konfigurationsdatei \fB²DPROG².conf\fR wird ggf. geschrieben.
-.LP
-\fB20)\fR Wenn die Option \fB-autoakt\fR bzw. \fB--autoaktual\fR aktiv ist, wird zuletzt bei jedem zweiten Aufruf jedes Tages die Versionsummer von \fB²DPROG²\fR mit der der Installationsquelle verglichen und im Fall eines Rückstands eine Aktualisierung durchgeführt
-.LP
-Einige Programmteile laufen parallel, dies kann sich die Reihenfolge der Ergebnisanzeige auflockern. 
-.br
-Senden und Empfangen wiederholen sich ggf. minütlich, bis der jeweils andere Teil zum ersten Mal fertig ist.
-.br
-Überprüfung und ggf. Korrektur evtl. falsch abgelegter Fax-Dateien (z.B. infolge eines willkürlichen Programmabbruchs von außen) werden in Abständen durchgeführt.
-
+\fB11)\fR Wenn die Option \fB-autoakt\fR aktiv ist, wird die Versionsnummer des Programms mit der Installationsquelle verglichen und im Fall eines Rückstands eine Aktualisierung durchgeführt.
 .SH VORAUSSETZUNGEN
-\fBHardware\fR: Computer mit einer Fritzcard 2.0 oder 2.1 und/oder einem linux-kompatiblen Modem; in der vorliegenden Fassung wird für eine automatische Installation des Programms (unter Beantwortung einiger Rückfragen) ein US Robotics Modem USR5637 und eine der untenstehenden Linuxversionen benötigt.
-Im Fall der Verwendung von Fritzcard plus einem Modem kann das Programm beide Faxwege alternativ nutzen, um die Übertragungssicherheit zu erhöhen. 
+\fBHardware\fR: Eine im Netzwerk erreichbare AVM FRITZ!Box mit aktiviertem TR-064-Zugriff (Heimnetz-Freigabe) und einem dafür eingerichteten Benutzer.
 .br
-\fBSoftware\fR: Das Programm wurde auf eine Installation von Opensuse >= 42.1, Debian >= 9.10, Ubuntu >= 16.04, Mint >= 18 oder Fedora >= 24 mit jeweils Standardoptionen abgestimmt. System D muss installiert sein bzw. systemctl muss laufen, was in den genannten Programmversionen der Fall ist. Jeweils einer der Paketmanager rpm oder dpkg sowie apt, dnf, yum oder zypper muss installiert sein, wie in den genannten Linuxdistributionen standardmäßig der Fall. Das Programm '\fBwget\fR' wird vorausgesetzt. Die Deinstallation der durch ²DPROG² hinzugefügten Programme mit \fBmake uninstall\fR ist gegenwärtig nur für englische und deutsche Versionen der Paketmanager eingerichtet.
-.br
-.\"In Manjaro können vor Installation noch die Befehle: 'sudo pacman -S wget vi' und 'sudo pacman -Syu' nötigt werden.
+\fBSoftware\fR: Das Programm wurde für Linux (Opensuse >= 42.1, Debian >= 9, Ubuntu >= 16.04, Mint >= 18, Fedora >= 24) entwickelt. SystemD muss installiert sein. Einer der Paketmanager \fBapt\fR, \fBdnf\fR, \fByum\fR oder \fBzypper\fR muss vorhanden sein. \fBwget\fR muss installiert sein. MariaDB muss laufen.
 .SH AUTOMATISCH INSTALLIERTE PROGRAMMPAKETE
 .br
-(hierzu wird je nach Distribution zypper, apt(-get), dnf oder yum verwendet).
+(hierzu werden je nach Distribution \fBzypper\fR, \fBapt(-get)\fR, \fBdnf\fR oder \fByum\fR verwendet).
 .LP
-\fI\fBmakefile:\fR
+\fI\fBMakefile:\fR
 .br
-gcc V.6, g++ V.6, groff, libmysqlclient-dev(el), libtiff-dev(el) (im Fall von Vers. 4.0.7 mit leichter Modifikation, s. Makefile)
+gcc V.6 oder höher, g++ V.6 oder höher, groff, libmysqlclient-dev(el), libtiff-dev(el)
 .LP
 \fI\fB²DPROG²:\fR
 .br
-acl, boost, boost-devel, boost-iostreams-devel, boost-local-devel, cron, ghostscript, imagemagick, libreoffice-common, libreoffice-base, mariadb-server, policycoreutils, policycoreutils-python-utils, poppler-tools, samba, sfftobmp, (in debian-derivates, für mariadb, zusätzlich: apt-transport-https)
-.LP
-\fIfalls \fBcapisuite\fR \fIbenutzt werden soll\fR:
-.br
-capisuite, capiutils, capi4linux, fcpci-3.10.0, gcc-4.8, g++-4.8, kernel-source (linux-source), libcapi20-2, libcapi20-3, libxslt-tools, linux-headers-$(uname -r), python-devel, (in fedora, zusätzlich: kernel-modules-extra), 
-.LP
-\fIfalls \fBhylafax\fR \fIbenutzt werden soll\fR:
-.br
-hylafax+, hylafax+-client, sendmail, tiff (im Fall von Vers. 4.0.7 mit kleiner Modifikation, s. Makefile)
-.LP
-\fIfalls \fBocr\fR \fIbenutzt werden soll\fR:
-.br
-ffmpeg, ffmpeg-devel, ffmpeg-compat, gcc, libavformat-devel, libffi-devel, ocrmypdf, python3-devel, python3-pip, python3-setuptools, rpmfusion, qpdf, redhat-rpm-config, tesseract-ocr, unpaper, and via 'python3 pip': cryptography, cffi, image, M2Crypto, ocrmypdf, PyPDF2, reportlab, ruffus.
-.LP
-\fIfalls Sie die Quelldateien mit 'sh viall' bearbeiten wollen\fR:
-.br
-vim
-.LP
-All diese Installationen können abhängige Programme einschließen.
-.br
-Falls Sie eines dieser Programme nicht wollen bzw. nicht aktualisieren wollen, dann dürfen Sie ²DPROG² oder die entsprechenden Programmteile nicht auf diesem Computer verwenden.
-
+acl, boost, boost-devel, boost-iostreams, boost-locale, cron, curl-devel, libtiff, mariadb-server, ncurses-devel
 .SH AUSWIRKUNGEN DES PROGRAMMABLAUFS
 Das Programm muss zum ordentlichen Funktionieren folgende Maßnahmen ergreifen:
 .LP
-\fB1)\fR In Debian kann in der Datei /etc/apt/sources.list ein DVD-Eintrag hinter die Standard-Online-Repositories verschoben werden.
+\fB1)\fR Sudo (fehlt anfangs bei Standardinstallation in Debian) wird ggf. installiert.
 .br
-\fB2)\fR Sudo (fehlt anfangs bei Standardinstallation in Debian) wird ggf. installiert. 
-.br
-Der Benutzer beim Installationsvorgang wird, falls nicht schon enthalten, in eine Administrator-Gruppe eingetragen, die in /etc/sudoers genannt wird, da er "sudo" ausführen muß.
+Der Installationsbenutzer wird, falls noch nicht enthalten, in eine Administrator-Gruppe aus \fB/etc/sudoers\fR eingetragen.
 .LP
-\fB3)\fR 'GNU make' wird, falls nicht vorhanden, durch Aufruf von 'sh ./install.sh' bzw. 'configure' automatisch installiert.
+\fB2)\fR 'GNU make' wird, falls nicht vorhanden, durch Aufruf von 'sh ./install.sh' automatisch installiert.
 .LP
-\fB4)\fR Installieren von \fBHylafax+\fR, falls ein Modem angeschlossen ist und Hylafax+ nicht installiert ist. Ggf. Konfiguration von Hylafax+ durch Aufruf von '\fBfaxsetup -nointeracitve\fR', durch Editieren der Konfigurationsdateien \fBconfig\fR und \fBconfig.*\fR (z.B. \fBconfig.ttyACM0\fR) im hylafax-Konfigurationsverzeichnis (Vorgabe z.B.: \fB/var/spool/hylafax/etc/\fR)
+\fB3)\fR Erstellen einer Protokolldatei, standardmäßig \fB/var/log/²DPROG².log\fR.
 .LP
-\fB5)\fR Installieren von \fBcapisuite\fR, falls eine Fritzkarte eingebaut ist und capisuite nicht installiert ist.
-Ggf. Bearbeitung der Konfigurationsdateien \fB/etc/capisuite/capisuite.conf\fR und \fB/etc/capisuite/fax.conf\fR.
-Ggf. Bearbeitung des Python-Scripts für ankommende Faxe (Vorgabe z.B.: \fB/usr/lib64/capisuite/incoming.py\fR) zur Bestimmung der Zahl der Klingeltöne 
-bis zur Faxannahme, Erstellung bzw. Bearbeitung der Dateien 
-'\fB/etc/udev/rules.d/46-FKN_isdn_capi.rules\fR', '\fB/etc/modprobe.d/50-blacklist.conf\fR'.
+\fB4)\fR Erstellen und Anpassen der Konfigurationsdatei \fB²DPROG².conf\fR im Programmverzeichnis (Standard: \fB/usr/local/sbin/\fR); darin wird auch das FRITZ!Box-Passwort abgelegt (nur schwach verschlüsselt).
 .LP
-\fB6)\fR Einrichten von Diensten: 
-.br
-\fBa)\fR in systemd (im Verzeichnis /usr/lib/systemd/system oder /lib/systemd/system), insbesondere:
-.br
-\fBhylafax-faxq.service\fR, \fBhylafax-hfaxd.service\fR, \fBhylafax-faxgetty-....service\fR (z.B. \fBhylafax-faxgetty-ttyACM0\fR),
-.br
-capisuite.service,
-.br
-\fBb)\fR Verschieben von Diensten aus dem Verzeichnis /etc/init.d in ein neu eingerichtes Verzeichnis /etc/ausrangiert:
-\fBhylafax\fR, \fBcapisuite\fR
-.br
-\fBc)\fR falls \fBselinux\fR aktiv ist (wie standardmäßig in fedora), dann behindert es standardmäßig \fBhylafax\fR; in diesem Fall wird im Hintergrund ein Modul für selinux eingerichtet, um den Betrieb von hylafax-hfaxd wieder zu erlauben. Ferner muss (bis zur eventuellen Erstellung einer maßgeschneiderteren Lösung) die Domäne 'getty' mit dem Befehl '\fBsemanage permissive -a getty_t\fR' in selinux entschärft werden, um faxe über hylafax empfangen zu können.
+\fB5)\fR Einfügen einer Zeile zum automatischen periodischen Aufruf des Programms in das crontab von root (sofern konfiguriert).
 .LP
-\fB7)\fR Erstellen einer Protokolldatei, standardmäßig \fB/var/log/²DPROG².log\fR.
-.LP
-\fB8)\fR ggf. Erstellen und Zugreifbarmachen der bestimmbaren \fBVerzeichnisse\fR für zu sendende, wartende, abgearbeitete und empfangene Faxe.
-.LP
-\fB9)\fR ggf. Erstellen und Verändern der Konfigurationsdatei ²DPROG².conf in dem Verzeichnis, in dem auch es selbst steht (Vorgabe: /usr/local/sbin/²DPROG²).
-.LP
-\fB10)\fR ggf. Einfügen einer Zeile zum automatischen periodischen Aufruf des Programms in das crontab (von root)
-.LP
-\fB11)\fR ggf. Einfügen von Abschnitten für die unter 8) genannten Verzeichnisse in /etc/samba/smb.conf, ggf. Einfügen/Passwortzuteilen des Programmbenutzers bzw. (falls root) des für die Capisuite gewählten Benutzers als Samba-Benutzer.
-Falls Suse-Firewall vorhanden, samba-Server fuer "externe Zone" eintragen.
-Nach Programmaufruf sollten die unter 8) genannten Verzeichnisse im Samba-Netzwerk sichtbar sein und Dateien im Verzeichnis für zu sendende Faxe erstellt werden können.
-.LP
-\fB12)\fR ggf. Einfügen einer Datenbank für die Faxe in mariadb unter einem bestimmbaren Namen, Anlage und Veränderung mehrerer Tabellen und einer Prozedur in dieser Datenbank, ggf. Einfügen eines Benutzers mit bestimmbarem Namen in mariadb zur Datenpflege in diesen Tabellen 
-.LP
-\fB13)\fR durch entsprechende Befehlszeilenoptionen von ²DPROG² können innerhalb von hylafax und capisuite Faxe gelöscht werden, insbesondere:
-.br
-\fBa)\fR in hylafax: durch Aufruf von 'faxrm'
-.br
-\fBb)\fR in capisuite: durch Löschen der Dateien wie /var/spool/capisuite/users/<user>/sendq/*.txt und ~/*.sff.
-In capisuite kann auch eine verwaiste Lock-Datei (/var/spool/capisuite/users/<user>/sendq/*.lock) gelöscht werden.
-.LP
-\fB14)\fR mit einer Befehlszeilenoption kann ein früher empfangenes Fax erneut in eine pdf-Datei umgewandelt werden.
-.br
+\fB6)\fR Einfügen bzw. Anlegen der konfigurierten Datenbank und der Tabelle \fBanrufe\fR in MariaDB; ggf. Anlegen eines MariaDB-Benutzers.
 .SH DEINSTALLATION
 Wechseln Sie in einem Terminal in das Installationsverzeichnis (beim selben eingeloggten Benutzer: \fBcd ~/²DPROG²\fR, ansonsten wird es über \fB²DPROG² -info\fR angezeigt).
 .br
 Rufen Sie dort \fBmake uninstall\fR auf.
 .br
-Dadurch wird das installierte \fB²DPROG²\fR gelöscht und das Script \fBuninstallinv\fR in umgekehrter Reihenfolge abgearbeitet, das bei der Installation und beim Aufruf von ²DPROG² erstellt wurde. 
+Dadurch wird das installierte \fB²DPROG²\fR gelöscht und das Script \fBuninstallinv\fR in umgekehrter Reihenfolge abgearbeitet, das bei der Installation und beim Aufruf von ²DPROG² erstellt wurde.
 .br
-Dadurch werden zusätzlich installierte Programmpakete, zusätzlich erteilte Berechtigungen, für ²DPROG² eingerichtete Sambafreigaben und Firewallausnahmen wieder gelöscht. 
+Dadurch werden zusätzlich installierte Programmpakete und zusätzlich erteilte Berechtigungen wieder gelöscht.
 .br
-Auf die Deinstallation der Konfigurationsdateien, der angesammelten Daten und systemrelevanter Programme wie libgcc und selinux wird dabei verzichtet.
+Auf die Deinstallation der Konfigurationsdateien, der angesammelten Daten und systemrelevanter Programme wird dabei verzichtet.
 .br
 Etwaige Fehlermeldungen beziehen sich meist auf einen Deinstallationsversuch bereits entfernter Programme und können ignoriert werden.
-.br
-.SH RUECKGABEWERTE
+.SH RÜCKGABEWERTE
 \fB0\fR: Normaler Rückgabewert
 .br
-\fB7\fR: Der Infobildschirm (\fB²DPROG² -info\fR) wurde angezeigt 
+\fB7\fR: Der Infobildschirm (\fB²DPROG² -info\fR) wurde angezeigt
 .br
 \fB8\fR: Die Hilfe wurde angezeigt
 .br
-\fB9\fR: Zur Inbetriebnahme des gerade eingerichteten Capi-Moduls muss der Rechner neu gestartet werden
-.br
 \fB10\fR: Die Initialisierung der Datenbank scheiterte und das Programm wurde deshalb beendet
 .br
-\fB11\fR: Die Überprüfung einer Datenbanktabelle scheiterte und das Programm wurde deshalb beendet
-.br
-\fB17\fR: Gabelung zu weiterem thread misslungen
+\fB11\fR: Die Überprüfung der Datenbanktabelle scheiterte und das Programm wurde deshalb beendet
 .br
 \fB98\fR: Programmaufruf abgebrochen, da es bereits einmal läuft
 .br
-\fB99\fR: Suchbefehl mit \fB²DPROG² -fd 2\fR bei Dateilink misslungen
-.br
-\fB113\fR: Ein SQL-Befehl für die Mariadb-Datenbank scheiterte an sonstigem Fehler
+\fB113\fR: Ein SQL-Befehl für die MariaDB-Datenbank scheiterte an sonstigem Fehler
 .br
 \fB115\fR: Eine Datenbankeintragung scheiterte an voller Festplatte
 .br
 Nach Aufruf von \fB²DPROG² -vi\fR oder \fB²DPROG² -vs\fR wird ggf. der Rückgabewert von \fBvi\fR/\fBvim\fR weitergeleitet
 .SH FEHLER
-Fehler bitte mit u.a. dem Wort '²DPROG²' in der Email-Ueberschrift melden. 
+Fehler bitte mit u.a. dem Wort '²DPROG²' in der E-Mail-Überschrift melden.
 .br
-Bitte auch melden, wenn sich Änderungsbedarf durch andere Hard- bzw. Software ergeben.
-.br
+Bitte auch melden, wenn sich Änderungsbedarf durch andere Hard- bzw. Software ergibt.
 .SH PROGRAMMÄNDERUNG
-Durch Aufruf von '\fBsh viall\fR' mit den üblichen '\fBvim\fR'-Befehlen, gefolgt von '\fBmake\fR' und '\fBmake install\fR' vom Installationsverzeichnis ('\fB~/²DPROG²\fR) aus können Sie das Programm ändern.
-
+Durch Aufruf von '\fBsh viall\fR' mit den üblichen '\fBvim\fR'-Befehlen, gefolgt von '\fBmake\fR' und '\fBmake install\fR' vom Installationsverzeichnis ('\fB~/²DPROG²\fR') aus können Sie das Programm ändern.
 .SH HAFTUNG
 Das Programm wurde mit bester Absicht entwickelt und durch den Autor getestet.
 .br
-Trotzdem kann der Autor für keine Schäden haften, die durch das Programm entstehen könnten
-
+Trotzdem kann der Autor für keine Schäden haften, die durch das Programm entstehen könnten.
 .SH AUTOR
 Gerald Schade (geraldschade@gmx.de; www.diabdachau.de)
