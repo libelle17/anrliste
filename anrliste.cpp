@@ -114,8 +114,8 @@ char const *DPROG_T[T_MAX+1][SprachZahl]={
 	{"s","s"},
 	// T_suche_l
 	{"suche","search"},
-	// T_suche_in_verarbeiteten_Faxen_nach
-	{"Suche in verarbeiteten Faxen nach <string>: ","Look in processed faxes for <string>: "},
+	// T_suche_in_Rufnummern_nach
+	{"Suche in Rufnummern nach <string>: ","Look in phone numbers for <string>: "},
 	//  T_holanr,
 	{"holanr()","fetchcall()"},
 	{"",""} //α
@@ -177,7 +177,7 @@ void hhcl::virtinitopt()
 	opn<<new optcl(/*pname*/"fbusr",/*pptr*/&fbusr,/*part*/pstri,T_fbusr_k,T_fbusr_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbusr.empty(),Tx[T_Benutzer_fuer_Fritzbox]);
 	opn<<new optcl(/*pname*/"fbpwd",/*pptr*/&fbpwd,/*part*/ppwd,T_fbpwd_k,T_fbpwd_l,/*TxBp*/&Tx,/*Txi*/T_verwendet_fuer_die_Fritzbox_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!fbpwd.empty(),Tx[T_Passwort_fuer_Fritzbox],/*obno*/0,/*refstr*/&fbusr);
 	opn<<new optcl(/*pptr*/&listt,/*art*/puchar,T_listt_k,T_listtel_l,/*TxBp*/&Tx,/*Txi*/T_listet_Datensaetze_aus,/*wi*/1,/*Txi2*/T_mit_Erfolgskennzeichen_auf,/*rottxt*/tabname,/*wert*/1,/*woher*/1);
-	opn<<new optcl(/*pptr*/&suchstr,/*art*/pstri,T_s_k,T_suche_l,/*TxBp*/&Tx,/*Txi*/T_suche_in_verarbeiteten_Faxen_nach,/*wi*/1,/*Txi2*/T_MAX,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
+	opn<<new optcl(/*pptr*/&suchstr,/*art*/pstri,T_s_k,T_suche_l,/*TxBp*/&Tx,/*Txi*/T_suche_in_Rufnummern_nach,/*wi*/1,/*Txi2*/T_MAX,/*rottxt*/nix,/*wert*/-1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&dszahl,/*art*/pdez,T_n_k,T_dszahl_l,/*TxBp*/&Tx,/*Txi*/T_Zahl_der_aufzulistenden_Datensaetze_ist_zahl_statt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/1); //α //ω
 	dhcl::virtinitopt(); //α
 } // void hhcl::virtinitopt

@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "07.07.26" "Version 0.4726" "Manual-Seite für ²DPROG²"
+.TH man 1 "08.07.26" "Version 0.47261" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- Anrufliste\fR: liest die Anrufliste einer AVM FRITZ!Box per TR-064 aus und trägt neue Anrufe in eine MariaDB-Datenbank ein
 .br
@@ -37,13 +37,13 @@ Mit \fB²DPROG² -listtel\fR können die zuletzt eingetragenen Datensätze samt 
 .SH OPTIONEN
  '\fB²DPROG² -?\fR' oder '\fB²DPROG² -h\fR' zeigt die wichtigen Befehlszeilenoptionen und '\fB²DPROG² -lh\fR' alle. Die Konfigurationsdatei kann über '\fB²DPROG² -vi\fR' direkt editiert oder über '\fB²DPROG² -rf\fR' interaktiv gepflegt werden.
 .br
-                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47260 \fR
+                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47261 \fR
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br
 \fB -listt, --listtel\fR: listet Datensaetze aus `\fBanrufe\fR` mit Erfolgskennzeichen auf (\fB0\fR)
 .br
-\fB -s, --suche <string>\fR: Suche in verarbeiteten Faxen nach <string>:  ('\fB\fR')
+\fB -s, --suche <string>\fR: Suche in Rufnummern nach <string>:  ('\fB\fR')
 .br
 \fB -n, --dszahl <string>\fR: Zahl der aufzulistenden Datensaetze = <zahl> statt ('\fB30\fR')
 .br

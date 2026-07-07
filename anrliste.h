@@ -54,7 +54,7 @@ enum T_
 	T_mit_Erfolgskennzeichen_auf,
 	T_s_k,
 	T_suche_l,
-	T_suche_in_verarbeiteten_Faxen_nach,
+	T_suche_in_Rufnummern_nach,
 	T_holanr,
 	T_MAX //α
 }; // enum T_ //ω

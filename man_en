@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "07.07.26" "Version 0.4726" "\fB²DPROG²\fR man page"
+.TH man 1 "08.07.26" "Version 0.47261" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Call list\fR: reads the call list of an AVM FRITZ!Box via TR-064 and records new calls in a MariaDB database
 .br
@@ -35,13 +35,13 @@ The program is typically called periodically via \fBcron\fR (option \fB-cm\fR/\f
 .SH OPTIONS
  '\fB²DPROG² -?\fR' or '\fB²DPROG² -h\fR' shows the important command line options and '\fB²DPROG² -lh\fR' all of them. The configuration file can be edited directly by '\fB²DPROG² -vi\fR' or interactively by '\fB²DPROG² -rf\fR'.
 .br
-                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47260 \fR
+                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47261 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
 \fB -listt, --listtel\fR: lists entries from `\fBanrufe\fR` with success flag (\fB0\fR)
 .br
-\fB -s, --search <string>\fR: Look in processed faxes for <string>:  ('\fB\fR')
+\fB -s, --search <string>\fR: Look in phone numbers for <string>:  ('\fB\fR')
 .br
 \fB -n, --reccount <string>\fR: No. of listed entries = <no> instead of ('\fB30\fR')
 .br
