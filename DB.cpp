@@ -1,5 +1,6 @@
 #include "kons.h"
 #include "DB.h"
+#include <unistd.h> // close()
 #define caus cout // nur zum Debuggen
 #define caup cout // zum Debuggen von Postgres
 #define exitp exit // zum Debuggen von Postgres
@@ -18,6 +19,24 @@ void kexitDB(const DB *dbp, int code)
 	}
 	exit(code);
 } // void kexitDB(const DB *dbp, int code)
+
+// Gibt nur die lokale fd-Kopie einer vom Elternprozess nach fork() geerbten Verbindung frei -
+// OHNE mysql_close() (das wuerde per COM_QUIT die mit dem Elternprozess geteilte Server-Session
+// beenden, s. TEMP-Fix 2026-07-06 / "Server has gone away"-Regression). close() auf dem rohen
+// Socket-fd ist ein rein lokaler Kernel-Vorgang: es geht nichts ueber die Leitung, der Server
+// merkt davon nichts, solange der Elternprozess seinen eigenen fd auf denselben Socket noch
+// offen haelt. Wird von neueEigeneMy() aufgerufen, bevor My ueberschrieben wird.
+void gebGeerbteVerbindungFrei(DB *const dbp)
+{
+	if (dbp) {
+		for (size_t i=0;i<dbp->conz;i++) {
+			if (dbp->conn[i]) {
+				close(mysql_get_socket(dbp->conn[i]));
+				dbp->conn[i]=0; // verhindert spaeteres versehentliches mysql_close() darauf
+			}
+		}
+	}
+} // void gebGeerbteVerbindungFrei(DB *const dbp)
 
 //const char *Txdbcl::TextC[T_dbMAX+1][SprachZahl]={
 const char *DB_T[T_dbMAX+1][SprachZahl]={
@@ -190,6 +209,13 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"Tabelle: ","Table: "},
 	// T_Versuche_in_doAbfrage_mehr_als,
 	{"Versuche in doAbfrage mehr als ","in doAbfrage more tries than "},
+	// T_sz_k
+	{"sz","sz"},
+	// T_sperrzeit_l
+	{"sperrzeit","locktimeout"},
+	// T_Setzt_maximale_Wartezeit_bei_auswaertigen_Tabellensperren
+	{"setzt die maximale Wartezeit bei fremden Tabellensperren auf <zahl> Sekunden (lock_wait_timeout) anstatt",
+	 "sets the maximum wait time for external table locks to <zahl> seconds (lock_wait_timeout) instead of"},
 	{"",""}
 };
 // Txdbcl::Txdbcl() {TCp=(const char* const * const * const *)&TextC;}
@@ -376,23 +402,15 @@ uchar DB::oisok{0};
 
 // /*1*/DB::DB() { }
 
-/*2*/DB::DB(const DBSTyp nDBS, const string& phost, const string& puser, const string& ppasswd, 
-		const size_t conz/*=1*/, const string& uedb, 
+/*2*/DB::DB(const DBSTyp nDBS, const string& phost, const string& puser, const string& ppasswd,
+		const size_t conz/*=1*/, const string& uedb,
        unsigned int port, const char *const unix_socket, unsigned long client_flag,
     int obverb,int oblog,const string charset, const string collate, int versuchzahl, const uchar ggferstellen,
-		const string& pmcnfdat):DBS(nDBS),
-		host(phost),user(puser),passwd(ppasswd),dbname(uedb),mcnfdat(pmcnfdat), conz(conz)
+		const string& pmcnfdat, const unsigned plockwait):DBS(nDBS),
+		host(phost),user(puser),passwd(ppasswd),dbname(uedb),mcnfdat(pmcnfdat),lockwait(plockwait), conz(conz)
 {
   init(charset,collate,port,unix_socket,client_flag,obverb,oblog,versuchzahl, ggferstellen);
 } // DB::DB
-
-// baut das Anmelde-Fragment fuer root-CLI-Befehle: ueber mcnfdat (defaults-extra-file), wenn gesetzt, sonst wie bisher -uroot/-p<rootpwd>
-string DB::credarg() const
-{
-	return mcnfdat.empty()
-			? (" -uroot -h'"+host+"' "+(rootpwd.empty()?string():"-p"+rootpwd))
-			: (" --defaults-extra-file="+mcnfdat+" -h'"+host+"'");
-} // DB::credarg
 
 /*3*/DB::DB(const DBSTyp nDBS, const char* const phost, const char* const puser,const char* const ppasswd, 
       const char* const prootpwd, const size_t conz/*=1*/, 
@@ -423,6 +441,14 @@ void DB::instmaria(int obverb, int oblog)
 		 systemrueck("mysql_install_db --user="+mysqlben+" --basedir=/usr/ --ldata=/var/lib/mysql",obverb,oblog,/*rueck=*/0,/*obsudc=*/1);
 	} // 					if (ipr==apt) else
 } // void DB::instmaria()
+
+// baut das Anmelde-Fragment fuer root-CLI-Befehle: ueber mcnfdat (defaults-extra-file), wenn gesetzt, sonst wie bisher -uroot/-p<rootpwd>
+string DB::credarg() const
+{
+	return mcnfdat.empty()
+			? (" -uroot -h'"+host+"' "+(rootpwd.empty()?string():"-p"+rootpwd))
+			: (" --defaults-extra-file="+mcnfdat+" -h'"+host+"'");
+} // DB::credarg
 
 void DB::init(
 		const string charset, const string collate, 
@@ -552,6 +578,14 @@ void DB::init(
 						if (mysql_real_connect(conn[aktc], host.c_str(), user.c_str(), passwd.c_str(), dbname.c_str(), port, unix_socket, client_flag)) {
 							// mysql_set_character_set(conn[aktc],"utf8");
 							cmd="SET NAMES 'utf8mb4' COLLATE 'utf8mb4_german2_ci'";
+							if (mysql_real_query(conn[aktc],cmd.c_str(),cmd.length())) {
+								if (MYSQL_RES *dbres{mysql_use_result(conn[aktc])}) {
+									mysql_free_result(dbres);
+								}
+							}
+							// begrenzt die Wartezeit bei fremden Tabellensperren (MDL, z.B. DDL gegen von anderen
+							// Verbindungen offen gehaltene Tabellen) statt unbegrenzt zu haengen, s. lockwait/Option "sperrzeit"
+							cmd="SET SESSION lock_wait_timeout="+ltoan(lockwait)+", innodb_lock_wait_timeout="+ltoan(lockwait);
 							if (mysql_real_query(conn[aktc],cmd.c_str(),cmd.length())) {
 								if (MYSQL_RES *dbres{mysql_use_result(conn[aktc])}) {
 									mysql_free_result(dbres);
@@ -1131,7 +1165,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
   int gesfehlr=0;
   RS rs(dbp,tbname);
   std::stringstream sql;
-  // eine Indexfeldlaenge groesser als die Feldlaenge fuehrt zu Fehler (zumindest bei MariaDB)
+	// eine Indexfeldlaenge groesser als die Feldlaenge fuehrt zu Fehler (zumindest bei MariaDB)
   for(unsigned i=0;i<indexzahl;i++){
     for(unsigned j=0;j<indices[i].feldzahl;j++){
       for(unsigned k=0;k<feldzahl;k++){
@@ -1164,7 +1198,7 @@ int Tabelle::prueftab(const size_t aktc,int obverb/*=0*/,int oblog/*=0*/)
 
           fstr.resize(fstr.size()+1);
           istr.resize(istr.size()+1);
-          ersetzAlle(felder[i].comment,"'","´"); // 13.8.17: \\' geht auf Fedora nicht mehr, \' auch nicht
+          ersetzAlle(felder[i].comment,"'","ï¿½"); // 13.8.17: \\' geht auf Fedora nicht mehr, \' auch nicht
           ////<<"felder[i].comment: "<<felder[i].comment<<endl;
 					utyp=boost::locale::to_upper(felder[i].typ, loc);
           fstr[i]= "`" + felder[i].name + "` "+
@@ -1782,7 +1816,7 @@ const char *cjj(const char * const* const* cerg, const int nr)
 	return "";
 }
 
-// das Ergebnis ist z.B. folgendermaßen zu prüfen:
+// das Ergebnis ist z.B. folgendermaï¿½en zu prï¿½fen:
 // char ***cerg=rs.HolZeile();
 // if (cerg) // 0, wenn Fehler im SQL-Befehl
 // if (*cerg) // 0, wenn keine Ergebniszeile
@@ -1794,7 +1828,7 @@ char*** RS::HolZeile()
 {
   switch (dbp->DBS) {
     case MySQL:
-      if (!obqueryfehler)// Anfrage erfolgreich, Rückgabedaten werden verarbeitet
+      if (!obqueryfehler)// Anfrage erfolgreich, Rï¿½ckgabedaten werden verarbeitet
         if (result) {  // Es liegen Zeilen vor
 					row = mysql_fetch_row(result);
           ////          lengths = mysql_fetch_lengths(result);
@@ -1832,7 +1866,7 @@ void RS::setzzruck()
 int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int oblog/*=0*/,string *idp/*=0*/,my_ulonglong *arowsp/*=0*/)
 {
 ////	int altobverb=obverb; obverb=1;
-	const unsigned vlz=10; // Verlängerungszahl
+	const unsigned vlz=10; // Verlï¿½ngerungszahl
 	const unsigned maxversuche=3;
 	yLog(obverb>0?obverb-1:0,oblog,0,0,"%s%s()%s, aktc: %s%zu%s, obverb: %s%d%s, asy: %s%d%s, oblog: %s%d%s,\nsql: %s%s%s",blau,__FUNCTION__,schwarz,blau,aktc,schwarz,blau, obverb,schwarz,blau,asy,schwarz,blau,oblog,schwarz,blau,sql.c_str(),schwarz);
 	fnr=0;
@@ -1905,7 +1939,7 @@ int RS::doAbfrage(const size_t aktc/*=0*/,int obverb/*=0*/,uchar asy/*=0*/,int o
 										if ((p1=SQL.find(suchstr[uru]))!=string::npos) {
 											p1+=suchstr[uru].length();
 											if ((p2=SQL.find_first_of(" (",p1)+1)) {
-												string tbl{sql.substr(p1,p2-p1-1)}; // wegen Groß- und Kleinschreibung
+												string tbl{sql.substr(p1,p2-p1-1)}; // wegen Groï¿½- und Kleinschreibung
 												anfzweg(&tbl);
 												if (tbl.find_first_of(",='`")!=string::npos) continue;
 												Tabelle aktt(dbp,tbl,aktc,obverb>0?obverb-1:0,oblog);
@@ -2363,7 +2397,6 @@ my_ulonglong RS::tbins(vector<instyp>* einfp,const size_t aktc/*=0*/,uchar samme
 			} // switch (dbp->DBS) 
 		} // if (obeinfuegen)
 	} // 	if (einfp)
-
 	if (!sammeln)if (zaehler) {
 		switch (dbp->DBS) {
 			case MySQL:
@@ -2497,6 +2530,7 @@ void dhcl::virtinitopt()
 	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty(),Txd[T_Datenbankname_fuer_MySQL_MariaDB_auf]);
 //	opn<<optcl(/*pname*/"tabl",/*pptr*/&tabl,/*art*/pstri,T_tb_k,T_tabelle_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1);
 	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
+	opn<<new optcl(/*pname*/"sperrzeit",/*pptr*/&sperrzeit,/*art*/pint,T_sz_k,T_sperrzeit_l,/*TxBp*/&Txd,/*Txi*/T_Setzt_maximale_Wartezeit_bei_auswaertigen_Tabellensperren,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,Txd[T_Setzt_maximale_Wartezeit_bei_auswaertigen_Tabellensperren]);
 	hcl::virtinitopt();
 } // void hhcl::virtinitopt
 
@@ -2521,7 +2555,7 @@ int dhcl::initDB()
 	} else {
 		if (!My) {
 			My=new DB(myDBS,host,muser,mpwd,maxconz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/CLIENT_MULTI_STATEMENTS,obverb,oblog,
-			DB::defmycharset,DB::defmycollat,/*versuchzahl=*/3,/*ggferstellen=*/1,mcnfdat);
+					DB::defmycharset,DB::defmycollat,/*versuchzahl=*/3,/*ggferstellen=*/1,mcnfdat,/*plockwait=*/sperrzeit);
 			if (My->ConnError) {
 				delete My;
 				My=0;
@@ -2538,12 +2572,27 @@ int dhcl::initDB()
 	return 0;
 } // initDB
 
+// TEMP-Fix 2026-07-06: erzeugt fuer den aufrufenden Prozess (insbesondere Kindprozesse nach fork())
+// eine NEUE, unabhaengige Verbindung und ersetzt My damit - OHNE den zuvor bestehenden,
+// mit dem Elternprozess geteilten Pool anzufassen oder zu schliessen. So teilen sich Eltern- und
+// Kindprozess nach fork() nie dieselbe MySQL-Verbindung (Ursache der 2026-07-06 beobachteten
+// "Server has gone away"-Kaskade, als Kindprozesse beim Beenden versehentlich den ganzen geerbten
+// Pool schlossen). Verwendet dieselben Zugangsdaten wie initDB(). conz ist bewusst pro Aufrufstelle
+// auf den dort tatsaechlich benoetigten hoechsten aktc-Index+1 abgestimmt (nicht pauschal maxconz),
+// um die Zahl neu aufgebauter Verbindungen je Fork zu minimieren.
+void dhcl::neueEigeneMy(const size_t conz)
+{
+	gebGeerbteVerbindungFrei(My); // fd-Kopie der geerbten Verbindung freigeben, bevor My ueberschrieben wird
+	My=new DB(myDBS,host,muser,mpwd,conz,dbq,/*port=*/0,/*unix_socket=*/0,/*client_flag=*/CLIENT_MULTI_STATEMENTS,obverb,oblog,
+			DB::defmycharset,DB::defmycollat,/*versuchzahl=*/3,/*ggferstellen=*/1,mcnfdat,/*plockwait=*/sperrzeit);
+} // dhcl::neueEigeneMy
+
 // wird aufgerufen in autofax.pvirtnachrueckfragen
 int dhcl::pruefDB(DB** testMy, const string& db)
 {
 	hLog(violetts+Txk[T_pruefDB]+db+")"+schwarz);
 	unsigned fehnr{0};
-  *testMy=new DB(myDBS,host,muser,mpwd,maxconz,db,0,0,0,obverb,oblog,DB::defmycharset,DB::defmycollat,3,0,mcnfdat);
+  *testMy=new DB(myDBS,host,muser,mpwd,maxconz,db,0,0,0,obverb,oblog,DB::defmycharset,DB::defmycollat,3,0,mcnfdat,sperrzeit);
   fehnr=(*testMy)->fehnr;
   if ((*testMy)->ConnError) {
     delete (*testMy);
@@ -2609,6 +2658,7 @@ insv::~insv()
 {
 	delete rsp;
 }
+
 
 my_ulonglong insv::schreib(const uchar sammeln/*=0*/,int obverb/*=0*/,string* const idp/*=0*/,uchar mitupd/*=0*/)
 {

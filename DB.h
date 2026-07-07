@@ -123,8 +123,11 @@ enum Txdb_
 	T_Wertma,
 	T_Tabelle,
 	T_Versuche_in_doAbfrage_mehr_als,
+	T_sz_k,
+	T_sperrzeit_l,
+	T_Setzt_maximale_Wartezeit_bei_auswaertigen_Tabellensperren,
 	T_dbMAX,
-}; // enum Txdb_ 
+}; // enum Txdb_
 
 // extern struct Txdbcl Txd;
 extern const char *DB_T[T_dbMAX+1][SprachZahl];
@@ -347,6 +350,7 @@ struct DB
 	string passwd; // kann in pruefrpw dem eingegebenen rootpw gleichgesetz werden, deshalb nicht const
 	const string dbname;
 	const string mcnfdat; // Pfad zu einer mariadb-defaults-extra-file; wenn nicht leer, ersetzt sie bei Root-CLI-Befehlen '-uroot'/'-p<rootpwd>'
+	const unsigned lockwait{180}; // maximale Wartezeit (Sekunden) bei fremden Tabellensperren, s. DB::init() (SET SESSION lock_wait_timeout/innodb_lock_wait_timeout)
 	string myloghost; // einheitliche Benennung von 'localhost' bzw. '%', zu kompliziert, um in jedem DB::DB aufzufuehren, deshalb nicht const
 	string rootpwd; // root-Passwort // wird in pruefrpw geaendert, deshalb nicht const
 	size_t conz; // Zahl der Verbindungen (s.o., conn)
@@ -378,11 +382,11 @@ struct DB
 			const char* const prootpwd, const size_t conz/*=1*/, const char* const uedb="", unsigned int port=0, const char *const unix_socket=NULL, 
 			unsigned long client_flag=0, int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3, 
 			const uchar ggferstellen=1);
-	/*4*/DB(const DBSTyp nDBS,const string& phost, const string& puser, const string& ppasswd, 
-			const size_t conz/*=1*/, 
+	/*4*/DB(const DBSTyp nDBS,const string& phost, const string& puser, const string& ppasswd,
+			const size_t conz/*=1*/,
 			const string& uedb=string(), unsigned int port=0, const char* const unix_socket=NULL, unsigned long client_flag=0,
 			int obverb=0,int oblog=0,const string charset=defmycharset, const string collate=defmycollat, int versuchzahl=3,const uchar ggferstellen=1,
-			const string& pmcnfdat=string());
+			const string& pmcnfdat=string(), const unsigned plockwait=180);
 	void init(const string charset, const string collate,
 			unsigned int port=0, const char *const unix_socket=NULL, unsigned long client_flag=0,int obverb=0,int oblog=0,unsigned versuchzahl=3,
 			const uchar ggferstellen=1);
@@ -406,6 +410,11 @@ struct DB
 // TEMP-Fix 2026-07-06: schliesst alle offenen dbp->conn[i] sauber vor exit() (sonst "Aborted connection" im MariaDB-Log,
 // da direktes exit() DB::~DB() fuer bereits erfolgreich geoeffnete Slots ueberspringt)
 void kexitDB(const DB *dbp, int code);
+
+// gibt nur die lokale fd-Kopie einer von fork() geerbten Verbindung frei (kein mysql_close(),
+// s. Kommentar bei der Definition in DB.cpp) - fuer Kindprozesse, die per neueEigeneMy() eine
+// eigene Verbindung statt des geerbten Pools bekommen
+void gebGeerbteVerbindungFrei(DB *const dbp);
 
 struct Tabelle 
 {
@@ -559,6 +568,7 @@ struct dhcl:public hcl
 		uchar ZDB{0}; // fuer Zusatz-Debugging (SQL): ZDB 1, sonst: 0
 		DB* My{0};
 		const size_t maxconz{12};//aktc: 0=... //α
+		int sperrzeit{180}; // maximale Wartezeit (Sekunden) bei fremden Tabellensperren (lock_wait_timeout), s. DB::init(); ueber Option "sperrzeit" einstellbar
 	private:
 	protected:
 		void virtlgnzuw(); // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
@@ -579,6 +589,8 @@ struct dhcl:public hcl
 		~dhcl();
 		int  initDB();
 		int  pruefDB(DB** testMy, const string& db);
+		// TEMP-Fix 2026-07-06: siehe DB.cpp
+		void neueEigeneMy(const size_t conz);
 #ifdef VOMHAUPTCODE
 		__attribute__((weak)) // implementationsspezifische Vorgaben, Modul vgb.cpp)
 #endif
