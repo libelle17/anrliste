@@ -1292,6 +1292,7 @@ struct hcl
 //			;  //α
 		string muser; // Benutzer fuer Mysql/MariaDB
 		string mpwd;  // Passwort fuer Mysql/MariaDB //ω
+		string cmpwd; // wenn gesetzt (-cmpwd/--changemariadbpwd): mpwd wird hierauf gesetzt, gespeichert, danach keine weitere Verarbeitung
 		stringstream uebers; // Ueberschrift fuer Verarbeitungslauf
 		unsigned tmmoelen;
 #ifdef _WIN32
@@ -1370,6 +1371,7 @@ struct hcl
     virtual void virtMusterVorgb();
     virtual void virtlieskonfein();
     void verarbeitkonf();
+    virtual void virtnachkonf(); // wird aufgerufen in hcl::lauf, direkt nach verarbeitkonf() -- z.B. fuer -cmpwd
 		int zeighilfe(const stringstream *const erkl);
 		virtual void virttesterg()=0;
 		virtual void pvirtvorzaehler()=0;

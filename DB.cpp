@@ -141,6 +141,10 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"mpwd","mpwd"},
 	// T_mpwd_l
 	{"mpwd","mpwd"},
+	// T_cmpwd_k
+	{"cmpwd","cmpwd"},
+	// T_cmpwd_l
+	{"changemariadbpwd","changemariadbpwd"},
 	// T_db_k
 	{"db","db"},
 	// T_datenbank_l
@@ -159,6 +163,9 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"verwendet fuer MySQL/MariaDB den Benutzer <string> anstatt","takes the user <string> for MySQL/MariaDB instead of"},
 	// T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string
 	{"verwendet fuer MySQL/MariaDB das Passwort <string>","takes the password <string> for MySQL/MariaDB"},
+	// T_aendert_das_MySQL_MariaDB_Passwort_und_beendet_danach
+	{"aendert das MySQL/MariaDB-Passwort <string> (speichert es verschluesselt in der Konfiguration) und beendet danach, ohne weiter zu arbeiten",
+	 "changes the MySQL/MariaDB password to <string> (stores it encrypted in the configuration) and exits afterwards without further processing"},
 	// T_verwendet_die_Datenbank_string_anstatt
 	{"verwendet die Datenbank <string> anstatt","uses the database <string> instead of"},
 	// T_verwendet_die_Tabelle_string_anstatt
@@ -182,6 +189,8 @@ const char *DB_T[T_dbMAX+1][SprachZahl]={
 	{"Benutzer fuer MySQL/MariaDB:","user for mysql/mariadb:"},
 	// T_Passwort_fuer_MySQL_MariaDB,
 	{"Passwort fuer MySQL/MariaDB (Achtung: nur schwach verschluesselt!)","password for mysql/mariadb (caution: only weakly encrypted!)"},
+	// T_Aendert_das_Passwort_fuer_MySQL_MariaDB,
+	{"Aendert das Passwort fuer MySQL/MariaDB und beendet danach (Achtung: nur schwach verschluesselt!)","changes the password for mysql/mariadb and exits afterwards (caution: only weakly encrypted!)"},
 	// T_Datenbankname_fuer_MySQL_MariaDB_auf
 	{"Datenbankname fuer MySQL/MariaDB auf '","database name for mysql/mariabd on '"},
 	// T_Tabellenname_in
@@ -2527,6 +2536,7 @@ void dhcl::virtinitopt()
 	opn<<new optcl(/*pname*/"mcnfdat",/*pptr*/&mcnfdat,/*part*/pstri,T_mcnfdat_k,T_mcnfdat_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_Rootbefehle_die_defaults_extra_file_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mcnfdat.empty(),Txd[T_defaults_extra_file_fuer_MySQL_MariaDB_Rootbefehle]);
 	opn<<new optcl(/*pname*/"muser",/*pptr*/&muser,/*part*/pstri,T_muser_k,T_muser_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!muser.empty(),Txd[T_Benutzer_fuer_MySQL_MariaDB]);
 	opn<<new optcl(/*pname*/"mpwd",/*pptr*/&mpwd,/*part*/ppwd,T_mpwd_k,T_mpwd_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!mpwd.empty(),Txd[T_Passwort_fuer_MySQL_MariaDB],0,&muser);
+	opn<<new optcl(/*pname*/"cmpwd",/*pptr*/&cmpwd,/*part*/ppwd,T_cmpwd_k,T_cmpwd_l,/*TxBp*/&Txd,/*Txi*/T_aendert_das_MySQL_MariaDB_Passwort_und_beendet_danach,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!cmpwd.empty(),Txd[T_Aendert_das_Passwort_fuer_MySQL_MariaDB],/*obno*/1);
 	opn<<new optcl(/*pname*/"datenbank",/*pptr*/&dbq,/*part*/pstri,T_db_k,T_datenbank_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Datenbank_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1,/*woher*/!dbq.empty(),Txd[T_Datenbankname_fuer_MySQL_MariaDB_auf]);
 //	opn<<optcl(/*pname*/"tabl",/*pptr*/&tabl,/*art*/pstri,T_tb_k,T_tabelle_l,/*TxBp*/&Txd,/*Txi*/T_verwendet_die_Tabelle_string_anstatt,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/-1);
 	opn<<new optcl(/*pptr*/&ZDB,/*art*/puchar,T_sqlv_k,T_sql_verbose_l,/*TxBp*/&Txd,/*Txi*/T_Bildschirmausgabe_mit_SQL_Befehlen,/*wi*/1,/*Txi2*/-1,/*rottxt*/nix,/*wert*/1,/*woher*/1);
@@ -2537,6 +2547,19 @@ void dhcl::virtinitopt()
 dhcl::dhcl(const int argc, const char *const *const argv,const char* const DPROG,const uchar mitcron):hcl(argc,argv,DPROG,mitcron)
 {
 }
+
+// wird aufgerufen in hcl::lauf, direkt nach verarbeitkonf() -- setzt bei -cmpwd/--changemariadbpwd
+// mpwd neu, sorgt dafuer, dass virtautokonfschreib() es verschluesselt speichert, und ueberspringt
+// danach jede weitere Verarbeitung (kein pvirtfuehraus, keine Rueckfragen)
+void dhcl::virtnachkonf()
+{
+	hcl::virtnachkonf();
+	if (!cmpwd.empty()) {
+		mpwd=cmpwd;
+		cmpwd.clear(); // nicht dauerhaft (fehl-)speichern, sonst wuerde jeder Folgelauf erneut abbrechen
+		keineverarbeitung=1;
+	}
+} // void dhcl::virtnachkonf
 
 // wird aufgerufen in: virtrueckfragen, parsecl, virtlieskonfein, hcl::hcl nach holsystemsprache
 void dhcl::virtlgnzuw()

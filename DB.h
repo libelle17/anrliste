@@ -90,6 +90,8 @@ enum Txdb_
 	T_muser_l,
 	T_mpwd_k,
 	T_mpwd_l,
+	T_cmpwd_k,
+	T_cmpwd_l,
 	T_db_k,
 	T_datenbank_l,
 	T_tb_k,
@@ -99,6 +101,7 @@ enum Txdb_
 	T_verwendet_fuer_MySQL_MariaDB_Rootbefehle_die_defaults_extra_file_string_anstatt,
 	T_verwendet_fuer_MySQL_MariaDB_den_Benutzer_string_anstatt,
 	T_verwendet_fuer_MySQL_MariaDB_das_Passwort_string,
+	T_aendert_das_MySQL_MariaDB_Passwort_und_beendet_danach,
 	T_verwendet_die_Datenbank_string_anstatt,
 	T_verwendet_die_Tabelle_string_anstatt,
 	T_sqlv_k,
@@ -110,6 +113,7 @@ enum Txdb_
 	T_defaults_extra_file_fuer_MySQL_MariaDB_Rootbefehle,
 	T_Benutzer_fuer_MySQL_MariaDB,
 	T_Passwort_fuer_MySQL_MariaDB,
+	T_Aendert_das_Passwort_fuer_MySQL_MariaDB,
 	T_Datenbankname_fuer_MySQL_MariaDB_auf,
 	T_Tabellenname_in,
 	T_Referenz,
@@ -575,6 +579,7 @@ struct dhcl:public hcl
 		void virtVorgbAllg();
 		void pvirtVorgbSpeziell();
 		void virtinitopt(); // (programm-)spezifische Optionen
+		void virtnachkonf(); // -cmpwd: setzt mpwd und keineverarbeitung, danach normales virtautokonfschreib
 		//		void pvirtmacherkl();
 		void virtMusterVorgb();
 		void virtzeigversion(const string& ltiffv=nix);

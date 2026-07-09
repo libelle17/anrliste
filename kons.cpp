@@ -5164,6 +5164,7 @@ void hcl::lauf()
       exit(0);
     }
     verarbeitkonf();
+    virtnachkonf();
 //		opn.gibomapaus();
 //		if (obverb) opn.oausgeb(gruen);
 	} // if (obhilfe==3)
@@ -5215,6 +5216,11 @@ void hcl::lauf()
 	virtschlussanzeige();
 	hLog(violetts+Txk[T_Ende]+schwarz);
 } // hcl::lauf
+
+// wird aufgerufen in hcl::lauf, direkt nach verarbeitkonf() -- Default: nichts zu tun
+void hcl::virtnachkonf()
+{
+} // void hcl::virtnachkonf
 
 // wird aufgerufen in: hcl::hcl
 void hcl::holbefz0(const int argc, const char *const *const argv)
