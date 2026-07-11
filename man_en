@@ -2,7 +2,7 @@
 .\" manual page for ²DPROG²
 .\" write to geraldschade@gmx.de if You discover an error or a deficit in the program
 .pc
-.TH man 1 "08.07.26" "Version 0.47261" "\fB²DPROG²\fR man page"
+.TH man 1 "11.07.26" "Version 0.47262" "\fB²DPROG²\fR man page"
 .SH NAME
 \fB²DPROG² \- Call list\fR: reads the call list of an AVM FRITZ!Box via TR-064 and records new calls in a MariaDB database
 .br
@@ -35,7 +35,7 @@ The program is typically called periodically via \fBcron\fR (option \fB-cm\fR/\f
 .SH OPTIONS
  '\fB²DPROG² -?\fR' or '\fB²DPROG² -h\fR' shows the important command line options and '\fB²DPROG² -lh\fR' all of them. The configuration file can be edited directly by '\fB²DPROG² -vi\fR' or interactively by '\fB²DPROG² -rf\fR'.
 .br
-                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47261 \fR
+                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47262 \fR
 .br
 \fBOptions which are not saved (current value in parentheses): \fR
 .br
@@ -88,6 +88,8 @@ The program is typically called periodically via \fBcron\fR (option \fB-cm\fR/\f
 \fB -muser, --muser <string>\fR: takes the user <string> for MySQL/MariaDB instead of ('\fB\fR')
 .br
 \fB -mpwd, --mpwd <string>\fR: takes the password <string> for MySQL/MariaDB
+.br
+\fB -cmpwd, --changemariadbpwd <string>\fR: changes the MySQL/MariaDB password to <string> (stores it encrypted in the configuration) and exits afterwards without further processing\fB or not\fR
 .br
 \fB -db, --database <string>\fR: uses the database <string> instead of ('\fBfaxeinp\fR')
 .br

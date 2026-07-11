@@ -16,7 +16,7 @@
 
 
 #define caus cout // nur zum Debuggen
-const string& pwk{"4893019320jfdksalö590ßs89d0qÃ9m0943Ã09Ãax"}; // fuer Antlitzaenderung
+const string& pwk{"4893019320jfdksalï¿½590ï¿½s89d0qï¿½9m0943ï¿½09ï¿½ax"}; // fuer Antlitzaenderung
 
 
 #ifdef _WIN32
@@ -1565,7 +1565,7 @@ string ltoan(long value, int base/*=10*/, uchar obtz/*=0*/, uchar minstel/*=0*/)
 {
   /**
    * C++ version 0.4 char* style "itoa":
-   * Written by Lukás Chmela
+   * Written by Lukï¿½s Chmela
    * Released under GPLv3.
    */
   const uchar resultlenge{30};
@@ -1602,7 +1602,7 @@ char* ltoa_(long value, char* result, int base/*=10*/)
 {
   /**
    * C++ version 0.4 char* style "itoa":
-   * Written by Lukás Chmela
+   * Written by Lukï¿½s Chmela
    * Released under GPLv3.
    */
   // check that the base if valid
@@ -1835,8 +1835,8 @@ char ers(const char roh)
   case ':': return ';';
   case '"': return '\'';
   case '\\': return '`';
-  case '/': return '´';
-  case '*': return '°';
+  case '/': return 'ï¿½';
+  case '*': return 'ï¿½';
   case '?': return '~';
 	default: return roh;
  } //  switch(roh)
@@ -2676,7 +2676,7 @@ int systemrueck(const string& cmd, int obverb/*=0*/, int oblog/*=0*/, vector<str
   } else {
     erg=system(bef.c_str());
   } // if (rueck) else
-	// temporäre Datei loeschen, falls leer
+	// temporï¿½re Datei loeschen, falls leer
 	struct stat tmpdst{0};
 	if (!lstat(tmpd,&tmpdst)) if (!tmpdst.st_size) tuloeschen(tmpd,string(),0,0);
 	//int erg2 __attribute__((unused)){system(string("printf ' %.0s' {1.."+ltoan(getcols()-2)+"};printf '\r';").c_str())};
@@ -5748,7 +5748,8 @@ uchar hcl::pruefcron(const string& cm)
 			const string vaufr{mpfad+" -noia"}, // /usr/bin/<DPROG> -noia // (vollaufruf) z.B. '/usr/bin/<DPROG> -noia >/dev/null 2>&1'
 						zsaufr{base_name(vaufr)}, // ersetzAllezu(cbef,"/","\\/"); // Suchstring zum Loeschen
 						vorsaetze{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+cpt+"/ ]&&"+linstp->ionicepf+" -c2 -n7 "+linstp->nicepf+" -n19 "},
-						cabfr{vorsaetze+".*"+zsaufr},// <DPROG> -noia // Suchstring in Crontab // Befehl zum Abfragen der Cronminuten aus aktuellem Cron-Script
+						vorsaetze_grep{ersetzAllezu(ersetzAllezu(ersetzAllezu(vorsaetze,"[","\\["),"]","\\]"),"\\%","\\\\\\\\%")}, // fuer grep: literale [ ] escapen; \% (aus der Crontab-Datei) mit 4 Backslashes matchen (bash -c "..."-Ebene halbiert sie auf 2, was grep als 1 literalen Backslash liest; sonst nie erkannt, s. pruefcron-Rewrite-Bug)
+						cabfr{vorsaetze_grep+".*"+zsaufr},// <DPROG> -noia // Suchstring in Crontab // Befehl zum Abfragen der Cronminuten aus aktuellem Cron-Script
 						cbef{string("*/")+cmhier+" * * * *"+vorsaetze+vaufr+" -cf "+akonfdt+" >/dev/null 2>&1"}, // "-"-Zeichen nur als cron
 						czt{" \\* \\* \\* \\*"};
 			////		string vorcm; // Vor-Cron-Minuten
