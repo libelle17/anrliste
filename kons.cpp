@@ -6818,7 +6818,10 @@ void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const strin
 	const string zsauf_awk{ersetzAllezu(zsauf,"\\$","$")}, cbef_awk{ersetzAllezu(cbef,"\\$","$")};
 	const string shqzsauf{ersetzAllezu(ersetzAllezu(zsauf_awk,"\\","\\\\"),"'","'\\''")},
 				shqcbef{ersetzAllezu(ersetzAllezu(cbef_awk,"\\","\\\\"),"'","'\\''")};
-	const string awkprog{"index($0,pat){if(plan==1)print newline;found=1;next} {print} END{if(!found && plan==1)print newline}"};
+	// Auskommentierte Zeilen (fuehrendes '#') nie als "eigene Zeile" werten und damit auch nie
+	// scharfschalten - sonst wuerde ein root-Aufruf eine nur zu Dokumentationszwecken
+	// auskommentierte Zeile fuer dieses Programm aktivieren (Fund von linux0).
+	const string awkprog{"/^#/{print;next} index($0,pat){if(plan==1)print newline;found=1;next} {print} END{if(!found && plan==1)print newline}"};
 	const string awkargs{string(" -v pat='")+shqzsauf+"' -v newline='"+shqcbef+"' -v plan="+(cronzuplanen?"1":"0")+" '"+awkprog+"'"};
 
 	// crontabdump (git-verfolgte Quelle) zuerst auf denselben Stand bringen wie die gleich
@@ -6831,9 +6834,13 @@ void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const strin
 		struct stat cdst;
 		if (!lstat(cdpfad.c_str(),&cdst)) {
 			const string shqcdpfad{ersetzAllezu(cdpfad,"'","'\\''")};
-			string cdcmd{"awk"+awkargs+" '"+shqcdpfad+"' > '"+shqcdpfad+".neu' && mv -f '"+shqcdpfad+".neu' '"+shqcdpfad+"'"};
+			// Stand vorher sichern, um hinterher zu wissen, ob sich wirklich etwas geaendert hat
+			// (sonst wuerde die Mail unten auch bei einem inhaltlich wirkungslosen Durchlauf
+			// kommen, z.B. wenn crontabdump den neuen Stand zufaellig schon enthielt).
+			string cdcmd{"cp -f '"+shqcdpfad+"' '"+shqcdpfad+".vorher' && awk"+awkargs+" '"+shqcdpfad+"' > '"+shqcdpfad+".neu' && mv -f '"+shqcdpfad+".neu' '"+shqcdpfad+"'"};
 			systemrueck(cdcmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/0);
-			cdgeaendert=1;
+			cdgeaendert = (systemrueck("cmp -s '"+shqcdpfad+"' '"+shqcdpfad+".vorher'",obverb,oblog,/*rueck=*/0,/*obsudc=*/0)!=0);
+			systemrueck("rm -f '"+shqcdpfad+".vorher'",obverb,oblog,/*rueck=*/0,/*obsudc=*/0);
 		} // if (!lstat(cdpfad.c_str(),&cdst))
 	}
 	string unicmd{"T="+tmpcron+";rm -f $T;"};
