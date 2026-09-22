@@ -6803,29 +6803,48 @@ void hcl::setztmpcron()
 // wird aufgerufen in pruefcron (2x)
 void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const string& cbef)
 {
+	// (a) Zeile ERSETZEN statt loeschen+anhaengen, damit ihre Position in Crontab UND
+	// crontabdump erhalten bleibt - sonst driftet sie bei jeder Aenderung ans Dateiende, auch
+	// wenn sich der Inhalt gar nicht aendert, und ein reiner Positionsunterschied liess
+	// bumonitor (vergleicht Hashes) faelschlich Abweichung melden. awk statt sed, weil cbef
+	// Zeichen enthaelt (z.B. $, &), die sed als Ersetzungs-Metazeichen lesen wuerde; index()
+	// sucht dabei bewusst als literale Teilzeichenkette, nicht als Regex.
+	// awk -v verarbeitet Backslash-Escapes im Wert selbst (anders als das bisherige echo "cbef" in
+	// doppelten Anfuehrungszeichen, das \$ zu $ entschaerfte, \% aber unveraendert liess - genau
+	// das erwartet crontab(5): $ braucht keine Maskierung, % dagegen zwingend, sonst schneidet
+	// crontab die Zeile dort ab). \$ deshalb hier explizit vorab entfernen (entspricht dem alten
+	// Verhalten), jeder verbleibende (nur noch %-bezogene) Backslash wird dann verdoppelt, damit
+	// awks eigenes Escaping ihn zu genau einem Backslash zusammenzieht statt ihn zu verschlucken.
+	const string zsauf_awk{ersetzAllezu(zsauf,"\\$","$")}, cbef_awk{ersetzAllezu(cbef,"\\$","$")};
+	const string shqzsauf{ersetzAllezu(ersetzAllezu(zsauf_awk,"\\","\\\\"),"'","'\\''")},
+				shqcbef{ersetzAllezu(ersetzAllezu(cbef_awk,"\\","\\\\"),"'","'\\''")};
+	const string awkprog{"index($0,pat){if(plan==1)print newline;found=1;next} {print} END{if(!found && plan==1)print newline}"};
+	const string awkargs{string(" -v pat='")+shqzsauf+"' -v newline='"+shqcbef+"' -v plan="+(cronzuplanen?"1":"0")+" '"+awkprog+"'"};
+
 	// crontabdump (git-verfolgte Quelle) zuerst auf denselben Stand bringen wie die gleich
 	// folgende scharfe Crontab, damit beide nicht auseinanderlaufen. Nur wirksam, wenn die
 	// Datei existiert (auf Reserverechnern ohnehin unerreichbar wegen der cronrechner-Sperre
 	// oben in pruefcron()).
+	uchar cdgeaendert{0};
+	string cdpfad{gethome()+"/neuserver/crontabdump"};
 	{
-		const string cdpfad{gethome()+"/neuserver/crontabdump"};
 		struct stat cdst;
 		if (!lstat(cdpfad.c_str(),&cdst)) {
-			string cdcmd{"sed -i '/"+zsauf+"/d' '"+cdpfad+"'"};
-			if (cronzuplanen) cdcmd+="; echo \""+cbef+"\" >> '"+cdpfad+"'";
+			const string shqcdpfad{ersetzAllezu(cdpfad,"'","'\\''")};
+			string cdcmd{"awk"+awkargs+" '"+shqcdpfad+"' > '"+shqcdpfad+".neu' && mv -f '"+shqcdpfad+".neu' '"+shqcdpfad+"'"};
 			systemrueck(cdcmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/0);
+			cdgeaendert=1;
 		} // if (!lstat(cdpfad.c_str(),&cdst))
 	}
 	string unicmd{"T="+tmpcron+";rm -f $T;"};
 	string cmd{unicmd};
-	string dazu{"crontab -l|sed '/"+zsauf+"/d' >$T;"};
-	unicmd+=dazu;	
+	string dazu{"crontab -l | awk"+awkargs+" >$T;"};
+	unicmd+=dazu;
 	if (!nochkeincron) {
 		// cmd=dazu; // 26.2.17: Debian: nach Deinstallation rootscrontab mit root-Berechtigungen, die Programm hier aufhielten
 		cmd=unicmd;
-	}
-	if (cronzuplanen) {
-		cmd+=" echo \""+cbef+"\" >>$T;";
+	} else if (cronzuplanen) {
+		cmd+=" echo \""+cbef+"\" >>$T;"; // noch keine Crontab vorhanden: awk haette nichts zu lesen
 	}
 	dazu=" crontab $T;";
 	unicmd+=dazu;
@@ -6835,6 +6854,16 @@ void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const strin
 	//// ersetzAlle(unicmd,"'\\''","'");
 	const string bef{sudc+"sh -c '"+cmd+"'"};
 	anfgg(unindt,unicmd,bef,obverb,oblog);
+
+	if (cdgeaendert) {
+		// (b) crontabdump wurde soeben automatisch geaendert - ohne Hinweis faellt leicht nicht
+		// auf, dass Commit+Push auf linux1 noch fehlt und die Reserverechner die Aenderung sonst
+		// nie sehen. Zusaetzlich zum Log per Mail an root, da der Cron-Aufruf selbst normalerweise
+		// nach /dev/null umgeleitet wird und ein reines Log daher leicht uebersehen wird.
+		const string hinweis{"crontabdump ("+cdpfad+") wurde soeben durch die Crontab-Selbstverwaltung von "+meinname+" geaendert (Zeile fuer '"+zsauf+"') - bitte pruefen, committen und pushen, sonst weicht die Kanon-Datei von den Reserverechnern ab."};
+		hLog(string(rot)+"ACHTUNG: "+schwarz+hinweis,1,1);
+		systemrueck("echo \""+hinweis+"\" | mail -s 'crontabdump automatisch geaendert ("+meinname+")' root",obverb,oblog,/*rueck=*/0,/*obsudc=*/0);
+	} // if (cdgeaendert)
 } // void hcl::tucronschreib
 
 // wird aufgerufen in dodovi
