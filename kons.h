@@ -476,6 +476,9 @@ enum Tkons_
 	T_rueckfragen,
 	T_Frage_ab,
 	T_dateivgl,
+	T_cr_k,
+	T_cronrechner_l,
+	T_Rechnernamen_fuer_Cron_Selbstverwaltung,
 	T_konsMAX
 }; // Tkons_
 // Konsistenz in gdb pruefen, z.B.:  p (const char* const)reinterpret_cast<TCtp*>(Txk.TCp)[T_unbek][Txk.lgn]
@@ -1280,6 +1283,10 @@ struct hcl
 	protected:
 		string tmpcron; // fuer crontab
     string cronminut; // Minuten fuer crontab; 0 = kein Crontab-Eintrag
+    string cronrechner{"linux1"}; // kommagetrennte Kurz-Rechnernamen (vor dem ersten Punkt), auf
+      // denen pruefcron() die Crontab selbst lesen/schreiben darf; ueberall sonst wird pruefcron()
+      // sofort verlassen, ohne die Crontab anzufassen (Schutz vor versehentlicher Aktivierung auf
+      // Reserverechnern bei einem root-Testaufruf)
 		uchar nochkeincron;
 		uchar cronzuplanen;
 		uchar cmeingegeben=0; // cron-Minuten eingegeben

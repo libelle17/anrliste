@@ -709,6 +709,12 @@ const char *kons_T[T_konsMAX+1][SprachZahl]=
 	{"Frage ab: ","Asking for: "},
   // T_dateivgl
 	{"dateivgl()","filecmp()"},
+	// T_cr_k
+	{"cr","cr"},
+	// T_cronrechner_l
+	{"cronrechner","cronhosts"},
+	// T_Rechnernamen_fuer_Cron_Selbstverwaltung
+	{"kommagetrennte Kurz-Rechnernamen (vor dem ersten Punkt), auf denen der Crontab-Eintrag selbst gepflegt wird","comma-separated short host names (before the first dot) on which the crontab entry is self-maintained"},
 	{"",""}
 }; // const char *Txkonscl::TextC[T_konsMAX+1][SprachZahl]=
 
@@ -5362,6 +5368,7 @@ void hcl::virtinitopt()
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_sh,T_standardhilfe,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/3,/*woher*/1);
 	opn<<new optcl(/*pptr*/&obhilfe,/*art*/puchar,T_libtest,T_libtest,/*TxBp*/&Txk,/*Txi*/-1,/*wi*/255,/*Txi2*/-1,/*rottxt*/string(),/*wert*/4,/*woher*/1);
 	opn<<new optcl(/*pname*/"cronminut",/*pptr*/&cronminut,/*art*/pdez,T_cm_k,T_cronminuten_l,/*TxBp*/&Txk,/*Txi*/T_Alle_wieviel_Minuten_soll,/*wi*/1,/*Txi2*/T_aufgerufen_werden_0_ist_gar_nicht,/*rottxt*/meinname,/*wert*/-1,/*woher*/1,/*Txtrf*/Txk[T_Alle_wieviel_Minuten_soll]+meinname+Txk[T_aufgerufen_werden_0_ist_gar_nicht],/*obno*/0,/*refstr*/0,/*obfragz*/&mitcron);
+	opn<<new optcl(/*pname*/"cronrechner",/*pptr*/&cronrechner,/*art*/pstri,T_cr_k,T_cronrechner_l,/*TxBp*/&Txk,/*Txi*/T_Rechnernamen_fuer_Cron_Selbstverwaltung,/*wi*/1,/*Txi2*/-1,/*rottxt*/string(),/*wert*/-1,/*woher*/1,/*Txtrf*/Txk[T_Rechnernamen_fuer_Cron_Selbstverwaltung],/*obno*/0,/*refstr*/0,/*obfragz*/&mitcron);
 	opn<<new optcl(/*pptr*/&obvi,/*art*/puchar,T_vi_k,T_vi_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei,/*wi*/0,/*Txi2*/T_Logdatei_usw_bearbeiten_sehen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&kfzg,/*art*/puchar,T_kf_k,T_konfzeiglang_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdateinamen,/*wi*/0,/*Txi2*/T_anzeigen,/*rottxt*/akonfdt,/*wert*/1,/*woher*/1);
 	opn<<new optcl(/*pptr*/&kschreib,/*art*/puchar,T_ks_k,T_kschreib_l,/*TxBp*/&Txk,/*Txi*/T_Konfigurationsdatei_schreiben,/*wi*/0,/*Txi2*/-1,/*rottxt*/string(),/*wert*/1,/*woher*/1);
@@ -5726,6 +5733,28 @@ uchar hcl::pruefcron(const string& cm)
 	// damit nicht nur deshalb das root-Passwort abgefragt werden muss => cronminuten nur ueberpruefen/aendern, wenn etweder ohnehin root oder ueber Befehlszeile neue Minutenzahl gewuenscht
 ////	<<"opn.olmap[Txk[T_cronminuten_l]]->woher: "<<(int)opn.olmap[Txk[T_cronminuten_l]]->woher<<", cus.cuid: "<<cus.cuid<<endl;
 	if (opn.olmap[Txk[T_cronminuten_l]]->woher==3 ||!cus.cuid) {
+		// Selbstverwaltung der Crontab nur auf den in cronrechner gelisteten Kurz-Rechnernamen
+		// (kommagetrennt, Default "linux1"): schuetzt davor, dass ein root-Aufruf auf einem
+		// Reserverechner (z.B. linux0/linux7) dort versehentlich einen scharfen Crontab-Eintrag
+		// anlegt oder aendert - cpt liefert den vollen Hostnamen (auf linux7 z.B. "linux7.site"),
+		// nie automatisch den erwarteten Kurznamen.
+		{
+			string kurzcpt{cpt};
+			const size_t punktpos{kurzcpt.find('.')};
+			if (punktpos!=string::npos) kurzcpt.erase(punktpos);
+			bool rechnererlaubt{false};
+			string liste{cronrechner+","};
+			size_t pos{0}, kpos;
+			while ((kpos=liste.find(',',pos))!=string::npos) {
+				if (liste.substr(pos,kpos-pos)==kurzcpt) { rechnererlaubt=true; break; }
+				pos=kpos+1;
+			} // while ((kpos=liste.find(',',pos))!=string::npos)
+			if (!rechnererlaubt) {
+				hLog(violetts+Txk[T_pruefcron]+schwarz+" uebersprungen: Rechner '"+kurzcpt+
+						"' nicht in cronrechner ('"+cronrechner+"')");
+				return obschreib;
+			} // if (!rechnererlaubt)
+		}
 		const string& cmhier{cm.empty()?cronminut:cm};
 		crongeprueft=1;
 		//  svec rueck;
@@ -5753,6 +5782,20 @@ uchar hcl::pruefcron(const string& cm)
 						cbef{string("*/")+cmhier+" * * * *"+vorsaetze+vaufr+" -cf "+akonfdt+" >/dev/null 2>&1"}, // "-"-Zeichen nur als cron
 						czt{" \\* \\* \\* \\*"};
 			////		string vorcm; // Vor-Cron-Minuten
+			// su-Umhuellung erkennen ("]&&su - <Nutzer> -c \"..."): ein von Hand so eingerichteter
+			// Crontab-Eintrag (z.B. fuer einen Nutzerwechsel wie sturm statt root) gilt als bewusster
+			// manueller Eingriff und wird nicht angefasst, egal ob cronminut abweicht.
+			if (!nochkeincron) {
+				const string vorsaetze_su{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+cpt+"/ ]&&su - "},
+							vorsaetze_su_grep{ersetzAllezu(ersetzAllezu(ersetzAllezu(vorsaetze_su,"[","\\["),"]","\\]"),"\\%","\\\\\\\\%")},
+							cabfr_su{vorsaetze_su_grep+".*"+zsaufr};
+				svec suok;
+				systemrueck("bash -c 'grep \""+cabfr_su+"\" -q <(crontab -l 2>/dev/null) && echo 1'",obverb,oblog,&suok,/*obsudc=*/1);
+				if (suok.size() && suok[0]=="1") {
+					hLog(blaus+"'"+zsaufr+"'"+schwarz+": su-umhuellter Crontab-Eintrag gefunden, wird nicht angefasst",1,oblog);
+					return obschreib;
+				} // if (suok.size() ...
+			} // if (!nochkeincron) [su-Erkennung]
 			if (!nochkeincron) {
 				cmd="bash -c 'grep \"\\*/.*"+czt+cabfr+"\" <(crontab -l 2>/dev/null)| sed \"s_\\*/\\([^ ]*\\) .*_\\1_\"'"; // fuer debian usw.: dash geht hier nicht
 				svec cmrueck;
@@ -6756,6 +6799,19 @@ void hcl::setztmpcron()
 // wird aufgerufen in pruefcron (2x)
 void hcl::tucronschreib(const string& zsauf,const uchar cronzuplanen,const string& cbef)
 {
+	// crontabdump (git-verfolgte Quelle) zuerst auf denselben Stand bringen wie die gleich
+	// folgende scharfe Crontab, damit beide nicht auseinanderlaufen. Nur wirksam, wenn die
+	// Datei existiert (auf Reserverechnern ohnehin unerreichbar wegen der cronrechner-Sperre
+	// oben in pruefcron()).
+	{
+		const string cdpfad{gethome()+"/neuserver/crontabdump"};
+		struct stat cdst;
+		if (!lstat(cdpfad.c_str(),&cdst)) {
+			string cdcmd{"sed -i '/"+zsauf+"/d' '"+cdpfad+"'"};
+			if (cronzuplanen) cdcmd+="; echo \""+cbef+"\" >> '"+cdpfad+"'";
+			systemrueck(cdcmd,obverb,oblog,/*rueck=*/0,/*obsudc=*/0);
+		} // if (!lstat(cdpfad.c_str(),&cdst))
+	}
 	string unicmd{"T="+tmpcron+";rm -f $T;"};
 	string cmd{unicmd};
 	string dazu{"crontab -l|sed '/"+zsauf+"/d' >$T;"};
