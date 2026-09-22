@@ -5730,18 +5730,22 @@ void hcl::virtpruefweiteres()
 uchar hcl::pruefcron(const string& cm)
 {
 	uchar obschreib{0};
+	// Kurzname (vor dem ersten Punkt) statt des vollen Hostnamens (cpt liefert auf linux7 z.B.
+	// "linux7.site") - fuer die cronrechner-Sperre UND fuer die Crontab-Suchmuster/-Zeile selbst,
+	// damit dort nie ein Domain-Suffix landet (sonst B2 erneut, nur hinter der Sperre versteckt).
+	string kurzcpt{cpt};
+	{
+		const size_t punktpos{kurzcpt.find('.')};
+		if (punktpos!=string::npos) kurzcpt.erase(punktpos);
+	}
 	// damit nicht nur deshalb das root-Passwort abgefragt werden muss => cronminuten nur ueberpruefen/aendern, wenn etweder ohnehin root oder ueber Befehlszeile neue Minutenzahl gewuenscht
 ////	<<"opn.olmap[Txk[T_cronminuten_l]]->woher: "<<(int)opn.olmap[Txk[T_cronminuten_l]]->woher<<", cus.cuid: "<<cus.cuid<<endl;
 	if (opn.olmap[Txk[T_cronminuten_l]]->woher==3 ||!cus.cuid) {
 		// Selbstverwaltung der Crontab nur auf den in cronrechner gelisteten Kurz-Rechnernamen
 		// (kommagetrennt, Default "linux1"): schuetzt davor, dass ein root-Aufruf auf einem
 		// Reserverechner (z.B. linux0/linux7) dort versehentlich einen scharfen Crontab-Eintrag
-		// anlegt oder aendert - cpt liefert den vollen Hostnamen (auf linux7 z.B. "linux7.site"),
-		// nie automatisch den erwarteten Kurznamen.
+		// anlegt oder aendert.
 		{
-			string kurzcpt{cpt};
-			const size_t punktpos{kurzcpt.find('.')};
-			if (punktpos!=string::npos) kurzcpt.erase(punktpos);
 			bool rechnererlaubt{false};
 			string liste{cronrechner+","};
 			size_t pos{0}, kpos;
@@ -5776,7 +5780,7 @@ uchar hcl::pruefcron(const string& cm)
 			setztmpcron();
 			const string vaufr{mpfad+" -noia"}, // /usr/bin/<DPROG> -noia // (vollaufruf) z.B. '/usr/bin/<DPROG> -noia >/dev/null 2>&1'
 						zsaufr{base_name(vaufr)}, // ersetzAllezu(cbef,"/","\\/"); // Suchstring zum Loeschen
-						vorsaetze{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+cpt+"/ ]&&"+linstp->ionicepf+" -c2 -n7 "+linstp->nicepf+" -n19 "},
+						vorsaetze{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+kurzcpt+"/ ]&&"+linstp->ionicepf+" -c2 -n7 "+linstp->nicepf+" -n19 "},
 						vorsaetze_grep{ersetzAllezu(ersetzAllezu(ersetzAllezu(vorsaetze,"[","\\["),"]","\\]"),"\\%","\\\\\\\\%")}, // fuer grep: literale [ ] escapen; \% (aus der Crontab-Datei) mit 4 Backslashes matchen (bash -c "..."-Ebene halbiert sie auf 2, was grep als 1 literalen Backslash liest; sonst nie erkannt, s. pruefcron-Rewrite-Bug)
 						cabfr{vorsaetze_grep+".*"+zsaufr},// <DPROG> -noia // Suchstring in Crontab // Befehl zum Abfragen der Cronminuten aus aktuellem Cron-Script
 						cbef{string("*/")+cmhier+" * * * *"+vorsaetze+vaufr+" -cf "+akonfdt+" >/dev/null 2>&1"}, // "-"-Zeichen nur als cron
@@ -5786,7 +5790,7 @@ uchar hcl::pruefcron(const string& cm)
 			// Crontab-Eintrag (z.B. fuer einen Nutzerwechsel wie sturm statt root) gilt als bewusster
 			// manueller Eingriff und wird nicht angefasst, egal ob cronminut abweicht.
 			if (!nochkeincron) {
-				const string vorsaetze_su{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+cpt+"/ ]&&su - "},
+				const string vorsaetze_su{string(" HOST=\\$(hostname);[ \\${HOST\\%\\%.*}/ = ")+kurzcpt+"/ ]&&su - "},
 							vorsaetze_su_grep{ersetzAllezu(ersetzAllezu(ersetzAllezu(vorsaetze_su,"[","\\["),"]","\\]"),"\\%","\\\\\\\\%")},
 							cabfr_su{vorsaetze_su_grep+".*"+zsaufr};
 				svec suok;
