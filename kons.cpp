@@ -3497,6 +3497,8 @@ void wpgcl::virtoausgeb() const
 			cout<<*(long*)pptr;
 		} else if (part==pdat) {
 			cout<<ztacl((struct tm*)pptr,"%F %T");
+		} else if (part==ppwd) {
+			cout<<(((string*)pptr)->empty()?"":"***"); // Passwoerter nie im Klartext anzeigen (-v landet in Protokollen/Terminals)
 		} else {
 			cout<<*(string*)pptr;
 		}
@@ -3510,7 +3512,7 @@ void WPcl::virtoausgeb() const
 {
 	wpgcl::virtoausgeb();
 	cout<<",wa:"<<blau<<part<<schwarz;
-	cout<<",we:"<<blau<<wert<<schwarz;
+	cout<<",we:"<<blau<<(part==ppwd&&!wert.empty()?string("***"):wert)<<schwarz;
 	cout<<",gel:"<<blau<<setw(1)<<(int)gelesen<<schwarz;
 	cout<<",eing:"<<blau<<(int)eingetragen<<schwarz;
 	cout<<endl;
