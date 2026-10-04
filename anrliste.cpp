@@ -352,17 +352,20 @@ int hhcl::holanr() // fetchcall()
 		caus<<"fbpwd: '"<<fbpwd<<"'"<<endl;
 	}
 */
-    string filename("fbpwd.txt");
-    fstream file_out;
-
-    file_out.open(filename, std::ios_base::out);
-    if (!file_out.is_open()) {
-        cout << "failed to open " << filename << '\n';
-    } else {
-        file_out <<fbpwd<< endl;
-    }
-
-	tr64cl tr64(fbusr,fbpwd);
+	// Fritzbox-Zugangsdaten seit 4.10.2026 zentral in /root/.fbcred (username=/password=, wie
+	// fuer /etc/fstab, weckalle.sh, fb.sh); nur wenn dort nichts steht, gelten fbusr/fbpwd aus
+	// der Konfiguration. Lokale Kopien, damit die Konfigurationsdatei unveraendert bleibt.
+	string fbu{fbusr},fbp{fbpwd};
+	{
+		ifstream fbc("/root/.fbcred");
+		string zeile;
+		while (getline(fbc,zeile)) {
+			if (!zeile.empty() && zeile.back()=='\r') zeile.pop_back();
+			if (!zeile.compare(0,9,"username=")) fbu=zeile.substr(9);
+			else if (!zeile.compare(0,9,"password=")) fbp=zeile.substr(9);
+		}
+	}
+	tr64cl tr64(fbu,fbp);
   std::string buffer,nurl;
   tr64.fragurl("x_contact","X_AVM-DE_OnTel:1","GetCallList",&buffer,0,0,obverb);
 
