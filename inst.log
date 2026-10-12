@@ -32688,3 +32688,346 @@ Repository-Daten werden geladen...
 Installierte Pakete werden gelesen...
 'verbose' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
 IP: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [.....fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......fertig]
+Nach-Transaktions-Skripte werden ausgeführt [........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [..fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......fertig]
+Nach-Transaktions-Skripte werden ausgeführt [....
+Ausgabe des Skripts %transfiletriggerin(systemd-257.13-160000.2.1.x86_64):
+Job for mariadb.service canceled.
+error: lua script failed: [string "%transfiletriggerin(systemd-257.13-160000.2.1..."]:5: exit code
+...
+Ausgabe des Skripts %transfiletriggerpostun(systemd-257.13-160000.2.1.x86_64):
+Error from %transfiletriggerin(systemd-257.13-160000.2.1.x86_64)
+..fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [..fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......fertig]
+Nach-Transaktions-Skripte werden ausgeführt [........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [..fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [.....fertig]
+Nach-Transaktions-Skripte werden ausgeführt [....
+Ausgabe des Skripts %transfiletriggerin(systemd-257.13-160000.3.1.x86_64):
+Reload daemon failed: Transport endpoint is not connected
+error: lua script failed: [string "%transfiletriggerin(systemd-257.13-160000.3.1..."]:5: exit code
+...
+Ausgabe des Skripts %transfiletriggerpostun(systemd-257.13-160000.3.1.x86_64):
+Error from %transfiletriggerin(systemd-257.13-160000.3.1.x86_64)
+.fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [...fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......fertig]
+Nach-Transaktions-Skripte werden ausgeführt [.........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [...fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......fertig]
+Nach-Transaktions-Skripte werden ausgeführt [.........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [...fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [.....fertig]
+Nach-Transaktions-Skripte werden ausgeführt [........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [......fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......
+Failed to set unit properties on mariadb.target: Connection timed out
+Failed to set unit properties on mariadb-extra.socket: Transport endpoint is not connected
+Failed to set unit properties on mariadb.service: Transport endpoint is not connected
+Failed to set unit properties on mariadb.socket: Transport endpoint is not connected
+fertig]
+Nach-Transaktions-Skripte werden ausgeführt [........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [..fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [......
+Failed to set unit properties on mariadb.service: Transport endpoint is not connected
+Failed to set unit properties on mariadb.target: Transport endpoint is not connected
+Failed to set unit properties on mariadb.socket: Transport endpoint is not connected
+Failed to set unit properties on mariadb-extra.socket: Transport endpoint is not connected
+fertig]
+Nach-Transaktions-Skripte werden ausgeführt [........fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung zu: 'zypper -n --gpg-auto-import-keys in -y -f mariadb':
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+Installation von 'mariadb-11.8.8-160000.1.1.x86_64' aus Repository 'repo-oss (16.0)' wird erzwungen.
+Paketabhängigkeiten werden aufgelöst...
+
+Das folgende Paket wird erneut installiert:
+  mariadb
+
+1 zu installierendes Paket.
+
+Paketgröße zum Herunterladen:
+            |      23,5 MiB  Gesamtpaketgröße
+       0 B  |  -   23,5 MiB  bereits im Cache
+
+Änderung der Installationsgröße des Pakets:
+            |     126,7 MiB  erforderlich für Pakete, die installiert werden sollen
+       0 B  |  -  126,7 MiB  freigegeben von Paketen, die entfernt werden sollen
+
+Backend:  classic_rpmtrans
+Fortfahren? [j/n/v/...? zeigt alle Optionen] (j): j
+Im Cache mariadb-11.8.8-160000.1.1.x86_64.rpm (1/1),  23,5 MiB    
+
+Überprüfung auf Dateikonflikte läuft: [......fertig]
+(1/1) Installieren: mariadb-11.8.8-160000.1.1.x86_64 [.......fertig]
+Nach-Transaktions-Skripte werden ausgeführt [....
+Ausgabe des Skripts %transfiletriggerin(systemd-257.13-160000.4.1.x86_64):
+Reload daemon failed: Transport endpoint is not connected
+error: lua script failed: [string "%transfiletriggerin(systemd-257.13-160000.4.1..."]:5: exit code
+Error from %transfiletriggerin(systemd-257.13-160000.4.1.x86_64)
+....fertig]
+ustring: ''
+ustring: ''
+
+Rueckmeldung bei einricht verbose:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+'verbose' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
+IP: ''
+
+Rueckmeldung bei einricht verbose:
+Dienst 'openSUSE' wird aktualisiert.
+Repository-Daten werden geladen...
+Installierte Pakete werden gelesen...
+'verbose' wurde in den Paketnamen nicht gefunden. Fähigkeiten werden durchsucht.
+IP: ''

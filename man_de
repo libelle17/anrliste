@@ -2,7 +2,7 @@
 .\" Manual-Seite für ²DPROG²
 .\" Schreiben Sie an geraldschade@gmx.de, wenn Sie Fehler oder Mängel entdeckt haben
 .pc
-.TH man 1 "11.07.26" "Version 0.47262" "Manual-Seite für ²DPROG²"
+.TH man 1 "12.10.26" "Version 0.47264" "Manual-Seite für ²DPROG²"
 .SH NAME
 \fB²DPROG² \- Anrufliste\fR: liest die Anrufliste einer AVM FRITZ!Box per TR-064 aus und trägt neue Anrufe in eine MariaDB-Datenbank ein
 .br
@@ -37,7 +37,7 @@ Mit \fB²DPROG² -listtel\fR können die zuletzt eingetragenen Datensätze samt 
 .SH OPTIONEN
  '\fB²DPROG² -?\fR' oder '\fB²DPROG² -h\fR' zeigt die wichtigen Befehlszeilenoptionen und '\fB²DPROG² -lh\fR' alle. Die Konfigurationsdatei kann über '\fB²DPROG² -vi\fR' direkt editiert oder über '\fB²DPROG² -rf\fR' interaktiv gepflegt werden.
 .br
-                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47262 \fR
+                                                                              \fRProgramm: \fB/root/anrliste/anrliste\fR, V: \fB0.47264 \fR
 .br
 \fBOptionen, die nicht gespeichert werden (aktueller Wert in Klammern): \fR
 .br
@@ -106,6 +106,8 @@ Mit \fB²DPROG² -listtel\fR können die zuletzt eingetragenen Datensätze samt 
 \fB -l, --log <zahl>\fR: protokolliert ausfuehrlich in Datei '\fB/var/log/anrliste.log\fR' (sonst knapper) (\fB0\fR)
 .br
 \fB -cm, --cronminuten <string>\fR: alle wieviel Minuten soll \fBanrliste\fR ueber crontab aufgerufen werden (0=gar nicht), anstatt  ('\fB0\fR')
+.br
+\fB -cr, --cronrechner <string>\fR: kommagetrennte Kurz-Rechnernamen (vor dem ersten Punkt), auf denen der Crontab-Eintrag selbst gepflegt wird ('\fBlinux1\fR')
 .br
 \fB -autoakt, --autoaktual <zahl>\fR: Programm automatisch aktualisieren (\fB1\fR)
 .SH FUNKTIONSWEISE
