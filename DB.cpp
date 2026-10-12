@@ -1,6 +1,9 @@
 #include "kons.h"
 #include "DB.h"
 #include <unistd.h> // close()
+#include <fcntl.h> // open()
+#include <sys/file.h> // flock()
+#include <sys/stat.h> // fchmod()
 #define caus cout // nur zum Debuggen
 #define caup cout // zum Debuggen von Postgres
 #define exitp exit // zum Debuggen von Postgres
@@ -438,6 +441,57 @@ uchar DB::oisok{0};
   init(charset,collate,port,unix_socket,client_flag,obverb,oblog,versuchzahl,ggferstellen);
 }
 
+#ifdef linux
+// 12.10.26: schonender Start der lokalen Datenbank nach Fehler 2002/2006 (statt servc::restart mit daemon-reload, restart
+// und pkill): nur ein Programm stoesst den Start an (Sperrdatei), laeuft der Dienst schon bzw. startet er gerade, wird nur
+// gewartet; dann bis zu maxsek Sekunden warten, bis der Server Verbindungen annimmt; Rueckgabe: 1 = erreichbar
+// aufgerufen in: DB::init
+static uchar dbstartgeschont(servc *const dbsv,const string& host,const string& user,const string& passwd,const unsigned int port,
+		const char *const unix_socket,const unsigned long client_flag,const unsigned maxsek,int obverb,int oblog)
+{
+	// erreichbar = Verbindung gelingt oder scheitert aus anderem Grund als "Server nicht da" (z.B. Zugriff verweigert)
+	auto erreichbar=[&]()->uchar {
+		MYSQL *const pr{mysql_init(NULL)};
+		if (!pr) return 0;
+		unsigned int ztout{5};
+		mysql_options(pr,MYSQL_OPT_CONNECT_TIMEOUT,&ztout);
+		uchar obda{1};
+		if (!mysql_real_connect(pr,host.c_str(),user.c_str(),passwd.c_str(),NULL,port,unix_socket,client_flag)) {
+			const unsigned int fnr{mysql_errno(pr)};
+			if (fnr==2002||fnr==2003||fnr==2006||fnr==2013) obda=0;
+		}
+		mysql_close(pr);
+		return obda;
+	}; // erreichbar
+	// Sperrdatei in /tmp, da labimp als sturm laeuft und /run/lock nur fuer root beschreibbar ist
+	const int sfd{open("/tmp/dbstart.lock",O_RDWR|O_CREAT|O_CLOEXEC,0666)};
+	if (sfd>=0) fchmod(sfd,0666); // gelingt nur dem Eigentuemer, sonst egal
+	const uchar habsperre{sfd>=0&&!flock(sfd,LOCK_EX|LOCK_NB)};
+	if (habsperre) {
+		svec srueck;
+		systemrueck("systemctl is-active '"+dbsv->sname+"' 2>/dev/null || true",obverb,oblog,&srueck,/*obsudc=*/0);
+		const string zustand{srueck.size()?srueck[0]:string()};
+		if (zustand=="active"||zustand=="activating"||zustand=="reloading") {
+			fLog("Datenbankdienst "+blaus+dbsv->sname+schwarz+" ist "+zustand+", warte bis zu "+ltoan(maxsek)+" s ohne Neustart",1,oblog);
+		} else {
+			fLog("Starte Datenbankdienst "+blaus+dbsv->sname+schwarz+" (Zustand: "+zustand+")",1,oblog);
+			dbsv->start(obverb,oblog);
+		} // if (zustand=="active"||zustand=="activating"||zustand=="reloading") else
+	} else {
+		fLog("Ein anderes Programm startet die Datenbank gerade, warte bis zu "+ltoan(maxsek)+" s",1,oblog);
+	} // if (habsperre) else
+	uchar erg{0};
+	for(const time_t anf{time(0)};time(0)-anf<(time_t)maxsek;sleep(3)) {
+		if ((erg=erreichbar())) break;
+	}
+	if (sfd>=0) {
+		if (habsperre) flock(sfd,LOCK_UN);
+		close(sfd);
+	}
+	return erg;
+} // static uchar dbstartgeschont
+#endif // linux
+
 // 2 x in DB::init
 void DB::instmaria(int obverb, int oblog)
 {
@@ -628,20 +682,17 @@ void DB::init(
 									if (!strcasecmp(host.c_str(),"localhost")) {
 										fLog(Txd[T_Fehler_db]+drots+mysql_error(conn[aktc])+schwarz+Txd[T_Versuche_mysql_zu_starten],1,1);
 #ifdef linux
+										// 12.10.26: hoechstens ein Startversuch je Programmlauf; frueher bis zu 3 Versuche x 2 servc::restart mit je daemon-reload,
+										// restart und pkill - bei mehreren cron-Programmen zugleich blockierte das systemd (daemon-reload ~156 s), schoss die gerade
+										// startende DB wieder ab und loeste ueber instmaria() sogar zypper in -f mariadb aus (hielt die DB ~20 min unten)
+										static uchar dbstartversucht{0};
+										if (dbstartversucht) break;
+										dbstartversucht=1;
+										if (!installiert) instmaria(obverb,oblog); // nur wenn mariadbd beim Programmstart wirklich fehlte
 										dbsv->enableggf(1,1);
 										setfaclggf(datadir,obverb,oblog,wahr,7,0,0,mysqlben);
-										fLog(blaus+Txd[T_Vor_restart]+Txd[T_Versuch_Nr]+schwarz+ltoan(versuch),1,oblog);
-										for(int iiru=0;iiru<2;iiru++) {
-											if (dbsv->restart(1,1)) {
-												fLog(Txd[T_MySQL_erfolgreich_gestartet],1,1);
-												break;
-											} // 									 if (dbsv-restart(1,1))
-											// nur neu installieren, wenn mariadbd beim Programmstart wirklich fehlte: ein gescheiterter Neustart (z.B. nach
-											// OOM-Kill, solange systemd mit daemon-reloads blockiert ist) rechtfertigt keine Neuinstallation, die den gerade
-											// wieder anlaufenden Dienst stoppt (12.10.26: zypper in -f mariadb aus anrliste hielt die DB ~20 min unten)
-											if (installiert) break;
-											instmaria(obverb,oblog);
-										} // 									for(int iiru=0;iiru<2;iiru++)
+										if (!dbstartgeschont(dbsv,host,user,passwd,port,unix_socket,client_flag,/*maxsek=*/180,obverb,oblog)) break;
+										fLog(Txd[T_MySQL_erfolgreich_gestartet],1,1);
 										continue;
 #endif // linux
 									} //                 if (!strcasecmp(host.c_str(),"localhost")) 
