@@ -636,6 +636,10 @@ void DB::init(
 												fLog(Txd[T_MySQL_erfolgreich_gestartet],1,1);
 												break;
 											} // 									 if (dbsv-restart(1,1))
+											// nur neu installieren, wenn mariadbd beim Programmstart wirklich fehlte: ein gescheiterter Neustart (z.B. nach
+											// OOM-Kill, solange systemd mit daemon-reloads blockiert ist) rechtfertigt keine Neuinstallation, die den gerade
+											// wieder anlaufenden Dienst stoppt (12.10.26: zypper in -f mariadb aus anrliste hielt die DB ~20 min unten)
+											if (installiert) break;
 											instmaria(obverb,oblog);
 										} // 									for(int iiru=0;iiru<2;iiru++)
 										continue;
